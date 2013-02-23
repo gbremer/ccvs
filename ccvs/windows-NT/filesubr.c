@@ -19,11 +19,14 @@
 
 #include <assert.h>
 #include <io.h>
-#include <windows.h>
+#include <sys/socket.h>  /* This does: #include <windows.h> */
 
 #include "cvs.h"
+#include "setenv.h"
 
 #include "JmgStat.h"
+
+#undef mkdir
 
 static int deep_remove_dir( const char *path );
 
@@ -101,6 +104,53 @@ copy_file (from, to)
     t.modtime = sb.st_mtime;
     (void) utime (to, &t);
 }
+
+
+static char *tmpdir_env;
+/*
+ * Return seperator (\) terminated path to system temporary directory.
+ */
+const char *
+get_system_temp_dir (void)
+{
+	if (! tmpdir_env)
+	{
+		DWORD dwBufferSize, dwReturn;
+
+		dwReturn = 0;
+		dwBufferSize = 64;
+		do {
+			if (dwReturn >= dwBufferSize)
+			{
+				dwBufferSize = dwReturn + 4;
+			}
+
+			tmpdir_env = xrealloc (tmpdir_env, dwBufferSize);
+			if (tmpdir_env)
+			{
+				dwReturn = GetTempPath (dwBufferSize, tmpdir_env);
+				if (dwReturn <= 0)
+				{
+					free (tmpdir_env);
+					tmpdir_env = NULL;
+				}
+			}
+		} while (tmpdir_env && dwReturn >= dwBufferSize);
+	}
+
+	return tmpdir_env;
+}
+
+
+void
+push_env_temp_dir (void)
+{
+	const char *tmpdir = get_cvs_tmp_dir ();
+
+	if (tmpdir_env && strcmp (tmpdir_env, tmpdir))
+		setenv ("TMP", tmpdir, 1);
+}
+
 
 /* FIXME-krp: these functions would benefit from caching the char * &
    stat buf.  */
@@ -692,8 +742,7 @@ cvs_temp_name ()
 /* FIXME: This should use the mkstemp() function from the lib/mkstemp.c file
  * from the GNULIB project.
  */
-FILE *cvs_temp_file (filename)
-    char **filename;
+FILE *cvs_temp_file (char ** filename)
 {
     char *fn;
     FILE *fp;
@@ -705,9 +754,14 @@ FILE *cvs_temp_file (filename)
 
     /* assert (filename != NULL); */
 
-    fn = _tempnam (Tmpdir, "cvs");
+    fn = _tempnam (getenv("TEMP"), "cvs");
     if (fn == NULL) fp = NULL;
-    else if ((fp = CVS_FOPEN (fn, "w+")) == NULL) free (fn);
+    else
+    if ((fp = CVS_FOPEN (fn, "w+")) == NULL)
+    {
+        free (fn);
+        fn = NULL;
+    }
 
     /* tempnam returns a pointer to a newly malloc'd string, so there's
      * no need for a xstrdup
@@ -715,47 +769,6 @@ FILE *cvs_temp_file (filename)
 
     *filename = fn;
     return fp;
-}
-
-
-
-/* char *
- * xresolvepath ( const char *path )
- *
- * Like xreadlink(), but resolve all links in a path.
- *
- * INPUTS
- *  path	The original path.
- *
- * RETURNS
- *  The path with any symbolic links expanded.
- *
- * ERRORS
- *  This function exits with a fatal error if it fails to read the link for
- *  any reason.
- */
-char *
-xresolvepath ( path )
-    const char *path;
-{
-    char *hardpath;
-    char *owd;
-
-    /* assert ( isdir ( path ) ); */
-
-    /* FIXME - If HAVE_READLINK is defined, we should probably walk the path
-     * bit by bit calling xreadlink().
-     */
-
-    owd = xgetcwd ();
-    if ( CVS_CHDIR ( path ) < 0)
-	error ( 1, errno, "cannot chdir to %s", path );
-    if ((hardpath = xgetcwd ()) == NULL)
-	error (1, errno, "cannot readlink %s", hardpath);
-    if ( CVS_CHDIR ( owd ) < 0)
-	error ( 1, errno, "cannot chdir to %s", owd );
-    free (owd);
-    return hardpath;
 }
 
 
@@ -805,25 +818,16 @@ last_component (const char *path)
    said to be set to c:\users\default by default.  */
 
 char *
-get_homedir ()
+get_homedir (void)
 {
-    static char *pathbuf;
-    char *hd, *hp;
+    char *homedir;
 
-    if (pathbuf != NULL)
-	return pathbuf;
-    else if ((hd = getenv ("HOME")))
-	return hd;
-    else if ((hd = getenv ("HOMEDRIVE")) && (hp = getenv ("HOMEPATH")))
-    {
-	pathbuf = xmalloc (strlen (hd) + strlen (hp) + 5);
-	strcpy (pathbuf, hd);
-	strcat (pathbuf, hp);
+    homedir = getenv ("HOME");
 
-	return pathbuf;
-    }
-    else
-	return NULL;
+    if (homedir == NULL)
+	homedir = woe32_home_dir ();
+
+    return homedir;
 }
 
 /* Compose a path to a file in the home directory.  This is necessary because
@@ -877,13 +881,12 @@ expand_wild (argc, argv, pargc, pargv)
 	char *last_forw_slash, *last_back_slash, *end_of_dirname;
 	int dirname_length = 0;
 
-	/* FIXME: If argv[i] is ".", this code will expand it to the
-	   name of the current directory in its parent directory which
-	   will cause start_recursion to do all manner of strange things
-	   with it (culminating in an error).  This breaks "cvs co .".
-	   As nearly as I can guess, this bug has existed since
-	   expand_wild was first created.  At least, it is in CVS 1.9 (I
-	   just tried it).  */
+	if ( strcmp( argv[i], "." ) == 0 )
+	{
+	    new_argv[new_argc] = (char *) xmalloc ( 2 );
+	    strcpy( new_argv[ new_argc++ ], "." );
+	    continue;
+	}
 
 	/* FindFirstFile doesn't return pathnames, so we have to do
 	   this ourselves.  Luckily, it's no big deal, since globbing
@@ -985,9 +988,21 @@ expand_wild (argc, argv, pargc, pargv)
     *pargv = new_argv;
 }
 
-static void check_statbuf (const char *file, struct stat *sb)
+/* undo config.h stat macro */
+#undef stat
+extern int stat (const char *file, struct wnt_stat *sb);
+
+/* see config.h stat macro */
+int
+wnt_stat (const char *file, struct wnt_stat *sb)
 {
-    /* Win32 processes file times in a 64 bit format
+    int retval;
+
+    retval = stat (file, sb);
+    if (retval < 0)
+		return retval;
+
+	/* Win32 processes file times in a 64 bit format
        (see Win32 functions SetFileTime and GetFileTime).
        If the file time on a file doesn't fit into the
        32 bit time_t format, then stat will set that time
@@ -999,40 +1014,16 @@ static void check_statbuf (const char *file, struct stat *sb)
        on Win32 via GetFileTime, but that would be a lot of
        hair and I'm not sure there is much payoff.  */
     if (sb->st_mtime == (time_t) -1)
-	error (1, 0, "invalid modification time for %s", file);
+		error (1, 0, "invalid modification time for %s", file);
     if (sb->st_ctime == (time_t) -1)
 	/* I'm not sure what this means on windows.  It
 	   might be a creation time (unlike unix)....  */
-	error (1, 0, "invalid ctime for %s", file);
+		error (1, 0, "invalid ctime for %s", file);
     if (sb->st_atime == (time_t) -1)
-	error (1, 0, "invalid access time for %s", file);
+		error (1, 0, "invalid access time for %s", file);
 
     if (!GetUTCFileModTime (file, &sb->st_mtime))
-	error (1, 0, "Failed to retrieve modification time for %s", file);
-}
+		error (1, 0, "Failed to retrieve modification time for %s", file);
 
-/* see CVS_STAT */
-int
-wnt_stat (const char *file, struct stat *sb)
-{
-    int retval;
-
-    retval = stat (file, sb);
-    if (retval < 0)
-	return retval;
-    check_statbuf (file, sb);
-    return retval;
-}
-
-/* see CVS_LSTAT */
-int
-wnt_lstat (const char *file, struct stat *sb)
-{
-    int retval;
-
-    retval = lstat (file, sb);
-    if (retval < 0)
-	return retval;
-    check_statbuf (file, sb);
     return retval;
 }

@@ -263,18 +263,39 @@ Current versions of \fBcvs\fR do not run \fBrcs\fR
 programs; for compatibility this option is accepted,
 but it does nothing.
 .SP
-.IX "TMPDIR, overriding"
-.IX "Overriding TMPDIR"
+.IX "TMPDIR, environment variable"
+.IX "temporary file directory, set via command line"
+.IX "temporary file directory, set via environment variable"
+.IX "temporary file directory, set via config"
+.IX "temporary files, location of"
 .IP "" 0
 \fB-T \fItempdir\fB\fR
 .IP "" 2
 Use \fItempdir\fR as the directory where temporary files are
-located.  Overrides the setting of the \fB$TMPDIR\fR environment
-variable and any precompiled directory.  This parameter should be
-specified as an absolute pathname.
-(When running client/server, \fB-T\fR affects only the local process;
+located.
+.SP
+The \fBcvs\fR client and server store temporary files in a temporary directory.
+The path to this temporary directory is set via, in order of precedence:
+.SP
+.IP "\(bu" 4
+The argument to the global \fB-T\fR option.
+.SP
+.IP "\(bu" 4
+The value set for \fBTmpDir\fR in the config file (server only -
+see node `config\(aq in the CVS manual).
+.SP
+.IP "\(bu" 4
+The contents of the \fB$TMPDIR\fR environment variable (\fB%TMPDIR%\fR on
+Windows - see node `Environment variables\(aq in the CVS manual).
+.SP
+.IP "\(bu" 4
+/tmp
+.SP
+.SP
+Temporary directories should always be specified as an absolute pathname.
+When running a CVS client, \fB-T\fR affects only the local process;
 specifying \fB-T\fR for the client has no effect on the server and
-vice versa.)
+vice versa.
 .SP
 .IX "CVSROOT, overriding"
 .IX "Overriding CVSROOT"
@@ -414,16 +435,20 @@ special configure option, \fB--enable-encryption\fR,
 when you build \fBcvs\fR.
 .SP
 .IP "" 0
-\fB-z \fIgzip-level\fB\fR
+\fB-z \fIlevel\fB\fR
 .IP "" 2
 .IX "Compression"
 .IX "Gzip"
-Set the compression level.
+Request compression \fIlevel\fR for network traffic.
+\fBcvs\fR interprets \fIlevel\fR identically to the \fBgzip\fR program.
 Valid levels are 1 (high speed, low compression) to
 9 (low speed, high compression), or 0 to disable
-compression (the default).
-Only has an effect on the \fBcvs\fR client.
-.SP
+compression (the default).  Data sent to the server will
+be compressed at the requested level and the client will request
+the server use the same compression level for data returned.  The
+server will use the closest level allowed by the server administrator to
+compress returned data.  This option only has an effect when passed to
+the \fBcvs\fR client.
 .SP
 .SH "Common options"
 .SS "Common command options"
@@ -523,8 +548,8 @@ it operates on, and continues to use that \fIkflag\fR with future
 commands on the same files until you specify otherwise.
 .SP
 The \fB-k\fR option is available with the \fBadd\fR,
-\fBcheckout\fR, \fBdiff\fR, \fBexport\fR, \fBimport\fR and
-\fBupdate\fR commands.
+\fBcheckout\fR, \fBdiff\fR, \fBexport\fR, \fBimport\fR,
+\fBrdiff\fR, and \fBupdate\fR commands.
 .SP
 \fBWARNING: Prior to CVS version 1.12.2, the \fB-k\fB flag
 overrode the \fB-kb\fB indication for a binary file.  This could
@@ -615,9 +640,13 @@ on sticky tags/dates, see node `Sticky tags\(aq in the CVS manual).
 .SP
 The tag can be either a symbolic or numeric tag, as
 described in see node `Tags\(aq in the CVS manual, or the name of a branch, as
-described in see node `Branching and merging\(aq in the CVS manual.  When \fItag\fR is the name of a
+described in see node `Branching and merging\(aq in the CVS manual.
+When \fItag\fR is the name of a
 branch, some commands accept the optional \fIdate\fR argument to specify
-the revisions as of the given date on the branch.
+the revision as of the given date on the branch.
+When a command expects a specific revision,
+the name of a branch is interpreted as the most recent
+revision on that branch.
 .SP
 Specifying the \fB-q\fR global option along with the
 \fB-r\fR command option is often useful, to suppress
@@ -967,10 +996,10 @@ it is created.  The state is visible in the output from
 \fIcvs log\fR (see node `log\(aq in the CVS manual), and in the
 \fB$\fP\fPLog$\fR and \fB$\fP\fPState$\fR keywords
 (see node `Keyword substitution\(aq in the CVS manual).  Note that \fBcvs\fR
-uses the \fBdead\fR state for its own purposes; to
+uses the \fBdead\fR state for its own purposes (see node `Attic\(aq in the CVS manual); to
 take a file to or from the \fBdead\fR state use
-commands like \fBcvs remove\fR and \fBcvs add\fR, not
-\fBcvs admin -s\fR.
+commands like \fBcvs remove\fR and \fBcvs add\fR
+(see node `Adding and removing\(aq in the CVS manual), not \fBcvs admin -s\fR.
 .SP
 .IP "" 0
 \fB-t[\fIfile\fB]\fR
@@ -2561,14 +2590,24 @@ Requires: the file \fB$CVSROOT/CVSROOT/history\fR
 .IP "\(bu" 2
 Changes: nothing.
 .SP
-\fBcvs\fR can keep a history file that tracks each use of the
-\fBcheckout\fR, \fBcommit\fR, \fBrtag\fR,
-\fBupdate\fR, and \fBrelease\fR commands.  You can
-use \fBhistory\fR to display this information in
+\fBcvs\fR can keep a history log that tracks each use of most \fBcvs\fR
+commands.  You can use \fBhistory\fR to display this information in
 various formats.
 .SP
-Logging must be enabled by creating the file
-\fB$CVSROOT/CVSROOT/history\fR.
+To enable logging, the \fBLogHistory\fR config option must be set to
+some value other than the empty string and the history file specified by
+the \fBHistoryLogPath\fR option must be writable by all users who may run
+the \fBcvs\fR executable (see node `config\(aq in the CVS manual).
+.SP
+To enable the \fBhistory\fR command, logging must be enabled as above and
+the \fBHistorySearchPath\fR config option (see node `config\(aq in the CVS manual) must be set to
+specify some number of the history logs created thereby and these files must
+be readable by each user who might run the \fBhistory\fR command.
+.SP
+Creating a repository via the \fBcvs init\fR command will enable logging of
+all possible events to a single history log file
+(\fB$CVSROOT/CVSROOT/history\fR) with read and write permissions for all
+users (see node `Creating a repository\(aq in the CVS manual).
 .SP
 \fBNote: \fBhistory\fB uses \fB-f\fB, \fB-l\fB,
 \fB-n\fB, and \fB-p\fB in ways that conflict with the
@@ -3136,7 +3175,10 @@ Suppress the header if no revisions are selected.
 .IP "" 2
 Print information about revisions whose state
 attributes match one of the states given in the
-comma-separated list \fIstates\fR.
+comma-separated list \fIstates\fR.  Individual states may
+be any text string, though \fBcvs\fR commonly only uses two
+states, \fBExp\fR and \fBdead\fR.  See see node `admin options\(aq in the CVS manual
+for more information.
 .SP
 .IP "" 0
 \fB-t\fR
@@ -3350,6 +3392,12 @@ Use the most recent revision no later than \fIdate\fR.
 .IP "" 2
 If no matching revision is found, retrieve the most
 recent revision (instead of ignoring the file).
+.SP
+.IP "" 0
+\fB-k \fIkflag\fB\fR
+.IP "" 2
+Process keywords according to \fIkflag\fR.  See
+see node `Keyword substitution\(aq in the CVS manual.
 .SP
 .IP "" 0
 \fB-l\fR
@@ -3571,6 +3619,41 @@ $
 .PD
 .IP "" 0
 .SP
+.SH "server & pserver"
+.SS "Act as a server for a client on stdin/stdout"
+.IX "pserver (subcommand)"
+.IX "server (subcommand)"
+.SP
+.IP "\(bu" 2
+pserver [-c path]
+.SP
+server [-c path]
+.IP "\(bu" 2
+Requires: repository, client conversation on stdin/stdout
+.IP "\(bu" 2
+Changes: Repository or, indirectly, client working directory.
+.SP
+The \fBcvs\fR \fBserver\fR and \fBpserver\fR commands are used to provide
+repository access to remote clients and expect a client conversation on
+stdin & stdout.  Typically these commands are launched from \fBinetd\fR or
+via \fBssh\fR (see node `Remote repositories\(aq in the CVS manual).
+.SP
+\fBserver\fR expects that the client has already been authenticated somehow,
+typically via \fBssh\fR, and \fBpserver\fR attempts to authenticate the client
+itself.
+.SP
+Only one option is available with the \fBserver\fR and \fBpserver\fR
+commands:
+.SP
+.IX "configuration file"
+.IP "" 0
+\fB-c path\fR
+.IP "" 2
+Load configuration from \fIpath\fR rather than the default location 
+\fB$CVSROOT/CVSROOT/config\fR (see node `config\(aq in the CVS manual).  \fIpath\fR must be
+\fB/etc/cvs.conf\fR or prefixed by \fB/etc/cvs/\fR.  This option is
+supported beginning with \fBcvs\fR release 1.12.13.
+.SP
 .SH "update"
 .SS "Bring work tree in sync with repository"
 .IX "update (subcommand)"
@@ -3750,7 +3833,7 @@ by one character indicating the status of the file:
 .IP "" 2
 The file was brought up to date with respect to the
 repository.  This is done for any file that exists in
-the repository but not in your source, and for files
+the repository but not in your working directory, and for files
 that you haven\(aqt changed but are not the most recent
 versions available in the repository.
 .SP
@@ -3868,7 +3951,7 @@ to CVS, development of CVS, and more, see:
 .SP
 .PD 0
 .IP "" 4
-.B http://cvshome.org
+.B http://www.nongnu.org/cvs/
 .in -1i
 .SP
 .BR ci ( 1 ),

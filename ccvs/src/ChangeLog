@@ -1,3 +1,756 @@
+2005-09-30  Larry Jones  <lawrence.jones@ugs.com>
+
+	* expand_path.c (expand_path): Fix memory leaks.
+
+2005-09-29  Mark D. Baushke  <mdb@gnu.org>
+
+	* main.c (main): Simplify commitid creation.
+
+	* main.c (main): Not all hosts support O_NOCTTY for open.
+	Try to use more random data when time() returns -1.
+	
+2005-09-29  Derek Price  <derek@ximbiot.com>
+
+	* main.c (main): Check for error return from time().
+
+2005-09-29  Paul Eggert  <eggert@CS.UCLA.EDU>
+	    Derek Price  <derek@ximbiot.com>
+
+	* client.c (handle_m, handle_e): Remove incomplete workaround for
+	O_NONBLOCK problem; no longer needed because of the fix below.
+	* cvs.h (piped_child): New bool argument saying whether O_NONBLOCK
+	fix is needed.  All uses changed.
+	* rsh-client.c (start_rsh_server): We need the O_NONBLOCK fix,
+	so pass 'true' to piped_child to enable the workaround.
+	* run.c (work_around_openssh_glitch): New function.
+	(piped_child): Use it if the fix is requested.  Avoid call call to
+	vfork with undefined behavior.
+
+2005-09-29  Mark D. Baushke  <mdb@gnu.org>
+
+	* main.c (main): Rename N as COMMITID_RAW_SIZE.
+	Use base62 encoding for non-urandom case.
+
+2005-09-29  Derek Price  <derek@ximbiot.com>
+
+	* buffer.c (fd_buffer_input), client.c (handle_m, handle_e): Use new
+	fd_select in place of select.
+
+	* subr.c: Remove select includes - the sleep functions are now in
+	lib.
+
+2005-09-28  Mark D. Baushke  <mdb@gnu.org>
+
+	* main.c (N, RANDOM_BYTES): New constants for base62 conversion.
+	(divide_by): Used in base62 conversion.
+	(convert): Ditto.
+	(main): Set global_session_id using more random data and the
+	current time in base62 if possible, otherwise fallback to the old
+	method.
+
+2005-09-25  Conrad T. Pino  <Conrad@Pino.com>
+
+	* rcs.c: Use "#ifdef HAVE_FSYNC" just like every where else.
+
+2005-09-25  Conrad T. Pino  <Conrad@Pino.com>
+
+	* buffer.c client.h socket-client.h:  Remove HAVE_WINSOCK_H macro &
+	change <winsock.h> to <sys/socket.h> include.
+
+	* server.c:  Remove HAVE_WINSOCK_H and <winsock.h> include.
+
+2005-09-25  Derek Price  <derek@ximbiot.com>
+
+	* rcs.c (rcs_internal_unlockfile): Fsync files before renaming them.
+	Patch from Rahul Bhargava <rahul@wandisco.com>.
+
+	* cvs.h, filesubr.c, main.c, server.c:
+	s/push_cvs_tmp_dir/push_cvs_temp_dir/.
+
+	* main.c (get_cvs_temp_dir): Use new get_system_temp_dir function.
+	(push_env_temp_dir): Move to...
+	* filesubr.c (push_env_temp_dir): ...here to split from Windows.
+	(get_system_temp_dir): New function.
+	* cvs.h (get_cvs_temp_dir, push_env_temp_dir): Add protos.
+
+	* buffer.c (fd_buffer_input): Fix spelling in header comment block.
+
+2005-09-24  Derek Price  <derek@ximbiot.com>
+
+	* socket-client.c: Check HAVE_CONFIG_H, not HAVE_CONFIG.
+
+	* socket-client.c, socket-client.h: Minor cleanup.
+
+	* Makefile.am (cvs_SOURCES): Move socket-client.[ch] to...
+	(EXTRA_cvs_SOURCES): ...here to avoid compiling them.
+	* socket-client.c (init_sockaddr), socket-client.h (init_sockaddr):
+	Move to...
+	* client.c (init_sockaddr), client.c (init_sockaddr): ...here.
+
+	* socket-client.c (socket_buffer_input): Avoid overflow problems.
+
+	* socket-client.c: General cleanup.
+
+2005-09-23  Larry Jones  <lawrence.jones@ugs.com>
+
+	* checkout.c (export_usage): Note that -r requires a tag.
+
+2005-09-22  Derek Price  <derek@ximbiot.com>
+
+	* classify.c (Classify_File): Correct comment.
+
+2005-09-22  Larry Jones  <lawrence.jones@ugs.com>
+
+	* patch.c (patch_usage): Document -k option.
+
+2005-09-22  Derek Price  <derek@ximbiot.com>
+
+	* classify.c (Classify_File): If a file had a conflict and the
+	timestamp hasn't changed, it still has a conflict.  Add comment about
+	how T_MODIFIED could later turn out to have conflict markers and why
+	it should not be checked in this function.
+	* client.c (send_fileproc): Don't send contents for files known to have
+	conflicts unless this is for `cvs diff'.
+	* commit.c (check_fileproc): T_CONFLICT should be handled like
+	T_MODIFIED, since force could be requested.  Simplify logic since
+	T_CONFLICT can now be trusted.
+	* rcs.c (RCS_Checkout): Comment noexec behavior in header block.
+	* server.c (serve_unchanged, serve_is_modified): Handle conflicts.
+	* status.c (status_fileproc): Trust T_CONFLICT to simplify.
+	* subr.c (file_has_conflict): Removed.
+	* subr.h (file_has_conflict): Remove proto.
+	* update.c (update_fileproc): Trust T_CONFLICT.
+	(RegisterMerge): New function factored from...
+	(merge_file, join_file): ...these two functions.
+	* vers_ts.c (time_stamp_server): Handle = conflict timestamps in server
+	entdata.
+	* sanity.sh (files-12): Account for slight behavior improvement.
+	(status, conflicts, mwrap): Account for corrected behavior.
+	(join-readonly-conflict-10): Correct comment.
+	(binfiles-con1b): New test for correct behavior.
+
+	* classify.c (Classify_File): Consolidate redundant conditionals.
+
+2005-09-21  Derek Price  <derek@ximbiot.com>
+
+	* entries.c: Remove obsolete comment.
+
+2005-09-20  Derek Price  <derek@ximbiot.com>
+
+	* myndbm.c: #include getdelim.h for Windows.
+
+	* main.c: #include setenv.h for Windows.
+
+2005-09-19  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh (modules5-8): Rename...
+	(modules5-8r): ...to this and comment Mac OS X failure.
+	Comment Solaris 9 failure below with a `FIXME?' tag.
+
+	* sanity.sh: Remove previous hack in favor of setting TESTDIR on
+	Solaris (and Mac OS X) until problem is solved correctly.
+
+2005-09-15  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh: Use /bin/pwd to verify current dir since Solaris 9 is
+	sometimes resolving symlinked paths.
+
+2005-09-14  Derek Price  <derek@ximbiot.com>
+
+	* edit.c (edit_usage, unedit_usage, editors_usage), watch.c
+	(watch_usage, watchers_usage): Add quotes and reword for clarity and
+	consistency.
+
+	* edit.c (edit_usage): Add missing syntax.  Reword description for
+	clarity.  Mention default behavior.
+
+2005-09-13  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh ($anyusername): Reduce charset to that allowed on Linux.
+
+	* sanity.sh ($anyusername): Make more robust and expand comments.
+	Reported by Mark D. Baushke <mdb@gnu.org>.
+
+	* sanity.sh: Split $username into $username & $username8.  Rename
+	$author as $anyusername.
+
+2005-09-12  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh (username): Cut $username down to 8 characters when longer,
+	since that is all that appears in output.
+
+2005-09-11  Derek Price  <derek@ximbiot.com>
+
+	[bug #14504]
+	* main.c (main): Set server_hostname before it is used by
+	gserver_authenticate_connection.
+	(Report from Serguei E. Leontiev <leo@sai.msu.ru>.)
+
+2005-09-08  Larry Jones  <lawrence.jones@ugs.com>
+
+	* server.c (parseServerOptions): getopt() returns int, not char.
+
+2005-09-07  Derek Price  <derek@ximbiot.com>
+
+	* rcs.c (RCS_parse): Minor reformatting.
+
+	Close <http://savannah.nongnu.org/bugs/?func=detailitem&item_id=14462>.
+	* rcs.c (RCS_parse): Free variable *after* using it for the last time.
+
+2005-09-06  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh (tempfile): All CVS temp files start with "cvs".
+
+	* sanity.sh (tempfile): New var.
+	(tempname): Set to $TMPDIR/$tempfile after $TMPDIR is set.
+	(info): s#$TMPDIR/##.
+
+	* rcs.c (RCS_putdtree): Remove unused variable.
+
+2005-09-06  Mark D. Baushke  <mdb@gnu.org>
+
+	Close <https://savannah.nongnu.org/bugs/?func=detailitem&item_id=14435>.
+	* rcs.c (RCS_putdtree): Avoid stack overflow which may be
+	possible with excessive recursive calls to RCS_putdtree().
+	(Patch from Serg Masyutin.)
+
+2005-09-06  Derek Price  <derek@ximbiot.com>
+
+	Close <http://savannah.nongnu.org/bugs/?func=detailitem&item_id=14448>.
+	* kerberos-client.c (start_kerberos4_server): Pass new root arg to
+	make_bufs_from_fds.
+	(Patch from <Manuel.Guijarro.AT.cern.ch>.)
+
+	* server.c: Reorganize includes slightly and alphabetize sections.
+
+	* server.c: #include canon-host.h.
+	(gserver_authenticate_connection): Print out canon-host errors.
+	* subr.c: #include canon-host.h.
+	(isThisHost): Print out canon-host errors.
+
+	* parseinfo.c (parse_config): Don't check hostname without client
+	or server support.
+
+	* main.c (main): Set cvs_cmd_name before calling parseServerOptions.
+
+2005-09-05  Derek Price  <derek@ximbiot.com>
+
+	* cvs.h (Tmpdir): Remove global decl.
+	(get_cvs_tmp_dir, push_env_tmp_dir): New protos.
+	* filesubr.c (cvs_temp_file): Use get_cvs_tmp_dir.
+	* main.c (Tmpdir): Remove global.
+	(tmpdir_cmdline, tmpdir_env): New globals.
+	(get_cvs_tmp_dir, push_env_tmp_dir): New functions.
+	(main): Discard most tmpdir overhead in favor of new globals and
+	functions.
+	* parseinfo.c (parse_config): Parse TmpDir.
+	* sanity.sh (config4): New tests.
+	* server.c (serve_root): Set env TMPDIR after parsing config.  Create
+	tmpdir here instead of...
+	(serve_co, server): ...either of thse locations.
+	(server_cleanup): Use new function in favor of obsolete Tmpdir.
+
+	* sanity.sh (config2): Don't overwrite potentially significant config.
+
+	* sanity.sh (info): Use $tempfile instead of reproducing the regex.
+
+	* sanity.sh (info): Accept `.' in temp file names.
+
+	* main (main): Set the actual PID, not a pointer to a string.
+
+2005-09-04  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh (config3): Generalize.
+
+	* main.c (main), server.c (serve_root, switch_to_user): Replace putenv
+	with GNULIB setenv.
+	* sanity.config.sh.in (HAVE_PUTENV): Remove.
+	* sanity.sh (env): Remove reference to $HAVE_PUTENV.
+
+	* sanity.sh (tests): Add config2 & config3.
+
+	* server.c (isSamePath, isThisHost): Move to...
+	* subr.c (isSamePath, isThisHost): ...here.
+	* subr.h (isSamePath, isThisHost): Add protos.
+	* parseinfo.c (parse_config): Handle [rootspec] syntax.
+	* main.c (main): Always set server_hostname.
+	* sanity.sh (config3): New tests for same.
+
+	* server.c (gserver_authenticate_connection): Output hostname in
+	error message.
+
+	* server.c (isThisHost): Fix typo.
+
+	* server.c (isThisHost, gserver_authenticate_connection): Simplify
+	using canon_host().
+
+	* root.c (free_cvsroot_t): Update header comment.
+
+	* root.c (new_cvsroot_t): directory is not client-specific.
+	(free_cvsroot_t): Declare static.
+	* root.h (free_cvsroot_t): Remove proto.
+	* server.c (server_init): Don't free cvsroot_t when finished with it.
+
+2005-09-03  Derek Price  <derek@ximbiot.com>
+
+	* root.h (cvsroot_t->isremote): Update comment.
+
+	* history.c (read_hrecs_file): Suppress signed/unsigned char warning.
+
+	* root.h (cvsroot_t->isremote): Declare bool.
+	* root.c (new_cvsroot_t): Initialize isremote to false instead of 0.
+
+	* add.c (add_usage): Standardize usage message somewhat.
+
+2005-09-02  Larry Jones  <lawrence.jones@ugs.com>
+
+	* commit.c (checkaddfile): Improve error messages for lock_RCS failure.
+	* release.c (release): Improve error message for pclose failure.
+
+	* root.h (struct cvsroot_s): Always declare isremote to simplify
+	other code.  Simplify referencing code.
+	* root.c (new_cvsroot_t): Always initialize isremote.
+	* server.h: Always declare server_active to simplify other code.
+	Simplify referencing code.
+	* server.c: Always define server_active.
+
+2005-09-02  Larry Jones  <lawrence.jones@ugs.com>
+
+	* parseinfo.c (parse_config): Variable declarations must precede
+	executable code for pre-C99 compilers.  Pass correct line number
+	variable to expand_path.
+
+2005-09-01  Derek Price  <derek@ximbiot.com>
+
+	* recurse.c: Update bug report email address.
+
+2005-08-31  Derek Price  <derek@ximbiot.com>
+
+	* cvs.h (expand_path): Update proto.
+	* expand_path.c (expand_variable): Accept and use cvsroot arg inplace
+	of global.
+	(expand_path): Accept and pass through cvsroot arg.
+	* main.c (main): Prescan args for config path before config options are
+	used.  Pass config path on as needed.  Update comment. 
+	* modules.c (do_module): Update expand_path call.
+	* parseinfo.ci (Parse_Info): Ditto.
+	(allowed_config_prefixes): New global.
+	(parse_config): Accept configPath arg, update expand_path calls, and
+	expand LockDir path.
+	* parseinfo.h (parse_config): Update proto.
+	* root.c (root_allow_add, get_root_allow_config): Accept new configPath
+	arg and pass through to parse_config.
+	* root.h (root_allow_add, get_root_allow_config): Update protos.
+	* server.c (gConfigPath, server_usage): New globals.
+	(parseServerOptions): New function.
+	(server): Use new usage var.
+	(pserver_authenticate_connection): Update get_root_allow_config call.
+	* server.h (parseServerOptions): New proto.
+	* wrapper.c (wrap_add): Update expand_path calls.
+	* sanity.sh (server): New tests for setting config file path.
+
+2005-08-31  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh (close-stdout): Remove archive dir when done.
+
+2005-08-31  Larry Jones  <lawrence.jones@ugs.com>
+
+	* import.c (import_descend): Lock repository directory during import.
+
+2005-08-31  Derek Price  <derek@ximbiot.com>
+
+	* server.c (isSamePath): Compare args rather than assuming values.
+
+2005-08-29  Derek Price  <derek@ximbiot.com>
+
+	Add %{sV} format string to verifymsg script.
+	* logmsg.c (do_verify): Accept change list arg, pass through to...
+	(verifymsg_proc): ...here, to pass through to format_cmdline.
+	* commit.c (commit_fileproc, commit_direntproc), import.c (update):
+	Update all callers of do_verify.
+	* cvs.h (do_verify): Update proto.
+	* sanity.sh (info): Test new verifymsg format strings.
+
+2005-08-09  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh: Remove debugging echo.
+	(watch6, watch6-0): Clean up properly.
+
+2005-08-03  Jim Hyslop <jhyslop@dreampossible.ca>
+
+	* edit.c, watch.c, watch.h, sanity.sh: fixed problems with watch not
+	setting default attributes, when directory specified.
+
+2005-07-20  Derek Price  <derek@ximbiot.com>
+
+	* main.c: s/cvshome.org/nongnu.org.etc.../.
+
+2005-07-12  Derek Price  <derek@ximbiot.com>
+
+	* buffer.c, buffer.h, client.h, expand_path.c, history.c, myndbm.h,
+	release.c: Add copyright notices.
+
+2005-07-12  Derek Price  <derek@ximbiot.com>
+
+	* client.c: Update fwrite usage to use size & count in the standard
+	order.
+
+2005-07-11  Derek Price  <derek@ximbiot.com>
+
+	* buffer.c, buffer.h, client.h, expand_path.c, history.c, myndbm.h,
+	release.c: Update license notices.
+
+2005-06-28  Derek Price  <derek@ximbiot.com>
+
+	* server.c (serve_co): Remove obsolete support for Repository request.
+
+2005-06-10  Derek Price  <derek@ximbiot.com>
+
+	* filesubr.c, ignore.c, import.c, vers_ts.c: Include "lstat.h".
+
+2005-06-10  Derek Price  <derek@ximbiot.com>
+
+	* logmsg.c (logmsg_list_to_args_proc): Add format character for
+	destination tag.
+	(Original patch from Todd Vierling <tv@duh.org>).
+
+	* tag.c (pretag_list_to_args_proc): Likewise.
+	(check_fileproc): Set destination tag name.
+	(tag_delproc): Delete destination tag name.
+	* sanity.sh (info, taginfo): Test new format strings.
+
+2005-06-08  Derek Price  <derek@ximbiot.com>
+
+	* parseinfo.c: Restore comparison to NULL in assignment within
+	conditional to placate non-GNU compilers.  Eliminate assignments in
+	conditionals where possible by GNU coding standards.  Eliminate other
+	comparisons to NULL where possible.
+	(Parse_Info): Make int a true bool.
+
+2005-06-03  Derek Price  <derek@ximbiot.com>
+
+	* client.c (force_gzip): New static global.
+	(handle_force_gzip): New function.
+	(responses): Add `Force-gzip'.
+	(start_server): Turn on encryption and compression before potentially
+	sending other rooted requests.  Turn on compression when requested by
+	the user or the server.
+	* main.c (opt_usage):  Note that -z<level> *requests* compression
+	<level> from the server.
+	* parseinfo.c (new_config):  Initialize MaxCompressionLevel.
+	(parse_config): Parse MinCompressionLevel & MaxCompressionLevel.
+	* parseinfo.h (struct config): Add MinCompressionLevel &
+	MaxCompressionLevel.
+	* server.c (pending_warning_text):  New static global.
+	(print_pending_error): Print pending warnings too.
+	(warning_pending): New macro.
+	(alloc_pending_internal): New function with much content...
+	(alloc_pending): ...previously from here.
+	(alloc_pending_warning): New function.
+	(server_root, serve_gzip_contents, gzip_stream): Force gzip_level into
+	configured restrictions.
+	(serve_command_prep): Print pending errors.
+	(requests): Make `Gzip-stream', `gzip-file-contents',
+	`Kerberos-encrypt', `Gssapi-encrypt', & `Gssapi-authenticate' requests
+	rootless to allow them before compression starts.
+	(serve_valid_requests): Send `Force-gzip' response when needed.
+	(server): Abort if a rootless compression request forced compression
+	outside restricted levels.
+	* zlib.c (struct compress_buffer, compress_buffer_initialize): Store
+	compression level.
+	(compress_buffer_output): Reset compression level when global
+	gzip_level has changed.
+	* sanity.sh (config2): New tests for compression restrictions.
+
+2005-06-03  Derek Price  <derek@ximbiot.com>
+
+	* zlib.c (compress_buffer_input): Update comment.
+
+2005-06-03  Derek Price  <derek@ximbiot.com>
+
+	* error.c (error): Correct spelling and grammar in comment.
+
+2005-06-03  Derek Price  <derek@ximbiot.com>
+
+	* modules.c (my_module), wrappers.c (wrap_add): Use new expand_path
+	API.
+
+2005-06-03  Derek Price  <derek@ximbiot.com>
+
+	* cvs.h (expand_path): Rearrange args and use bool for formatsafe flag.
+	* expand_path.c: Globally: Remove init of globals to NULL by C89,
+	reformat to CVS conventions, remove unnecessary comparisons to NULL and
+	0, & remove unnecessary typecasts.
+	(expand_variable): Remove proto and move function above first use.
+	Make return value const.
+	(expand_path): Don't refer to var when contents are known.  Rearrange
+	args per cvs.h changes.  Improve header comment block.
+	* parseinfo.c (Parse_Info): Use new expand_path API.
+
+2005-06-02  Derek Price  <derek@ximbiot.com>
+
+	* client.c: Don't set NULL for globals by C89.  Globally remove
+	comparisons to NULL or replace with !.  Similarly remove or replace
+	comparisons of strcmp and strncmp return value to 0.  Remove some
+	unneeded braces around single-element blocks.
+	(handle_*): Remove unecessary protos.
+	(handle_notified, notified_a_file): Move up before first use.
+
+2005-06-02  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh (config): Simplify cleanup.
+
+2005-06-02  Derek Price  <derek@ximbiot.com>
+
+	* zlib.c (compress_buffer_input): Don't request more bytes from the
+	underlying buffer than asked for.
+	(compress_buffer_shutdown_input): Don't attempt to read EOF from the
+	client during shutdown.  It might never be sent.
+	* sanity.sh (abspath2): Test for this.
+
+2005-05-31  Derek Price  <derek@ximbiot.com>
+
+	* rcscmds.c (call_diff_argc_allocated): Rename to...
+	(call_diff_arg_allocated): ...to match similar usage in other files.
+
+2005-05-31  Derek Price  <derek@ximbiot.com>
+	for Alexander Taler <alex@0--0.org>
+
+	* rcscmds.c: Change type of call_diff_argc_allocated from int to
+	size_t, to match the prototype of run_add_arg_p().  This fixes a
+	bus error in OpenBSD 3.6 sparc64.
+
+2005-05-27  Derek Price  <derek@ximbiot.com>
+
+	* client.c (send_arg): Make arg const.  Remove unnecessary copy to
+	buffer.
+	(send_option_string): Rename to...
+	(send_options): ...this and accept argc/argv in place of string.
+	* client.h: Update protos to match the changes to client.c.
+	* cvs.h (RCS_exec_rcsdiff, diff_exec): Update protos.
+	(run_add_arg_p, run_arg_free_p): New protos.
+	* diff.c (opts, opts_allocated): Replace with...
+	(diff_argv, diff_argc, diff_arg_allocated): ...these.
+	(add_diff_args): New convenience function.
+	(diff): Use new constructs and APIs.
+	* patch.c (patch_fileproc, RCS_checkin, RCS_delete_revs), rcscmds.c
+	(call_diff_add_arg, call_diff_setup, RCS_merge, RCS_exec_rcsdiff,
+	diff_exec, RCS_output_diff_options), update.c (patch_file): Use new
+	APIs.
+	* run.c (run_add_arg_p, run_arg_free_p): New functions.
+	(run_argc_allocated): Make size_t.
+	(run_setup, run_add_arg): Use new functions.
+	* sanity.sh: Accomodate above changes.
+	(rcslib-diffrgx-3): Slip in test for space splitting.
+
+2005-05-26  Derek Price  <derek@ximbiot.com>
+
+	* subr.c (isabsolute), subr.h (isabsolute): Remove this function.
+	* root.c: Likewise, plus some reformatting.
+	* checkout.c, client.c, find_names.c, import.c, modules.c, parseinfo.c,
+	repos.c, root.c, server.c, subr.c: s/isabsolute/ISABSOLUTE/.
+
+2005-05-26  Derek Price  <derek@ximbiot.com>
+
+	* cvs.h: Move "system.h" include before GNULIB includes.  Move some
+	GNULIB includes from "system.h".
+
+2005-05-26  Conrad T. Pino <Conrad@Pino.com>
+
+	* buffer.c, buffer.h: Add & use typedefs for function pointer arguments
+	and struct buffer function pointers.  New typedefs are useful in casts.
+	* socket-client.c: Function pointers passed to buf_initialize use size_t
+	not int arguments.  buf_initialize warnings are gone from Windows build.
+
+2005-05-24  Derek Price  <derek@ximbiot.com>
+
+	* client.c, entries.c, filesubr.c, hardlink.c, ignore.c, import.c,
+	lock.c, logmsg.c, mkmodules.c, rcs.c, rcscmds.c, server.c, subr.c,
+	update.c, vers_ts.c: s/CVS_STAT/stat/ & s/CVS_LSTAT/lstat/.
+
+2005-05-23  Derek Price  <derek@ximbiot.com>
+
+	* filesubr.c (xresolvepath): Move to...
+	* subr.c (xcanonicalize_file_name): ...here and rename.  Use new
+	GNULIB canonicalize module.
+	* cvs.h (xresolvepath): Move proto...
+	* subr.h (xcanonicalize_file_name): ...here.
+	* checkout.c (safe_location), server.c (isSamePath): Use new function
+	name.
+
+2005-05-23  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh (rcslib-symlink-10): Accept empty result due to broken glob
+	in glibc 2.3.5.
+
+2005-05-18  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh (config-9): Split to local/remote tests to avoid unportable
+	expr characters.
+
+2005-05-17  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh: Use a predictable umask.
+
+2005-05-13  Derek Price  <derek@ximbiot.com>
+
+	* login.c (password_entry_parseline): Placate gcc -Wall.
+
+2005-05-11  Derek Price  <derek@ximbiot.com>
+
+	* cvs.h (find_files): New proto.
+	* find_names.c (find_files, strip_rcsext): New functions.
+	(find_rcs): Make arg const.  Use new find_files.  Improve header
+	comment block.
+	* history.c (histfile): Remove global.
+	(get_history_log_name): New function.
+	(history, history_write): Use new functions.
+	(read_hrecs_file): New function containing most content from...
+	(read_hrecs): ...this function, which now accepts a file list and calls
+	read_hrecs_file once for each file.
+	* parseinfo.c (parse_config): Parse HistoryLogPath & HistorySearchPath.
+	* parseinfo.h (struct config): Add HistoryLogPath & HistorySearchPath.
+	* sanity.sh (basic2-64): Remove obsolete comment.
+	(config): Test new history options.
+	(crerepos): Cleanup.
+
+2005-05-09  Derek Price  <derek@ximbiot.com>
+
+	* error.c (error): Avoid unportable calls to vsyslog.
+
+2005-05-09  Derek Price  <derek@ximbiot.com>
+
+	* history.c (history_write): Add FIXME.
+
+2005-05-09  Derek Price  <derek@ximbiot.com>
+
+	* hash.c (removenode, mergelists): New function.
+	(delnode): Use removenode.
+	* hash.h (mergelists): New proto.
+
+2005-05-04  Derek Price  <derek@ximbiot.com>
+
+	* error.c (error): Avoid recursion and syslog the problem.
+
+2005-05-03  Derek Price  <derek@ximbiot.com>
+
+	* tag.c (is_in_val_tags): Remove unnecessary existance checking for the
+	val-tags file and just rely on open() to create it when necessary.
+
+2005-05-03  Derek Price  <derek@ximbiot.com>
+
+	* tag.c (tag_check_valid): Don't verify the_val_args.found when it is
+	not initialized.
+
+2005-05-03  Derek Price  <derek@ximbiot.com>
+
+	* add.c: Update comment to include the -k option.  This resolves issue
+	#226 on cvshome.org.
+
+2005-05-02  Derek Price  <derek@ximbiot.com>
+
+	Remove unnecessary level of indirection.
+	* lock.c (L_HISTORY_LOCK, L_VAL_TAGS_LOCK): Remove macros.
+	(internal_lock, internal_clear_lock): Accept lock as argument.
+	(history_lock, clear_history_lock, val_tags_lock, clear_val_tags_lock):
+	Replace old macro arg with an actual lock pointer.
+
+2005-05-02  Derek Price  <derek@ximbiot.com>
+
+	* lock.c (internal_lock, internal_clear_lock): Add protos.
+	(history_lock, val_tags_lock): Return the chartered true/false status.
+
+2005-05-02  Derek Price  <derek@ximbiot.com>
+
+	* cvs.h (CVSHISTLCK): Rename macro to...
+	(CVSHISTORYLCK): ...this.
+	(CVSVALTAGSLCK): New macro.
+	(val_tags_lock, clear_val_tags_lock): New functions.
+	* lock.c (global_val_tags_lock): New global.
+	(Lock_Cleanup): Clean up after val-tags lock if necessary.
+	(L_HISTORY_LOCK, L_VAL_TAGS_LOCK): New local macros.
+	(internal_lock, val_tags_lock, clear_val_tags_lock): New functions.
+	(history_lock): Use new internal function.
+	* tag.c (is_in_val_tags, add_to_val_tags): New functions using the
+	write lock for val-tags and factored from...
+	(tag_check_valid): ...this function.
+	* sanity.sh (lockfiles-22): Add val-tags lock test.
+
+2005-04-30  Mark D. Baushke  <mdb@cvshome.org>
+
+	* lock.c (global_readlock, global_writelock, global_history_lock):
+	Add missing alternatives for non-LOCK_COMPATIBILITY initialization.
+
+2005-04-28  Derek Price  <derek@ximbiot.com>
+
+	* cvs.h (history_lock, clear_history_lock): New protos.
+	* lock.c (struct lock): Add lockdirname.
+	(global_history_lock): New global.
+	(global_read_lock): Initialize.
+	(lock_name): Handle const args.
+	(lock_simple_remove): Factor out code in favor of clear_lock call.
+	(set_lock): Handle variable lockdirname.
+	(lock_filesdoneproc): Set new lockdirname.
+	(history_lock, clear_history_lock): New functions.
+	(clear_lock): Avoid segfault on missing lock.
+	(Lock_Cleanup): Clean up history locks when necessary.
+	* history.c (history_write): Use new lock.
+	* sanity.sh (lockfiles-20): Test new lock.
+
+2005-04-28  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh (lockfiles): Port some locking tests over from 1.12.x.
+
+2005-04-28  Derek Price  <derek@ximbiot.com>
+
+	* lock.c (clear_lock): Improve comment.
+
+2005-04-28  Derek Price  <derek@ximbiot.com>
+
+	* lock.c (struct lock): Store lockdir name.
+	(masterlock): Remove global.
+	(remove_lock_files, clear_lock, set_lock): Update to compensate.
+
+2005-04-25  Mark D. Baushke  <mdb@cvshome.org>
+
+	* server.c: Add support for <pam/pam_appl.h> to allow
+	--enable-pam to work on MacOSX 10.2 and newer.
+	(Pach from Moriyoshi Koizumi <moriyoshi@at.wakwak.com>.)
+
+2005-04-25  Derek Price  <derek@ximbiot.com>
+
+	* mkmodules.c (mkmodules): Remove `#if 0' and reformat comment.
+
+2005-04-22  Mark D. Baushke  <mdb@cvshome.org>
+
+	* expand_path.c (expand_variable): Add SESSIONID and COMMITID
+	internal variables. Both return the unique global session id of
+	the CVS process. Passing this information to administrative
+	triggers seems reasonable. (The same feature exists in CVSNT and
+	the names were chosen to be the same as the CVSNT names.)
+
+	* sanity.sh (info): Add a test for $COMMITID and $SESSIONID.
+
+2005-04-20  Mark D. Baushke  <mdb@cvshome.org>
+
+	* sanity.sh (rcs4): Fix a typo.
+
+2005-04-20  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh (rcs5): Minor cosmetic change.
+
+2005-04-20  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh (tests): Add rcs4.
+	(rcs5): Add comments.
+
+2005-04-20  Derek Price  <derek@ximbiot.com>
+
+	* rcs.c (expand_keywords): Avoid buffer overflow.
+	(Original patch from Stewart Brodie <stewart@eh.org>.)
+
+	* sanity.sh (rcs5): New tests for the above.
+
 2005-04-08  Derek Price  <derek@ximbiot.com>
 
 	* edit.c (edit_fileproc, unedit_fileproc): s/GMT/-0000/.

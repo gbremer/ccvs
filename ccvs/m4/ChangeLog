@@ -1,3 +1,176 @@
+2005-09-26  Derek Price  <derek@ximbiot.com>
+
+	[bug #14639]
+	* acx_with_gssapi.m4: Find the crypto library on FreeBSD 5.x.
+	Patch from Serguei E. Leontiev <lse@CryptoPro.ru>.
+
+2005-09-25  Derek Price  <derek@ximbiot.com>
+
+	* lstat.m4: Update from GNULIB.
+
+2005-09-19  Derek Price  <derek@ximbiot.com>
+
+	Update from GNULIB.
+	* st_mtim.m4: Remove this file.
+	* timespec.m4, gnulib-cache.m4, gnulib-comp.m4: Updated.
+
+2005-09-15  Derek Price  <derek@ximbiot.com>
+
+	* strstr.m4: Update from GNULIB.
+
+2005-09-09  Derek Price  <derek@ximbiot.com>
+
+	* glob.m4: Update from GNULIB with alpha-quality glibc porting changes.
+
+2005-09-06  Derek Price  <derek@ximbiot.com>
+
+	Update from GNULIB with alpha-quality patch.
+	* canon-host.m4, gnulib-comp.m4: Updated.
+	* getaddrinfo.m4, sockpfaf.m4: New files.
+
+2005-09-05  Derek Price  <derek@ximbiot.com>
+
+	* mbchar.m4 (gl_MBCHAR): Only enable when wchar.h is found.
+	(Patch from Yoann Vandoorselaere <yoann.v@prelude-ids.com>.)
+
+2005-09-04  Derek Price  <derek@ximbiot.com>
+
+	Update from GNULIB.
+	* glob.m4, gnulib-cache.m4, gnulib-comp.m4: Updated.
+
+	Add canon-host module from GNULIB.
+	* canon-host.m4: New file.
+	* gnulib-cache.m4, gnulib-comp.m4: Updated.
+	* gnulib.m4: Removed.
+
+	Update from GNULIB.
+	* getopt.m4, getpass.m4, lib-link.m4, lib-prefix.m4, minmax.m4,
+	regex.m4, strcase.m4, strstr.m4, unistd-safer.m4, xgetcwd.m4:
+	Updated.
+	* gnulib-cache.m4, gnulib-comp.m4, gnulib-tool.m4, mbchar.m4,
+	mbiter.m4, memchr.m4: New files.
+
+2005-09-03  Larry Jones  <lawrence.jones.ugs.com>
+
+	* getlogin_r.m4: Fix cut & paste error.
+
+2005-08-12  Derek Price  <derek@ximbiot.com>
+
+	Update from GNULIB.
+	* bison.m4, dup2.m4, getcwd-path-max.m4, getcwd.m4, getline.m4,
+	getopt.m4, gnulib.m4, mbrtowc.m4, mkstemp.m4, onceonly_2_57.m4,
+	pagealign_alloc.m4, regex.m4, save-cwd.m4, size_max.m4, strftime.m4,
+	unistd-safer.m4: Updated from GNULIB.
+	* getdelim.m4: New file.
+
+2005-07-15  Derek Price  <derek@ximbiot.com>
+
+	* glob.m4: Import new version from GNULIB.
+
+2005-06-15  Derek Price  <derek@ximbiot.com>
+
+	* bison.m4 (gl_BISON): Use new build-aux/bison-missing script.
+
+2005-06-10  Derek Price  <derek@ximbiot.com>
+
+	Sync with GNULIB.
+	* getcwd-path-max.m4, rename.m4: Update from GNULIB.
+	* path-concat.m4: Rename to...
+	* filenamecat: ...this.
+
+	Test new stat module.
+	* stat.m4: Remove this file.
+	* lstat.m4: Don't check for empty string bug.
+
+2005-05-28  Derek Price  <derek@ximbiot.com>
+
+	* glob.m4: s/MISSING_SYS_CDEFS_H/_SYS_CDEFS_H/.  Add comment.
+
+2005-05-25  Derek Price  <derek@ximbiot.com>
+
+	* glob.m4: Don't cater to Solaris here...
+	* extensions.m4: ...do it here instead.
+
+2005-05-25  Derek Price  <derek@ximbiot.com>
+
+	* getlogin_r.m4: New module from GNULIB.
+
+2005-05-24  Derek Price  <derek@ximbiot.com>
+
+	* lstat.m4, stat.m4: Define rpl_stat & rpl_lstat when needed.
+
+2005-05-24  Derek Price  <derek@ximbiot.com>
+
+	* glob.m4 (gl_PREREQ_GLOB): Don't look for struct dirent64 or stat64.
+
+2005-05-23  Derek Price  <derek@ximbiot.com>
+
+	* canonicalize.m4, path-concat.m4: Import from GNULIB.
+
+2005-05-23  Derek Price  <derek@ximbiot.com>
+
+	* minmax.m4: New file from GNULIB.
+
+2005-05-19  Derek Price  <derek@ximbiot.com>
+
+	* glob.m4 (gl_PREREQ_GLOB): Check for __posix_getpwnam_r for Solaris.
+
+2005-05-19  Derek Price  <derek@ximbiot.com>
+
+	* glob.m4 (gl_PREREQ_GLOB): Check for <unistd.h>.
+
+2005-05-18  Derek Price  <derek@ximbiot.com>
+
+	* glob.m4 (gl_GLOB): Don't check for <gnu-versions.h> explicitly.
+	(gl_PREREQ_GLOB): Check for <sys/cdefs.h>.
+
+2005-05-17  Derek Price  <derek@ximbiot.com>
+
+	* glob.m4 (gl_GLOB): Prefer AC_COMPILE_IFELSE to AC_EGREP_CPP.
+	(Suggested by Paul Eggert <eggert@cs.ucla.edu>.)
+
+2005-05-15  Derek Price  <derek@ximbiot.com>
+
+	* glob.m4 (gl_GLOB): Don't call gl_PREREQ_GLOB.
+	(gl_PREREQ_GLOB): Replace search for lots of headers by requiring
+	AC_HEADER_DIRENT.  dirent64 is a type, not a function.
+
+2005-05-12  Derek Price  <derek@ximbiot.com>
+
+	* d-type.m4: New file from GNULIB.
+	* glob.m4 (gl_GLOB): Remove indirection.  Check gnu-versions.h instead
+	of looking for glob_pattern_p().  Use new d-type macro.
+	(gl_PREREQ_GLOB): Reformat to remove blanks line in the generated
+	configure script.
+
+2005-05-11  Derek Price  <derek@ximbiot.com>
+
+	* glob.m4: New file.
+	* strdup.m4: New file from GNULIB.
+
+2005-05-10  Derek Price  <derek@ximbiot.com>
+
+	* getopt.m4, stat-macros.m4: Update from GNULIB.
+
+2005-05-06  Derek Price  <derek@ximbiot.com>
+
+	* getopt.m4: Update from GNULIB.  Closes cvshome.org issue #248.
+
+2005-05-03  Derek Price  <derek@ximbiot.com>
+
+	Update from GNULIB.
+	* clock_time.m4, gnulib.m4, lstat.m4, mkstemp.m4, nanosleep.m4,
+	stat-macros.m4: Updated.
+	* unistd-safer.m4: New file.
+
+2005-05-01  Mark D. Baushke  <mdb@cvshome.org>
+
+	* mmap-anon.m4: Update from GNULIB.
+
+2005-04-25  Derek Price  <derek@ximbiot.com>
+
+	* getpass.m4, gettext.m4: Update from GNULIB.
+
 2005-03-29  Mark D. Baushke  <mdb@cvshome.org>
 
 	* getcwd-path-max.m4: Update from GNULIB.

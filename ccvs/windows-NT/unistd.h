@@ -21,18 +21,31 @@
 #ifndef UNISTD_H
 #define UNISTD_H
 
-int chdir (const char *path);
-int close (int fd);
+/* Don't include Microsoft's chdir, getcwd here, done in config.h now */
+#include <stddef.h>
+
+/* include Microsoft's close, dup */
+#include <io.h>
+
+#include <sys/types.h>
+
+/* These functions doesn't exist under Windows NT; we provide stubs */
+char * getpass (const char *prompt);
+pid_t getpid (void);
+int readlink (const char *path, char *buf, size_t buf_size);
+unsigned int sleep (unsigned int seconds);
+int usleep (useconds_t microseconds);
 
 /*
 FIXME:	gethostname prototype for lib/xgethostname.c, no #include <winsock.h>
 		Remove when GNULib folks provide a permenant fix.
 		Requested by Mark D. Baushke and committed by Conrad T. Pino
 */
-int __stdcall gethostname (char * name, int namelen);
+int __declspec(dllimport) __stdcall gethostname (char * name, int namelen);
 
 #if 0 /* someday maybe these should be added here as well */
 
+int chdir (const char *pathname);
 int mkdir (const char *pathname, mode_t mode);
 int rmdir (const char *pathname);
 int link (const char *oldpath, const char *newpath);
@@ -49,6 +62,7 @@ void rewinddir (DIR *dir);
 int access (const char *pathname, int mode);
 int open (const char *pathname, int flags);
 int creat (const char *pathname, mode_t mode);
+int close (int fd);
 ssize_t read (int fd, void *buf, size_t count);
 ssize_t write (int fd, const void *buf, size_t count);
 int fcntl (int fd, int cmd);
@@ -72,7 +86,6 @@ pid_t waitpid (pid_t pid, int *status, int options);
 pid_t waitpid (pid_t pid, int *status, int options);
 void _exit (int status);
 int kill (pid_t pid, int sig);
-unsigned int sleep (unsigned int seconds);
 int pause (void);
 unsigned int alarm (unsigned int seconds);
 int setuid (uid_t uid);

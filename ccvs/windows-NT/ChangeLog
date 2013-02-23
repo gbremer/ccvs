@@ -1,3 +1,284 @@
+2005-09-30  Conrad T. Pino  <Conrad@Pino.com>
+
+	* woe32.c woe32.h: Add "woe32_fd_select" function.
+
+2005-09-29  Conrad T. Pino  <Conrad@Pino.com>
+
+	* run.c:  Add "bool fix_stderr" argument to "piped_child" function.
+	Add "false" to "piped_child" call in "run_piped" function.
+
+2005-09-26  Conrad T. Pino  <Conrad@Pino.com>
+
+	* config.h.in.footer: Extend "mbsinit" Visual C++ 6.0 implementation
+	to add Visual C++ 5.0, Visual C++ .NET, Visual C++ .NET 2003.
+
+	* config.h config.h.in stamp-chi: Regenerated on UNIX.
+
+2005-09-26  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (EXTRA_DIST): Add unistd.c, woe32.h.
+
+2005-09-25  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (EXTRA_DIST): Add new files.
+
+2005-09-25  Conrad T. Pino  <Conrad@Pino.com>
+
+	* filesubr.c: Change <windows.h> to <sys/socket.h> which includes
+	<windows.h> through <winsock2.h> include.
+
+	* rcmd.c sockerror.c startserver.c unistd.c woe32.c: Change
+	<winsock.h> to <sys/socket.h> which includes <winsock2.h>.
+
+	* unistd.h: Change "gethostname" prototype to match <winsock2.h>.
+
+2005-09-25  Conrad T. Pino  <Conrad@Pino.com>
+
+	* filesubr.c: New (get_system_temp_dir push_env_temp_dir) functions.
+
+2005-09-25  Conrad T. Pino  <Conrad@Pino.com>
+
+	* config.h.in.footer: Add "#pragma once" in "#ifdef _MSC_VER" block.
+	Add "#define HAVE_DECL__SNPRINTF 1" macro.  Add "#include <direct.h>"
+	and "#define mkdir wnt_mkdir" macro.  Add "mbsinit" implementation as
+	an inline function for Microsoft Visual C++ 6.0 only.
+
+	* config.h.in.in: Remove (GLOB_PREFIX HAVE_HSTRERROR HAVE_STRCASECMP
+	HAVE_STRSTR ST_MTIM_NSEC _SYS_CDEFS_H) macros which now obsolete.
+	Change (HAVE_ATEXIT HAVE_DECL_GETENV HAVE_DUP2 HAVE_ENVIRON_DECL
+	HAVE_ERRNO_DECL HAVE_GETHOSTNAME HAVE_ISASCII HAVE_MBLEN HAVE_MBRLEN
+	HAVE_MBSRTOWCS HAVE_MBSTATE_T HAVE_MEMCHR HAVE_MEMMOVE HAVE_PTRDIFF_T
+	HAVE_SEARCH_H HAVE_STRCHR HAVE_STRTOUL HAVE_STRUCT_STAT_ST_RDEV
+	HAVE_TZNAME HAVE_TZSET HAVE_WCSLEN HAVE_WCTYPE_H HAVE_WINT_T
+	HAVE_WMEMCHR HAVE_WMEMCPY) from "#undef ..." to "#define ... 1".
+	Change from "#define HAVE_DIRECT_H 1" to "#undef HAVE_DIRECT_H" since
+	some functions aren't POSIX compliant.
+	Change (SIZEOF_CHAR SIZEOF_DOUBLE SIZEOF_FLOAT SIZEOF_INT SIZEOF_LONG
+	SIZEOF_LONG_DOUBLE SIZEOF_PTRDIFF_T SIZEOF_SHORT SIZEOF_SIZE_T
+	SIZEOF_WINT_T) from "#undef ..." to "#define ... constant" where
+	"constant" is the size in Microsoft Visual C++ 6.0 for 32-bit API.
+	Add (ALLOW_CONFIG_OVERRIDE HAVE_BP_SYM_H HAVE_DECL_GETDELIM
+	HAVE_DECL_GETLINE HAVE_FLOCKFILE HAVE_FUNLOCKFILE HAVE_GAI_STRERROR
+	HAVE_GETADDRINFO HAVE_IPV6 HAVE_ISBLANK HAVE_LANGINFO_CODESET
+	HAVE_TCGETATTR HAVE_TCSETATTR HAVE_TERMIOS_H HAVE___FSETLOCKING
+	_REGEX_LARGE_OFFSETS) as "#undef ..." macro.
+	Add (HAVE_IPV4 HAVE_LOCALE_H HAVE_WCRTOMB HAVE_WCSCOLL) as
+	"#define ... 1" macro.
+	Add "#define strcasecmp rpl_strcasecmp" macro.
+
+	* config.h config.h.in: Regenerated on UNIX for "config.h.in.footer"
+	and "config.h.in.in" changes.
+
+	* filesubr.c mkdir.c: Add "#undef mkdir" to use Microsoft function.
+
+	* unistd.h: Don't include Microsoft "mkdir" function from here, done
+	in "config.h.in.footer" file per Derek Price.
+
+2005-09-22  Conrad T. Pino  <Conrad@Pino.com>
+
+	* config.h.in.footer: Move macros to correct section in sorted order.
+
+2005-09-21  Conrad T. Pino  <Conrad@Pino.com>
+
+	* fix-msvc-mak.pl: Remove "basetsd" from "../lib/libcvs.dep".
+
+2005-09-20  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (EXTRA_DIST): s/netdb.c/netdb.h/.
+
+	* Makefile.am (EXTRA_DIST): Add netdb.h, sys/socket.h, & sys/types.h.
+
+2005-09-20  Conrad T. Pino  <Conrad@Pino.com>
+
+	* netdb.h: Add empty file since Windows doesn't provide one.
+
+2005-09-19  Conrad T. Pino  <Conrad@Pino.com>
+
+	* pwd.c: Replace include of "woe32.h" with "config.h" which 
+	includes "woe32.h" to fix compile error in "lib/timespec.h"
+	that depends on "config.h".
+
+2005-09-19  Conrad T. Pino  <Conrad@Pino.com>
+
+	* filesubr.c: Remove "extern char *Tmpdir" reference.
+
+2005-09-19  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (stamp-ch): Sub PACKAGE_STRING rather than reconstructing
+	it.  Sub PACKAGE_BUGREPORT.
+	(stamp-chi): Fix grammar in comment.
+	* config.h.in.in (PACKAGE_BUGREPORT): Define macro.
+	(PACKAGE_STRING): Use $PACKAGE_STRING directly.
+
+2005-09-04  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in (HAVE_PUTENV): Remove.
+
+2005-09-01  Derek Price  <derek@ximbiot.com>
+
+	* README, sys/types.h: Update links and email addresses.
+
+2005-08-12  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in (HAVE_GETCWD): Remove this macro.
+
+2005-08-03  Jim Hyslop  <jhyslop@dreampossible.ca>
+
+	* filesubr.c: don't expand "." to the name of the current directory.
+	* config.h, config.h.in, config.h.in.in: enabled HAVE_PRINTF_PTR and
+	HAVE_GETCWD.
+
+2005-07-12  Derek Price  <derek@ximbiot.com>
+
+	* mkdir.c, startserver.c, woe32.c: Add copyright notices.
+
+2005-07-12  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.footer: Restore missing FIXME response.
+
+2005-07-11  Derek Price  <derek@ximbiot.com>
+
+	* mkdir.c, startserver.c, woe32.c: Update license notices.
+
+2005-07-07  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.footer (WOE32): New macro.
+
+2005-06-10  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in: Remove HAVE_LSTAT_EMPTY_STRING_BUG,
+	HAVE_STAT_EMPTY_STRING_BUG, stat, and lstat definitions.
+	* config.h.in.footer: Add stat & lstat definitions.
+
+2005-05-31  Conrad T. Pino  <Conrad@Pino.com>
+
+	* config.h, config.h.in, stamp-chi: Regenerated on Solaris for updates
+	to config.h.in.footer and config.h.in.in committed on Windows.
+
+2005-05-31  Conrad T. Pino  <Conrad@Pino.com>
+
+	* config.h.in.in: Change macros (gid_t,pid_t,uid_t) to #undef.
+	* pwd.c, pwd.h: Prototypes now (gid_t,uid_t) instead of "int".
+	* pwd.c: Stop useing "root:root" for "uid:gid" values.
+	* unistd.h: Use "windows-NT/sys/types.h" for definitions.
+
+2005-05-31  Conrad T. Pino  <Conrad@Pino.com>
+
+	* unistd.c, unistd.c: Add new "usleep" function using "my_usleep"
+	  logic taken from "woe32.c" file.
+	* woe32.c, woe32.h: Add new (woe32_home_dir,woe32_shell) functions.
+	* woe32.c: Modify "woe32_nanosleep" to use "unistd.h" "usleep".
+	* filesubr.c: Modify "get_homedir" to use "woe32_home_dir".
+	* pwd.c: Modify "getpwuid" to use "woe32_home_dir" & "woe32_shell".
+	  Append "USERNAME" to "login_strings" array.
+
+
+2005-05-30  Conrad T. Pino  <Conrad@Pino.com>
+
+	* woe32.c, woe32.h: Move functions into alpabetical order.
+
+2005-05-30  Conrad T. Pino  <Conrad@Pino.com>
+
+	* woe32.c: Remove function (getpass,getpid,sleep) implementations.
+	* unistd.c: Add function (getpass,getpid,sleep) implementations.
+
+2005-05-30  Conrad T. Pino  <Conrad@Pino.com>
+
+	* config.h, config.h.in, stamp-chi: Regenerated on Solaris for updates
+	to config.h.in.footer and config.h.in.in committed on Windows.
+
+2005-05-30  Conrad T. Pino  <Conrad@Pino.com>
+
+	* woe32.h: Create header file with ANSI style function prototypes.
+	* woe32.c: Use "woe32.h" header and ANSI style function prototypes.
+	  Use minimal #include file set (#include "cvs.h" dropped).  Rename:
+		function "init_winsock" to "woe32_init_winsock"
+		function "wnt_cleanup" to "woe32_cleanup"
+		function "nanosleep" to "woe32_nanosleep"
+		function "win32getlogin" to "woe32_getlogin"
+	  Change function "sleep" return type to "unsigned int" was "unsigned".
+	* unistd.h: Move function (getpass,getpid,sleep) prototypes here.
+	* config.h.in.footer: Update 2 macros for the above changes:
+		#define SYSTEM_CLEANUP woe32_cleanup
+		#define SYSTEM_INITIALIZE(pargc,pargv) woe32_init_winsock()
+	  Use "woe32.h" header file and remove function prototypes:
+		pid_t getpid (void);
+		void init_winsock (void);
+		unsigned int sleep (unsigned int);
+		void wnt_cleanup (void);
+	* config.h.in.in: Modify 3 macros:
+		#define HAVE_DECL_GETPASS 1 /* was 0 */
+		#define HAVE_DECL_NANOSLEEP 1 /* was #undef */
+		#define nanosleep woe32_nanosleep /* was #undef */
+	* pwd.c: Update to use "woe32.h" and renamed "woe32.c" function.
+
+2005-05-28  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in (MISSING_SYS_CDEFS_H): Rename...
+	(_SYS_CDEFS_H): ...as this.
+
+2005-05-28  Conrad T. Pino  <Conrad@Pino.com>
+
+	* run.c: Implement functions "run_add_arg_p" and "run_arg_free_p" by
+	copying from "../src/run.c" and change all K&R style function argument
+	declarations to ANSI style.
+
+2005-05-26  Derek Price  <derek@ximbiot.com>
+
+	* pwd.h, pwd.c: Reformat to CVS conventions.
+
+2005-05-26  Derek Price  <derek@ximbiot.com>
+
+	* ndir.h, ndir.c: Reformatting to CVS conventions.
+
+2005-05-26  Conrad T. Pino  <Conrad@Pino.com>
+
+	* filesubr.c: Remove "wnt_lstat" function.  Collapse static function
+	"check_statbuf" logic into "wnt_stat" function body.
+
+2005-05-26  Conrad T. Pino  <Conrad@Pino.com>
+
+	* config.h, config.h.in, stamp-chi: Regenerated on Solaris for updates
+	to config.h.in.footer and config.h.in.in committed on Windows.
+
+2005-05-26  Conrad T. Pino  <Conrad@Pino.com>
+
+	* config.h.in.footer: Reorganize into 3 sections (macros, typedefs and
+	function prototypes) and alphabetize each section.  Synchronize with
+	GNULib import so Windows build succeeds.
+	* config.h.in.in: Synchronize with GNULib import so Windows build
+	succeeds.
+	* unistd.h: Include standard function prototypes from Microsoft files
+	to decrease warnings in GNULib import.
+
+2005-05-25  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in (_POSIX_PTHREAD_SEMANTICS): Undef on Windows.
+
+2005-05-25  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in (MISSING_SYS_CDEFS_H): Guess this should be defined.
+
+2005-05-23  Derek Price  <derek@ximbiot.com>
+
+	* filesubr.c (xresolvepath): Remove this function.
+
+2005-05-17  Conrad T. Pino  <Conrad@Pino.com>
+
+	* pwd.c, pwd.h: Add "const" modifier to "getpwnam" & "getgrnam" function
+	"char *" argument to elminate warning in "../lib/glob.c" module.
+
+2005-05-02  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in: Define LOCK_COMPATIBILITY.
+
+2005-04-25  Mark D. Baushke  <mdb@cvshome.org>
+
+	* config.h.in.in: Syncronize with ../config.h.in file.
+	Added: #undef HAVE_DECL_MEMRCHR, #undef HAVE_PAM_PAM_APPL_H,
+	#undef HAVE_SECURITY_PAM_APPL_H
+	* config.h, config.h.in: Regenerated.
+
 2005-03-22  Mark D. Baushke  <mdb@cvshome.org>
 
 	* Makefile.am, stdint.h: Updated from GNULIB.

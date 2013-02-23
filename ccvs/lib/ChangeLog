@@ -1,3 +1,395 @@
+2005-09-29  Derek Price  <derek@ximbiot.com>
+
+	* system.h: #define fd_select select when not already defined.
+
+2005-09-25  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libcvs.dsp: Add files (mkstemp.c tempname.c) to project.
+
+	* libcvs.dep, libcvs.mak: Regenerated for "libcvs.dsp" changes.
+
+2005-09-21  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libcvs.dep: Regenerated for "../windows-NT/fix-msvc-mak.pl" change
+	to remove "basetsd" references.
+
+2005-09-20  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libcvs.dsp: Add files (canon-host.c gai_strerror.c getaddrinfo.c
+	getdelim.c mbchar.c strnlen1.c canon-host.h getaddrinfo.h getdelim.h
+	glob-libc.h mbchar.h mbuiter.h regex_internal.h strcase.h strnlen1.h
+	..\windows-NT\netdb.h ..\windows-NT\sys\socket.h) to project.
+
+	* libcvs.dep libcvs.mak: Regenerated for "libcvs.dsp" changes.
+
+2005-09-20  Derek Price  <derek@ximbiot.com>
+
+	* getaddrinfo.c: Update from GNULIB.
+
+2005-09-20  Derek Price  <derek@ximbiot.com>
+	    Paul Eggert  <eggert@cs.ucla.edu>
+
+	* regcomp.c, regex_internal.c, regex_internal.h, regexec.c: New,
+	simpler replacement fix for the previous.
+
+2005-09-19  Derek Price  <derek@ximbiot.com>
+
+	* regcomp.c, regex_internal.c, regex_internal.h, regexec.c: Fix some
+	__attribute definition problems (submitted to GNULIB).
+
+	* __fpending.c, __fpending.h, atexit.c, basename.c, chdir-long.c,
+	closeout.c, cycle-check.c, dirname.c, dup-safer.c, dup2.c, exitfail.c,
+	fd-safer.c, filenamecat.c, fnmatch.c, ftruncate.c, getaddrinfo.c,
+	getcwd.c, getdate.h, getdelim.c, getline.c, getlogin_r.c, getndelim2.c,
+	getnline.c, getopt1.c, getpass.c, gettimeofday.c, lstat.c, malloc.c,
+	memmove.c, mkdir.c, mkstemp.c, nanosleep.c, openat.c, pipe-safer.c,
+	quotearg.c, readlink.c, realloc.c, regex.c, rename.c, rpmatch.c,
+	save-cwd.c, strerror.c, stripslash.c, strncasecmp.c, strnlen1.c,
+	strstr.c, strtol.c, tempname.c, time_r.c, timespec.h, xalloc-die.c,
+	xgetcwd.c, xmalloc.c, xreadlink.c, yesno.c: Update from GNULIB.
+
+	* canon-host.h, md5.c, md5.h, mktime.c, timespec.h: Update from GNULIB.
+
+2005-09-15  Derek Price  <derek@ximbiot.com>
+
+	* regcomp.c, regex_internal.c, regex_internal.h, regexec.c: Update from
+	GNULIB, again.
+
+	* regcomp.c, regex_internal.c, regex_internal.h, regexec.c: Update from
+	GNULIB.
+
+	* strstr.h: Update from GNULIB.
+
+2005-09-13  Derek Price  <derek@ximbiot.com>
+
+	* canon-host.c: Update from GNULIB.
+
+2005-09-12  Derek Price  <derek@ximbiot.com>
+
+	* gai_strerror.c: Include config.h when available.  Include
+	getaddrinfo.h before other headers to test interface.
+
+2005-09-10  Larry Jones  <lawrence.jones@ugs.com>
+
+	* canon-host.c (canon_host_r): Designated initializers are C99 only.
+	* getaddrinfo.c (getaddrinfo): Can't do arithmetic on void *.  Fix
+	incorrect hints member name.  Fix const mismatch.
+
+2005-09-09  Derek Price  <derek@ximbiot.com>
+
+	Install glibc porting changes.
+	* glob.c, glob_.h: Update with alpha-GNULIB.
+	* glob-libc.h: New file from same.
+
+2005-09-08  Derek Price  <derek@ximbiot.com>
+
+	* getaddrinfo.h: Don't assume HAVE_GETADDRINFO will be defined when the
+	system does not haev getaddrinfo.
+
+2005-09-06  Derek Price  <derek@ximbiot.com>
+
+	* regex_internal.h: Update from GNULIB.
+
+	* getpass.c, regcomp.c, regex_internal.c, regex_internal.h, regexec.c:
+	Update from GNULIB.
+
+	Update from GNULIB with alpha-quality patch.
+	* Makefile.am: Add getaddrinfo cruft.
+	* canon-host.c: Updated to use getaddrinfo module.
+	* canon-host.h, gai_strerror.c, getaddrinfo.c, getaddrinfo.h: New
+	files.
+
+2005-09-05  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (mbchar): Remove obsolete module cruft.
+
+2005-09-04  Derek Price  <derek@ximbiot.com>
+
+	Update from GNULIB.
+	* glob.c, glob_.h: Updated.
+	* Makefile.am: Move glob targets into alpha order.  Add size_max
+	module.
+
+	Add canon-host module from GNULIB.
+	* canon-host.c: New file.
+
+	Update from GNULIB.
+	* Makefile.am: Import modifications from...
+	* Makefile.gnulib: ...here.
+	* dup-safer.c, fd-safer.c, getpass.c, regcomp.c, regex.c, regex.h,
+	regex_internal.c, regex_internal.h, regexec.c, strcase.h,
+	strcasecmp.c, strftime.c, strncasecmp.c, strstr.c, strstr.h,
+	unistd-safer.h: Updated.
+	* mbchar.c, mbchar.h, mbuiter.h, memchr.c, pipe-safer.c, strnlen1.c,
+	strnlen1.h, unistd--.h: New files.
+
+2005-08-31  Derek Price  <derek@ximbiot.com>
+
+	* getdelim.c (getdelim): Return EOF on EOF, revisited.
+
+2005-08-31  Derek Price  <derek@ximbiot.com>
+
+	* getdelim.c (getdelim): Return EOF on EOF.
+
+2005-08-12  Derek Price  <derek@ximbiot.com>
+
+	Update from GNULIB.
+	* Makefile.am: Update using Makefile.gnulib changes.
+	* Makefile.gnulib, dup-safer.c, dup2.c, fnmatch.c, getcwd.c, getcwd.h,
+	getline.c, getline.h, getlogin_r.h, mktime.c, openat.h,
+	pagealign_alloc.c, quotearg.c, regex.c, regex.h, save-cwd.c,
+	strftime.c, tempname.c, time_r.h, xmalloc.c: Updated.
+	* getdelim.c, getdelim.h, regcomp.c, regex_internal.c,
+	regex_internal.h, regexec.c, size_max.h: New files.
+
+2005-06-12  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libcvs.dsp: Add files "filenamecat.h" and "lstat.c" to project.
+	* libcvs.dep, libcvs.mak: Regenerate for "libcvs.dsp" changes.
+
+2005-06-10  Derek Price  <derek@ximbiot.com>
+
+	Sync with GNULIB.
+	* basename.c, canonicalize.c, canonicalize.h, dirname.c, dirname.h,
+	fnmatch_.h, fnmatch_loop.c, getcwd.c, getlogin_r.c, mkstemp.c,
+	openat.c, openat.h, pathmax.h, rename.c, stripslash.c, tempname.c,
+	xreadlink.c: Update from GNULIB.
+	* path-concat.c, path-concat.h: Rename to...
+	* filenamecat.c, filenamecat.h: ...this.
+
+	Test new stat module.
+	* lstat.h: New file.
+	* stat.c: Remove this file and...
+	* lstat.c: ...move most functionality here.
+
+2005-05-30  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libcvs.dsp: Add file "windows-NT/woe32.h" to project.
+	* libcvs.dep: Regenerate for "libcvs.dsp" change.
+
+2005-05-28  Derek Price  <derek@ximbiot.com>
+
+	* glob_.h: s/MISSING_SYS_CDEFS_H/_SYS_CDEFS_H/.  Add comment.
+
+2005-05-27  Derek Price  <derek@ximbiot.com>
+
+	* getlogin_r.h: Import new version from GNULIB.
+
+2005-05-26  Derek Price  <derek@ximbiot.com>
+
+	* glob_.h: Protect __THROW separately from __BEGIN_DECLS.
+
+2005-05-26  Derek Price  <derek@ximbiot.com>
+
+	* system.h: Move non-system substitute GNULIB headers into cvs.h.
+	Remove stat macros in favor of GNULIB stat-macros module.  Assume
+	<sys/stat.h> and <stdlib.h> per HACKING.
+
+2004-05-26  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libcvs.dsp: Add files "getlogin_r.c" and "getlogin_r.h" to project.
+	* libcvs.dep, libcvs.mak: Regenerated for "libcvs.dsp" change.
+
+2004-05-26  Conrad T. Pino  <Conrad@Pino.com>
+
+	* glob_.h: Windows build fakes "ndir.h" which defines "struct direct"
+	which differs from "dirent.h" which defines "struct dirent".
+
+2005-05-25  Derek Price  <derek@ximbiot.com>
+
+	* glob.c (LOGIN_NAME_MAX): Wrap sysconf for Windows.
+
+2005-05-25  Derek Price  <derek@ximbiot.com>
+
+	* glob_.h: Simplify <sys/cdefs.h> include and GLIBC macro use.  Replace
+	use of defined _LIBC with !defined GLOB_PREFIX.  Restore some GLIBC
+	stuff we don't care about anyhow.  Separate some #defines into their
+	own section for clarity.
+	(__glob_pattern_p): Move this definition...
+	* glob.c (__glob_pattern_p): ...here.
+	(HAVE_D_TYPE): Remove this macro for simplicity's sake.
+	(HAVE__POSIX_GETPWNAM_R): Ditto.
+	* getlogin_r.c, getlogin_r.h: Update from GNULIB.
+	
+2005-05-25  Derek Price  <derek@ximbiot.com>
+
+	* glob.c: Remove HAVE_GETLOGIN_R complexity in favor of the GNULIB
+	getlogin_r module.  Redefine "struct_stat64" rather than "stat64" to
+	avoid macro collisions on Solaris.
+	* getlogin_r.c, getlogin_r.h: New files from GNULIB.
+
+2004-05-24  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libcvs.dsp: Add files "canonicalize.c", "cycle-check.c",
+	"canonicalize.h", "cycle-check.h", "dev-ino.h", "glob.h", "mempcpy.h",
+	"path-concat.h", "stat-macros.h" and "strdup.h" to project.
+	* libcvs.dep, libcvs.mak: Regenerated for "libcvs.dsp" change.
+
+2005-05-24  Conrad T. Pino  <Conrad@Pino.com>
+
+	* glob_.h: Remove "struct stat;" forward declaration and update comment.
+
+2005-05-24  Conrad T. Pino  <Conrad@Pino.com>
+
+	* glob_.h: "#include <sys/stat.h>" for Solaris "#define stat stat64"
+	case.
+
+2005-05-24  Derek Price  <derek@ximbiot.com>
+
+	* stat.c: Use system stat & lstat functions in this file.
+	* system.h (CVS_STAT, CVS_LSTAT): Remove these macros.
+
+2005-05-24  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (BUILT_SOURCES, EXTRA_DIST, MAINTAINERCLEANFILES): Add
+	getdate.c due to automake bug.
+
+2005-05-24  Derek Price  <derek@ximbiot.com>
+
+	* glob_.h, glob.c: Don't attempt to handle 64 bit file information
+	explicitly when not compiling as part of glibc.
+
+2005-05-23  Derek Price  <derek@ximbiot.com>
+
+	* canonicalize.c, canonicalize.h, cycle-check.c, cycle-check.h,
+	dev-ino.h, path-concat.c, path-concat.h: New files from GNULIB.
+
+2005-05-23  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am: Remove unnecessary comment.
+
+2005-05-23  Derek Price  <derek@ximbiot.com>
+
+	* __fpending.c, alloca_.h, allocsa.c, allocsa.h, asnprintf.c,
+	asprintf.c, basename.c, chdir-long.c, chdir-long.h, closeout.c,
+	closeout.h, dirname.c, dirname.h, dup-safer.c, dup2.c, error.c,
+	error.h, exit.h, exitfail.c, exitfail.h, fd-safer.c, fnmatch.c,
+	fnmatch_.h, fnmatch_loop.c, getcwd.c, getcwd.h, getdate.c, getdate.h,
+	getdate.y, gethostname.c, getline.c, getline.h, getndelim2.c,
+	getndelim2.h, getnline.c, getnline.h, getopt.c, getopt1.c, getopt_.h,
+	getopt_int.h, getpagesize.h, getpass.c, getpass.h, gettext.h,
+	gettime.c, gettimeofday.c, lstat.c, malloc.c, md5.c, md5.h, mempcpy.c,
+	mempcpy.h, memrchr.c, memrchr.h, minmax.h, mkdir.c, mkstemp.c,
+	mktime.c, nanosleep.c, openat.c, openat.h, pagealign_alloc.c,
+	pagealign_alloc.h, pathmax.h, printf-args.c, printf-args.h,
+	printf-parse.c, printf-parse.h, quotearg.c, quotearg.h, readlink.c,
+	realloc.c, regex.c, regex.h, rename.c, rpmatch.c, save-cwd.c,
+	save-cwd.h, setenv.c, setenv.h, stat-macros.h, stat.c, stdbool_.h,
+	stdint_.h, strcase.h, strcasecmp.c, strdup.c, strdup.h, strerror.c,
+	strftime.c, strftime.h, stripslash.c, strstr.c, strstr.h, strtol.c,
+	strtoul.c, tempname.c, time_r.c, time_r.h, timespec.h, unistd-safer.h,
+	unlocked-io.h, unsetenv.c, vasnprintf.c, vasnprintf.h, vasprintf.c,
+	vasprintf.h, xalloc-die.c, xalloc.h, xgetcwd.c, xgetcwd.h,
+	xgethostname.c, xmalloc.c, xreadlink.c, xreadlink.h, xsize.h, yesno.c,
+	yesno.h: Update from GNULIB.
+
+2005-05-20  Derek Price  <derek@ximbiot.com>
+
+	* glob.c (__stat64): Add args to macro definition for clarity.
+
+2005-05-19  Derek Price  <derek@ximbiot.com>
+
+	* glob.c: Use POSIX getpwnam_r on Solaris.
+
+2005-05-19  Derek Price  <derek@ximbiot.com>
+
+	* glob.c: Don't delcare protos for getlogin or getlogin_r if we got one
+	from <unistd.h>.
+
+2005-05-18  Derek Price  <derek@ximbiot.com>
+
+	* glob.c (GETPW_R_SIZE_MAX): Remove `;' from macro definition.
+
+2005-05-18  Derek Price  <derek@ximbiot.com>
+
+	More misc cleanup for compatibility with GNULIB & glibc, mostly
+	suggested by Paul Eggert <eggert@cs.ucla.edu>.
+	* glob.c: Improve comments.
+	(GETPW_R_SIZE_MAX): Add parens to definition.
+	(glob): Use GNU coding conventions (formatting change).
+	* glob_.h: Include <sys/cdefs.h> when possible.
+
+2005-05-17  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libcvs.dsp: Add "glob.c", "glob_.h" and "mempcpy.c" to project.
+	* libcvs.dep, libcvs.mak: Regenerated for "libcvs.dsp" change.
+
+2005-05-17  Derek Price  <derek@ximbiot.com>
+
+	More misc cleanup for compatibility with GNULIB & glibc, mostly
+	suggested by Paul Eggert <eggert@cs.ucla.edu>.
+	* glob.c: Improve comments.  
+	(GETPW_R_SIZE_MAX): New macro to avoid undefined sysconf macros.
+	(glob): Use new macro.
+	* glob_.h: Define __const, __restrict, and __USE_GNU when necessary.
+	Protect use of __BEGIN_DECLS & __END_DECLS.  Remove include of
+	<sys/types.h>.  Reorganize definitions for GNULIB.  Remove #undefs
+	which work around what is now probably a non-existant problem.
+
+2005-05-15  Derek Price  <derek@ximbiot.com>
+
+	* glob_.h, glob.c: More misc cleanup for compatibility with GNULIB &
+	glibc, mostly suggested by Paul Eggert <eggert@cs.ucla.edu>.  Remove
+	casts to and from void * - they are not needed in C89.
+
+2005-05-13  Derek Price  <derek@ximbiot.com>
+
+	* glob_.h: Enable GNU features by default.  Remove copy/pasted getopt
+	#define.
+	* glob.c: s/__strdup/strdup/ (Fixes BSD compilation issue).
+
+2005-05-13  Derek Price  <derek@ximbiot.com>
+
+	* glob.c, glob_.h: Misc cleanup for compatibility with GNULIB & glibc,
+	mostly suggested by Paul Eggert <eggert@cs.ucla.edu>.
+
+2005-05-12  Derek Price  <derek@ximbiot.com>
+
+	* glob.c, glob_.h: Misc improvements suggested by Paul Eggert, bringing
+	these files closer to their glibc sources.  Simplify & reorganize for
+	clarity.  Use protos.
+	(glob_in_dir): Fix GLOB_ONLYDIR bug/typo.
+
+2005-05-11  Derek Price  <derek@ximbiot.com>
+
+	* .cvsignore: Ignore glob.h.
+	* Makefile.am (BUILT_SOURCES, EXTRA_DIST, MOSTLYCLEANFILES): Add glob
+	files.
+	(glob.h): New target.
+	* glob.c, glob_.h: New files.
+	* strdup.c, strdup.h: New files from GNULIB.
+
+2005-05-09  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libcvs.dep, libcvs.mak: Regenerated after Windows full rebuild.
+
+2005-05-08  Mark D. Baushke  <mdb@cvshome.org>
+
+	* libcvs.dsp: unistd-safer.h is in lib, not windows-NT.
+	* libcvs.dep: Regenerate.
+
+2005-05-07  Mark D. Baushke  <mdb@cvshome.org>
+
+	* libcvs.dep: Use a relative path for unistd-safer.h.
+
+	* libcvs.dsp: Update from GNULIB.
+	Add files dup-safer.c, fd-safer.c, and unistd-safer.h.
+	* libcvs.dep, libcvs.mak: Regenerate.
+
+2005-05-03  Derek Price  <derek@ximbiot.com>
+
+	Update from GNULIB.
+	* chdir-long.c, nanosleep.c, save-cwd.c, tempname.c: Updated.
+	* dup-safer.c, fd-safer.c, unistd-safer.h: New files.
+
+2005-05-01  Mark D. Baushke  <mdb@cvshome.org>
+
+	* regex.c: Update from GNULIB.
+
+2005-04-25  Derek Price  <derek@ximbiot.com>
+
+	* getdate.y: Update from GNULIB.
+
 2005-04-15  Derek Price  <derek@ximbiot.com>
 
 	* Makefile.am (DISTCLEANFILES): Add getdate.log.

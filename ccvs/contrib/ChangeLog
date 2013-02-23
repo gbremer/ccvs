@@ -1,3 +1,96 @@
+2005-09-30  Mark D. Baushke  <mdb@gnu.org>
+
+	* rcs-5.7-commitid.patch: Convert diff timestamps to UTC.
+	Acknowledge Paul Eggert's help.
+	* rcs-5.7-sameuserlocks.patch: Patch from James Olin Oden allows
+	new co -S switch to disallow the user to check out the same file
+	twice.
+	* rcs-5.7-security.patch: tmpfile security patch from Olaf Kirch.
+	* README: Document rcs-5.7-sameuserlocks.patch and
+	rcs-5.7-security.patch.
+	
+2005-09-29  Mark D. Baushke  <mdb@gnu.org>
+
+	* rcs-5.7-commitid.patch: Not all hosts support O_NOCTTY for open.
+	Try to use more random data when time() returns -1.  
+	Simplify commitid creation.
+	
+2005-09-29  Derek Price  <derek@ximbiot.com>
+
+	* rcs-5.7-commitid.patch: Check for error return from time().
+
+2005-09-29  Mark D. Baushke  <mdb@gnu.org>
+
+	* rcs-5.7-commitid.patch: Rename N as COMMITID_RAW_SIZE.
+	Use base62 encoding for non-urandom case.
+	
+2005-09-28  Mark D. Baushke  <mdb@gnu.org>
+
+	* rcs-5.7-commitid.patch: Use base62 for the commitid with
+	more random content.
+
+2005-09-27  Mark D. Baushke  <mdb@gnu.org>
+
+	* rcs-5.7-commitid.patch: Add documentation for the new commitid
+	phrase.
+
+2005-09-26  Mark D. Baushke  <mdb@gnu.org>
+
+	* rcs-5.7-commitid.patch: New file.
+	* README: Add rcs-5.7-commitid.patch description.
+	* Makefile.am (contrib_DATA): Add new rcs-5.7-commitid.patch file.
+	(EXTRA_DIST): Ditto.
+	* Makefile.in: Regenerated.
+	
+2005-09-26  Derek Price  <derek@ximbiot.com>
+
+	* README: Rename check_cvs & cvscheck to verify_repo and
+	sandbox_status, respectively.
+
+2005-09-01  Derek Price  <derek@ximbiot.com>
+
+	* commit_prep.in, cvs_acls.in, log.in, log_accum.in, mfpipe.in,
+	pvcs2rcs.in, rcslock.in: Update links and email addresses.
+
+2005-07-22  Mark D. Baushke  <mdb@gnu.org>
+
+	* log_accum.in (change_summary): Handle cvs log date lines with
+	commitid information on them.
+
+2005-07-20  Derek Price  <derek@ximbiot.com>
+
+	* cvs_acls.html, cvs_acls.in, log_accum.in:
+	s/cvshome.org/nongnu.org.etc.../.
+
+2005-07-12  Derek Price  <derek@ximbiot.com>
+
+	* clmerge.in, cln_hist.in, commit_prep.in, cvs2vendor.sh, cvs_acls.in,
+	debug_check_log.sh, descend.sh, log.in, log_accum.in, mfpipe.in,
+	rcs-to-cvs.sh, rcs2log.sh, rcs2sccs.sh, rcslock.in,sandbox_status.sh,
+	sccs2rcs.in: Add copyright notices.
+
+2005-07-11  Derek Price  <derek@ximbiot.com>
+
+	* clmerge.in, cln_hist.in, commit_prep.in, cvs2vendor.sh, cvs_acls.in,
+	debug_check_log.sh, descend.sh, log.in, log_accum.in, mfpipe.in,
+	rcs-to-cvs.sh, rcs2log.sh, rcs2sccs.sh, rcslock.in, sandbox_status.sh,
+	sccs2rcs.in: Update license notices.
+
+2005-06-27  Derek Price  <derek@ximbiot.com>
+
+	* pvcs2rcs.pl (bin_ext): Add some new extensions.  Reorganize slightly.
+	(usage, error_count): Repaginate.
+	(help): Add cvs-module option.  Repaginate.
+	(options): Add cvs-module option.
+	(execdir): Keep track of CVS module dir.  Add quotes around file names
+	to handle spaces when passed to shell.  Parse "Description" fields
+	correctly.  Try not to abort when a log line matches /^Rev [\d.]+/.
+	Handle file locks in CVS module dir and moving archives into CVS module
+	dir when done.  Add a few debug prints.  Branch when a 2.*, etc.
+	revision is found since in PVCS, commits to 1.* and 2.* are treated as
+	different branches.
+	(pvcs_to_rcs_rev_number): Ignore 1.*, 2.*, etc., to be handled later.
+
 2005-04-14  Derek Price  <derek@ximbiot.com>
 
 	* commit_prep.in, cvs_acls.in, log.in, log_accum.in, mfpipe.in,

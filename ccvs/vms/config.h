@@ -9,7 +9,7 @@
               June 1995 - <benjamin@cyclic.com> */
 
 /* The following macro are defined by running ./configure under UNIX OSs.  */
-#define PACKAGE_STRING "Concurrent Versions System (CVS) 1.12.12"
+#define PACKAGE_STRING "Concurrent Versions System (CVS) 1.12.13"
 
 /* We only want to build the client */
 #define CLIENT_SUPPORT 1
@@ -141,9 +141,6 @@
 
 /* Define if you have the rename function */
 #define HAVE_RENAME 1
-
-/* Define if you have the putenv function.  */
-/* #undef HAVE_PUTENV */
 
 /* Define if you have the timezone function.  */
 /* #undef HAVE_TIMEZONE */

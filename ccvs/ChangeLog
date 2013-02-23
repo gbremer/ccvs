@@ -1,3 +1,300 @@
+2005-10-03  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note ZLib security issues.
+
+2005-09-30  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Mention Conrad's Windows client fix.
+
+2005-09-28  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Consolidate TmpDir with the other new config keys.
+
+2005-09-26  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note FreeBSD 5.x GSSAPI fix.
+
+	* NEWS: Note fsync'd commits.
+
+2005-09-25  Conrad T. Pino  <Conrad@Pino.com>
+
+	* cvsnt.dsp: Add files (lib\getdelim.h lib\setenv.h) to project.
+
+	* cvsnt.dep: Regenerated for "cvsnt.dsp" changes.
+
+2005-09-24  Derek Price  <derek@ximbiot.com>
+
+	* NEWS, HACKING: Standardize on Automake 1.9.6.
+
+2005-09-22  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Mention conflict fixes.
+
+2005-09-20  Conrad T. Pino  <Conrad@Pino.com>
+
+	* cvsnt.dsp: Add files (lib\canon-host.h lib\glob-libc.h) to project.
+
+	* cvsnt.dep: Regenerated for "cvsnt.dsp" changes.
+
+2005-09-19  Derek Price  <derek@ximbiot.com>
+
+	* maint-aux/gnulib-update: Default $GNULIB path rather than setting.
+	Check for error return from gnulib-tool before expecting results.
+
+2005-09-13  Derek Price  <derek@ximbiot.com>
+
+	* TESTS: Mention new $username8 & $anyusername variables.
+
+2005-09-06  Derek Price  <derek@ximbiot.com>
+
+	* TESTS: Reword slightly.  s/\$PROG/\$CPROG/.  Document $tempfile &
+	$tempname.
+
+	* NEWS: Note Kerberos4 build fix.
+
+2005-09-05  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note TmpDir config key.  Reorder config news items.  Reword
+	the [root] specification item.
+
+	* configure.in (--enable-config-override): Verify $prefix is set before
+	expanding $sysconfdir.
+
+2005-09-04  Derek Price  <derek@ximbiot.com>
+
+	* configure.in: Remove putenv cruft.
+
+	* maint-aux/gnulib-modules: Add glob.
+
+	* NEWS: Note new [root] specification in config files.
+
+	* configure.in: Remove unneeded search for hstrerror.
+	* maint-aux/gnulib-modules: Add canon-host.
+
+2005-09-04  Larry Jones  <lawrence.jones@ugs.com>
+
+	* NEWS: s/bug-cvs@gnu.org/bug-cvs@nongnu.org/.
+	* configure.in: s/info-cvs@gnu.org/info-cvs@nongnu.org/.
+	* configure: Regenerated.
+
+2005-09-03  Larry Jones  <lawrence.jones.ugs.com>
+
+	* configure: Regenerated.
+
+2005-09-01  Derek Price  <derek@ximbiot.com>
+
+	* DEVEL-CVS, FAQ, HACKING, INSTALL-CVS, README, README.VMS,
+	configure.in, build-aux/bison-missing: Update links and email
+	addresses.
+
+2005-08-31  Derek Price  <derek@ximbiot.com>
+
+	* www/.htaccess: Remove this file.
+
+2005-08-31  Derek Price  <derek@ximbiot.com>
+
+	* cvs.spec.in: Note last spec file change in internal ChangeLog.
+
+2005-08-31  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note spec file repair.
+
+2005-08-31  Derek Price  <derek@ximbiot.com>
+
+	* cvs.spec.in: Update links to point to Savannah.  s/Copyright/License/
+	for RPM 4.mumble.
+
+2005-08-31  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note configurable config file path.
+	* configure.in (--enable-config-override): New option.
+
+2005-08-30  Larry Jones  <lawrence.jones@ugs.com>
+
+	* NEWS: Note import locking fix.
+
+2005-08-29  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note new verifymsg %{sV} format strings.
+
+2005-08-04  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Move 1.12 change from BUG FIXES to NEW FEATURES and rephrase.
+	Correct spelling error in different entry.
+
+2005-07-20  Derek Price  <derek@ximbiot.com>
+
+	* AUTHORS, HACKING, README, cvs.spec.in:
+	s/cvshome.org/nongnu.org.etc.../.
+	* DEVEL-CVS: Ditto.  Remove devel-cvs mailing list charter.
+
+2005-07-12  Derek Price  <derek@ximbiot.com>
+
+	* FAQ, HACKING, INSTALL: Add copyright notices.
+
+2005-07-11  Derek Price  <derek@ximbiot.com>
+
+	* FAQ, HACKING, INSTALL-CVS: Update license notices.
+
+2005-06-15  Derek Price  <derek@ximbiot.com>
+
+	* build-aux/missing: Add hack to fail gracefully when Bison is too old.
+
+2005-06-15  Derek Price  <derek@ximbiot.com>
+
+	* HACKING: Note GNU Bison 1.875 requirement.
+
+2005-06-12  Conrad T. Pino  <Conrad@Pino.com>
+
+	* cvsnt.dsp: Add file "lstat.h" to project.
+	* cvsnt.dep: Regenerate for "cvsnt.dsp" change.
+
+2005-06-10  Derek Price  <derek@ximbiot.com>
+
+	* maint-aux/gnulib-modules: Remove stat module.
+
+2005-06-10  Mark D. Baushke  <mdb@cvshome.org>
+
+	* HACKING: Add a few more guidelines.  Adjust examples for switch
+	labels.  Fix some spelling mistakes.
+	* cvs-format.el (c-label-offset, case-label): Adjust indentation
+	to agree with changes in the HACKING document.
+	
+2005-06-03  Derek Price  <derek@ximbiot.com>
+
+	* HACKING: Remove `!= NULL' in example conditional.
+
+2005-06-03  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note new server compression limit config options.  Correct
+	HistorySearchPath name.
+
+2005-06-02  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note server compression hang fix.
+
+2005-06-01  Derek Price  <derek@ximbiot.com>
+
+	* TODO (214): Remove completed item.
+
+2005-06-01  Conrad T. Pino  <Conrad@Pino.com>
+
+	* makewin32.cmd: Add options to support CLEAN build target.
+
+2005-06-01  Conrad T. Pino  <Conrad@Pino.com>
+
+	* makewin32.cmd: Add Windows NT command file to build CVS Project.
+
+2005-05-31  Conrad T. Pino  <Conrad@Pino.com>
+
+	* cvsnt.dep: Regenerate after build for #include changes.
+
+2005-05-30  Conrad T. Pino  <Conrad@Pino.com>
+
+	* cvsnt.dsp: Add files "lib/quotearg.h", "lib/stat-macros.h",
+	  "windows-NT/woe32.h" and "windows-NT/unistd.c" to project.
+	* cvsnt.dep, cvsnt.mak: Regenerate for "cvsnt.dsp" changes.
+
+2005-05-27  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note diff space split fix.
+	* BUGS: Remove diff space split note.
+
+2005-05-27  Derek Price  <derek@ximbiot.com>
+
+	* maint-aux/gnulib-modules: Add quotearg module.
+
+2005-05-26  Derek Price  <derek@ximbiot.com>
+
+	* maint-aux/gnulib-modules: Add stat-macros module.
+
+2005-05-25  Derek Price  <derek@ximbiot.com>
+
+	* maint-aux/gnulib-modules: Add getlogin_r module.
+
+2005-05-24  Conrad T. Pino  <Conrad@Pino.com>
+
+	* cvsnt.dsp: Add lib/canonicalize.h and lib/glob.h to project.
+	* cvsnt.dep: Regenerate for cvsnt.dsp changes.
+
+2005-05-23  Derek Price  <derek@ximbiot.com>
+
+	* maint-aux/gnulib-modules: Add GNULIB canonicalize module.
+
+2005-05-23  Derek Price  <derek@ximbiot.com>
+
+	* configure.in: Update Copyright years.
+
+2005-05-17  Conrad T. Pino  <Conrad@Pino.com>
+
+	* cvsnt.dep: Regenerated for "lib/libcvs.dsp" change.
+
+2005-05-11  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note new History* config options.
+	* maint-aux/gnulib-filelist.txt: Add strdup module.
+
+2005-05-09  Conrad T. Pino  <Conrad@Pino.com>
+
+	* cvsnt.dep, cvsnt.mak: Regenerated after Windows full rebuild.
+
+2005-05-09  Derek Price  <derek@ximbiot.com>
+
+	* cvs.spec.in: Find install-sh in its new location.
+
+2005-05-06  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note Solaris 10 command option parsing fix.
+
+2005-05-04  Mark D. Baushke  <mdb@cvshome.org>
+
+	* maint-aux/gnulib-update: Depend on maint-aux/gnulib-modules
+	which needs to exist relative to the top-level directory rather
+	than config.h which may be sitting in a build subdirectory.
+
+2005-05-03  Derek Price  <derek@ximbiot.com>
+
+	* INSTALL-CVS: Add footnote about compiling a CVS checkout of CVS on a
+	case-insensitive UNIX file system like Mac OS X.
+
+2005-05-03  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note GNULIB updates as misc efficiency and portability fixes.
+
+2005-05-02  Derek Price  <derek@ximbiot.com>
+
+	* TODO (231): New item.
+	(22, 30, 31): Remove completed items.
+
+2005-05-02  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note new val-tags locks.
+
+2005-05-02  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note that lock compatibility is now enabled on Windows by
+	default.
+
+2005-05-01  Mark D. Baushke  <mdb@cvshome.org>
+
+	* maint-aux/gnulib-filelist.txt: Update from GNULIB.
+	* configure: Regenerated.
+
+2005-04-30  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note new history locks.
+
+2005-04-25  Mark D. Baushke  <mdb@cvshome.org>
+
+	* configure.in: Add support for <pam/pam_appl.h> to allow
+	--enable-pam to work on MacOSX 10.2 and newer.
+	(Pach from Moriyoshi Koizumi <moriyoshi@at.wakwak.com>.)
+	* configure, config.h.in: Regenerated.
+	
+2005-04-20  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note log overflow fix.
+
 2005-04-15  Derek Price  <derek@ximbiot.com>
 
 	* NEWS: Note Klocwork fixes.

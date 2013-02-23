@@ -328,6 +328,10 @@ SOURCE=.\src\tag.c
 # End Source File
 # Begin Source File
 
+SOURCE=".\windows-NT\unistd.c"
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\update.c
 # End Source File
 # Begin Source File
@@ -369,6 +373,14 @@ SOURCE=.\lib\alloca.h
 # Begin Source File
 
 SOURCE=.\src\buffer.h
+# End Source File
+# Begin Source File
+
+SOURCE=".\lib\canon-host.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\lib\canonicalize.h
 # End Source File
 # Begin Source File
 
@@ -424,6 +436,10 @@ SOURCE=.\lib\getdate.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\lib\getdelim.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\lib\getline.h
 # End Source File
 # Begin Source File
@@ -445,6 +461,14 @@ SOURCE=.\lib\getpass.h
 # Begin Source File
 
 SOURCE=.\lib\gettext.h
+# End Source File
+# Begin Source File
+
+SOURCE=".\lib\glob-libc.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\lib\glob.h
 # End Source File
 # Begin Source File
 
@@ -488,6 +512,10 @@ SOURCE=".\src\log-buffer.h"
 # End Source File
 # Begin Source File
 
+SOURCE=.\lib\lstat.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\lib\md5.h
 # End Source File
 # Begin Source File
@@ -528,6 +556,10 @@ SOURCE=".\windows-NT\pwd.h"
 # End Source File
 # Begin Source File
 
+SOURCE=.\lib\quotearg.h
+# End Source File
+# Begin Source File
+
 SOURCE=".\windows-NT\rcmd.h"
 # End Source File
 # Begin Source File
@@ -560,11 +592,19 @@ SOURCE=.\src\server.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\lib\setenv.h
+# End Source File
+# Begin Source File
+
 SOURCE=".\src\socket-client.h"
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\stack.h
+# End Source File
+# Begin Source File
+
+SOURCE=".\lib\stat-macros.h"
 # End Source File
 # Begin Source File
 
@@ -621,6 +661,10 @@ SOURCE=.\lib\wait.h
 # Begin Source File
 
 SOURCE=.\src\watch.h
+# End Source File
+# Begin Source File
+
+SOURCE=".\windows-NT\woe32.h"
 # End Source File
 # Begin Source File
 

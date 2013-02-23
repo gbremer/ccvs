@@ -1,3 +1,185 @@
+2005-09-26  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (cvs-paper.ps, cvs-paper.pdf): Remove implicit sources.
+	Add comments about why implicit rules won't work for these targets.
+	Make sure the distributed cvs-paper.pdf is created in $(srcdir).  Make
+	cvs-paper.pdf directly from cvs-paper.ms to avoid building it just
+	because cvs-paper.ps is missing.
+
+	* Makefile.am (EXTRA_DIST): Restore PDFs.
+	* cvs-paper.ps: Removed.
+
+2005-09-25  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (doc): Finish removing PSs.
+
+	* Makefile.am (EXTRA_DIST): Remove PDFs too until errors go away.
+
+	* Makefile.am (EXTRA_DIST): Dist PDFs rather than PSs.
+
+2005-09-22  Larry Jones  <lawrence.jones@ugs.com>
+
+	* cvs.texinfo (rdiff options): Document -k.
+	* cvs.1, stamp-vti, version.texi: Regenerated.
+
+2005-09-20  Larry Jones  <lawrence.jones@ugs.com>
+
+	* cvs.texinfo: Move summary and detail contents to the front
+	where they belong.
+
+2005-09-14  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am: s#cvs.1#$(srcdir)/cvs.1#.
+
+2005-09-12  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (stamp-gdt): Use texinfo, as opposed to C, comments in
+	the automatically generated getdate-cvs.texi file.
+
+2005-09-11  Larry Jones  <lawrence.jones@ugs.com>
+
+	* cvs.texinfo (Common options): Note that -r branch for a revision
+	means the head of the branch.
+
+2005-09-10  Larry Jones  <lawrence.jones@ugs.com>
+
+	* cvs.texinfo (Error messages): Add suggested messages.
+
+2005-09-09  Larry Jones  <lawrence.jones@ugs.com>
+
+	* cvs.texinfo (Error messages): Move out of sync message to correct
+	location and reword.
+	Clean up bad cross reference syntax.
+
+	* cvs.texinfo (Error messages): Add signal 11 message.
+
+2005-09-06  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (config): Alphabetize list of keys.
+
+	* cvs.texinfo (Global options): Clarify -T description with temporary
+	file path precedence.
+	(config): Shorten TmpDir stuff and reference Global options node.
+	(Environment variables): Ditto for $TMPDIR.  Remove $TMP and $TEMP.  As
+	near as I can tell they are no longer used.
+
+2005-09-05  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (config): Mention TmpDir first appeared in 1.12.13.
+
+	* cvs.texinfo (config): Describe new TmpDir option.
+
+2005-09-04  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (config): Describe new [cvsroot] syntax.
+
+2005-09-01  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo: Update links and email addresses.
+
+2005-08-31  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (CVS commands): Link to new node.
+	(server & pserver): New node.
+	(config): Note configurability of config file path.
+
+2005-08-29  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (verifymsg): Describe new %{sV} format strings.
+
+2005-08-29  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (From scratch): Add checkout to import example, from
+	wiki.
+
+2005-08-29  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Removing directories): Correct grammar, from wiki.
+
+2005-08-29  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (From scratch): Clarify note on `cvs add', inspired from
+	wiki.
+
+2005-08-22  Derek Price  <derek@ximbiot.com>
+
+	Address bug #13882, submitted by Fred Maranhao.
+	* cvs.texinfo (log options, admin options, Invoking CVS): Add cross
+	references for clarity about possible states.
+
+2005-08-22  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Updating a file): Add note about update -d, inspired by
+	wiki.
+
+2005-08-12  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (What is CVS?): Rephrase for clarity, imported from
+	Wiki.
+
+2005-08-02  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (What is CVS?, BUGS): Correct grammar.
+
+2005-07-20  Derek Price  <derek@ximbiot.com>
+
+	* cvs.man.footer, cvs.texinfo, cvsclient.texi:
+	s/cvshome.org/nongnu.org.etc.../.
+
+2005-06-22  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Builds): Update Gunnar Tornblom's email at his request.
+
+2005-06-10  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (loginfo, taginfo): Note new `T' format character in 
+	{sTVv} list.
+
+2005-06-03  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Global options): Note -z *requests* a compression level.
+	(config): Describe MinCompressionLevel and MaxCompressionLevel.
+	* cvsclient.texi (Responses): Add `Force-gzip' request.
+	(Requests): Clarify `Gzip-stream' description.
+
+2005-06-01  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Connecting via rsh):  Cross-reference method options and
+	don't capitalize `remsh' and `ssh' executable names.
+
+2005-05-23  Derek Price  <derek@ximbiot.com>
+
+	* getdate.texi: Update from GNULIB.
+
+2005-05-11  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (history, history file, config): Add info on the new
+	HistoryLogPath and HistorySearchPath config options.
+
+2005-05-03  Derek Price  <derek@ximbiot.com>
+
+	* cvsclient.texi (Goals): Remove typo.  Resolves cvshome issue #236.
+
+2005-05-03  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Creating a repository):  Provide xref to the remote
+	repositries section.  Resolves issue #203 on cvshome.org.
+
+2005-05-03  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Moving directories):  Clarify instructions on renaming a
+	directory.  Partially resolves issue #246 on cvshome.org.
+
+2005-05-03  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (update output): Use "working directory" in place of
+	"source" for clarity.  Closes issue #245 on cvshome.org.
+
+2005-04-22  Mark D. Baushke  <mdb@cvshome.org>
+
+	* cvs.texinfo (Variables): Document SESSIONID and COMMITID
+	internal variables.
+
 2005-04-18  Derek Price  <derek@ximbiot.com>
 
 	* Makefile.am (EXTRA_DIST): Restore getdate-cvs.texi.

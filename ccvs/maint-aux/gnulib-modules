@@ -30,7 +30,6 @@ mktime
 minmax
 memmove
 nanosleep
-stat
 lstat
 strerror
 vasprintf
@@ -58,3 +57,10 @@ pathmax
 xalloc-die
 pagealign_alloc
 closeout
+strdup
+canonicalize
+getlogin_r
+stat-macros
+quotearg
+canon-host
+glob

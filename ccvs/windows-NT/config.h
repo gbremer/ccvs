@@ -22,6 +22,11 @@
 
 /* config.h.in.  Generated from configure.in by autoheader.  */
 
+/* Define this to a NULL terminated list of allowed path prefixes (for
+   directories) and paths to files the CVS server will allow configuration to
+   be read from when specified from the command line. */
+#undef ALLOW_CONFIG_OVERRIDE
+
 /* Enable AUTH_CLIENT_SUPPORT to enable pserver as a remote access method in
    the CVS client (default) */
 #define AUTH_CLIENT_SUPPORT 1
@@ -115,9 +120,6 @@
    message to be appended to the temp file when the editor is started. */
 #undef FORCE_USE_EDITOR
 
-/* Define if gettimeofday clobbers localtime's static buffer. */
-#undef GETTIMEOFDAY_CLOBBERS_LOCALTIME_BUFFER
-
 /* Define to an alternative value if GSS_C_NT_HOSTBASED_SERVICE isn't defined
    in the gssapi.h header file. MIT Kerberos 1.2.1 requires this. Only
    relevant when using GSSAPI. */
@@ -135,10 +137,16 @@
 #define HAVE_ALLOCA_H 1
 
 /* Define to 1 if you have the `atexit' function. */
-#undef HAVE_ATEXIT
+#define HAVE_ATEXIT 1
+
+/* Define to 1 if you have the <bp-sym.h> header file. */
+#undef HAVE_BP_SYM_H
 
 /* Define to 1 if you have the `btowc' function. */
 #undef HAVE_BTOWC
+
+/* Define to 1 if you have the `canonicalize_file_name' function. */
+#undef HAVE_CANONICALIZE_FILE_NAME
 
 /* Define to 1 if you have the MacOS X function CFLocaleCopyCurrent in the
    CoreFoundation framework. */
@@ -223,13 +231,29 @@
    don't. */
 #undef HAVE_DECL_GETC_UNLOCKED
 
+/* Define to 1 if you have the declaration of `getdelim', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETDELIM
+
 /* Define to 1 if you have the declaration of `getenv', and to 0 if you don't.
    */
-#undef HAVE_DECL_GETENV
+#define HAVE_DECL_GETENV 1
+
+/* Define to 1 if you have the declaration of `getline', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETLINE
+
+/* Define to 1 if you have the declaration of `getlogin', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETLOGIN
+
+/* Define to 1 if you have the declaration of `getlogin_r', and to 0 if you
+   don't. */
+#undef HAVE_DECL_GETLOGIN_R
 
 /* Define to 1 if you have the declaration of `getpass', and to 0 if you
    don't. */
-#define HAVE_DECL_GETPASS 0
+#define HAVE_DECL_GETPASS 1
 
 /* Define to 1 if you have the declaration of `memrchr', and to 0 if you
    don't. */
@@ -237,7 +261,7 @@
 
 /* Define to 1 if you have the declaration of `nanosleep', and to 0 if you
    don't. */
-#undef HAVE_DECL_NANOSLEEP
+#define HAVE_DECL_NANOSLEEP 1
 
 /* Define to 1 if you have the declaration of `putchar_unlocked', and to 0 if
    you don't. */
@@ -246,6 +270,10 @@
 /* Define to 1 if you have the declaration of `putc_unlocked', and to 0 if you
    don't. */
 #undef HAVE_DECL_PUTC_UNLOCKED
+
+/* Define to 1 if you have the declaration of `strdup', and to 0 if you don't.
+   */
+#define HAVE_DECL_STRDUP 1
 
 /* Define to 1 if you have the declaration of `strerror_r', and to 0 if you
    don't. */
@@ -256,20 +284,20 @@
 #define HAVE_DECL___FPENDING 0
 
 /* Define to 1 if you have the <direct.h> header file. */
-#define HAVE_DIRECT_H 1
+#undef HAVE_DIRECT_H
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
 
 /* Define to 1 if you have the `dup2' function. */
-#undef HAVE_DUP2
+#define HAVE_DUP2 1
 
 /* Define if you have the declaration of environ. */
-#undef HAVE_ENVIRON_DECL
+#define HAVE_ENVIRON_DECL 1
 
 /* Define if you have the declaration of errno. */
-#undef HAVE_ERRNO_DECL
+#define HAVE_ERRNO_DECL 1
 
 /* Define to 1 if you have the `fchdir' function. */
 #undef HAVE_FCHDIR
@@ -279,6 +307,9 @@
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
+
+/* Define to 1 if you have the `flockfile' function. */
+#undef HAVE_FLOCKFILE
 
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
@@ -295,6 +326,15 @@
 /* Define to 1 if you have the `ftruncate' function. */
 #undef HAVE_FTRUNCATE
 
+/* Define to 1 if you have the `funlockfile' function. */
+#undef HAVE_FUNLOCKFILE
+
+/* Define to 1 if you have the `gai_strerror' function. */
+#undef HAVE_GAI_STRERROR
+
+/* Define to 1 if you have the `getaddrinfo' function. */
+#undef HAVE_GETADDRINFO
+
 /* Define to 1 if you have the `getdelim' function. */
 #undef HAVE_GETDELIM
 
@@ -305,7 +345,10 @@
 #undef HAVE_GETGROUPS
 
 /* Define to 1 if you have the `gethostname' function. */
-#undef HAVE_GETHOSTNAME
+#define HAVE_GETHOSTNAME 1
+
+/* Define to 1 if you have the `getlogin_r' function. */
+#undef HAVE_GETLOGIN_R
 
 /* Define to 1 if you have the <getopt.h> header file. */
 #undef HAVE_GETOPT_H
@@ -316,6 +359,9 @@
 /* Define to 1 if you have the `getpagesize' function. */
 #undef HAVE_GETPAGESIZE
 
+/* Define to 1 if you have the `getpwnam_r' function. */
+#undef HAVE_GETPWNAM_R
+
 /* Define if you have the getspnam function. */
 #undef HAVE_GETSPNAM
 
@@ -324,6 +370,9 @@
 
 /* Define to 1 if you have the `gettimeofday' function. */
 #undef HAVE_GETTIMEOFDAY
+
+/* Define to 1 if you have the <glob.h> header file. */
+#define HAVE_GLOB_H 1
 
 /* Define if you have GSSAPI with Kerberos version 5 available. */
 #undef HAVE_GSSAPI
@@ -336,9 +385,6 @@
 
 /* Define to 1 if you have the <gssapi.h> header file. */
 #undef HAVE_GSSAPI_H
-
-/* Define if you have the hstrerror function. */
-#undef HAVE_HSTRERROR
 
 /* Define if you have the iconv() function. */
 #undef HAVE_ICONV
@@ -359,8 +405,17 @@
 /* Define to 1 if you have the <io.h> header file. */
 #define HAVE_IO_H 1
 
+/* Define to 1 if <sys/socket.h> defines AF_INET. */
+#define HAVE_IPV4 1
+
+/* Define to 1 if <sys/socket.h> defines AF_INET6. */
+#undef HAVE_IPV6
+
 /* Define to 1 if you have the `isascii' function. */
-#undef HAVE_ISASCII
+#define HAVE_ISASCII 1
+
+/* Define to 1 if you have the `isblank' function. */
+#undef HAVE_ISBLANK
 
 /* Define to 1 if you have the `iswprint' function. */
 #define HAVE_ISWPRINT 1
@@ -374,6 +429,9 @@
 /* Define to 1 if you have the `krb_get_err_text' function. */
 #undef HAVE_KRB_GET_ERR_TEXT
 
+/* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
+#undef HAVE_LANGINFO_CODESET
+
 /* Define to 1 if you have the `krb' library (-lkrb). */
 #undef HAVE_LIBKRB
 
@@ -382,6 +440,9 @@
 
 /* Define to 1 if you have the `nsl' library (-lnsl). */
 #undef HAVE_LIBNSL
+
+/* Define to 1 if you have the <locale.h> header file. */
+#define HAVE_LOCALE_H 1
 
 /* Define to 1 if you have the `login' function. */
 #undef HAVE_LOGIN
@@ -398,10 +459,6 @@
 /* Define if you have the 'long long' type. */
 #undef HAVE_LONG_LONG
 
-/* Define to 1 if `lstat' has the bug that it succeeds when given the
-   zero-length file name argument. */
-#undef HAVE_LSTAT_EMPTY_STRING_BUG
-
 /* Define to 1 if your system has a GNU libc compatible `malloc' function, and
    to 0 otherwise. */
 #define HAVE_MALLOC 1
@@ -411,10 +468,10 @@
 #undef HAVE_MAP_ANONYMOUS
 
 /* Define to 1 if you have the `mblen' function. */
-#undef HAVE_MBLEN
+#define HAVE_MBLEN 1
 
 /* Define to 1 if you have the `mbrlen' function. */
-#undef HAVE_MBRLEN
+#define HAVE_MBRLEN 1
 
 /* Define to 1 if mbrtowc and mbstate_t are properly declared. */
 #define HAVE_MBRTOWC 1
@@ -423,16 +480,16 @@
 #undef HAVE_MBSINIT
 
 /* Define to 1 if you have the `mbsrtowcs' function. */
-#undef HAVE_MBSRTOWCS
+#define HAVE_MBSRTOWCS 1
 
 /* Define to 1 if <wchar.h> declares mbstate_t. */
-#undef HAVE_MBSTATE_T
+#define HAVE_MBSTATE_T 1
 
 /* Define if you have memchr (always for CVS). */
-#undef HAVE_MEMCHR
+#define HAVE_MEMCHR 1
 
 /* Define to 1 if you have the `memmove' function. */
-#undef HAVE_MEMMOVE
+#define HAVE_MEMMOVE 1
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -442,6 +499,12 @@
 
 /* Define to 1 if you have the `memrchr' function. */
 #undef HAVE_MEMRCHR
+
+/* Define to 1 if <limits.h> defines the MIN and MAX macros. */
+#define HAVE_MINMAX_IN_LIMITS_H 1
+
+/* Define to 1 if <sys/param.h> defines the MIN and MAX macros. */
+#undef HAVE_MINMAX_IN_SYS_PARAM_H
 
 /* Define to 1 if you have the `mknod' function. */
 #undef HAVE_MKNOD
@@ -472,6 +535,9 @@
    module, e.g. on systems with shadow passwords or via LDAP */
 #undef HAVE_PAM
 
+/* Define to 1 if pam/pam_appl.h is available */
+#undef HAVE_PAM_PAM_APPL_H
+
 /* Define to 1 if getcwd works, except it sometimes fails when it shouldn't,
    setting errno to ERANGE, ENAMETOOLONG, or ENOENT. If __GETCWD_PREFIX is not
    defined, it doesn't matter whether HAVE_PARTLY_WORKING_GETCWD is defined.
@@ -483,13 +549,10 @@
 
 /* Define to 1 if the `printf' function supports the %p format for printing
    pointers. */
-#undef HAVE_PRINTF_PTR
+#define HAVE_PRINTF_PTR 1
 
 /* Define to 1 if the system has the type `ptrdiff_t'. */
-#undef HAVE_PTRDIFF_T
-
-/* Define to 1 if you have the `putenv' function. */
-#define HAVE_PUTENV 1
+#define HAVE_PTRDIFF_T 1
 
 /* Define to 1 if you have the `readlink' function. */
 #undef HAVE_READLINK
@@ -510,6 +573,9 @@
 /* Define to 1 if you have the `regfree' function. */
 #undef HAVE_REGFREE
 
+/* Define to 1 if you have the `resolvepath' function. */
+#undef HAVE_RESOLVEPATH
+
 /* Define to 1 if you have the `rpmatch' function. */
 #undef HAVE_RPMATCH
 
@@ -517,7 +583,10 @@
 #define HAVE_RUN_TZSET_TEST 1
 
 /* Define to 1 if you have the <search.h> header file. */
-#undef HAVE_SEARCH_H
+#define HAVE_SEARCH_H 1
+
+/* Define to 1 if security/pam_appl.h is available */
+#undef HAVE_SECURITY_PAM_APPL_H
 
 /* Define to 1 if you have the `setenv' function. */
 #undef HAVE_SETENV
@@ -531,6 +600,9 @@
 /* Define to 1 if you have the `sigblock' function. */
 #undef HAVE_SIGBLOCK
 
+/* Define to 1 if you have the `siginterrupt' function. */
+#undef HAVE_SIGINTERRUPT
+
 /* Define to 1 if you have the `sigprocmask' function. */
 #undef HAVE_SIGPROCMASK
 
@@ -542,10 +614,6 @@
 
 /* Define to 1 if you have the `snprintf' function. */
 #undef HAVE_SNPRINTF
-
-/* Define to 1 if `stat' has the bug that it succeeds when given the
-   zero-length file name argument. */
-#undef HAVE_STAT_EMPTY_STRING_BUG
 
 /* Define to 1 if stdbool.h conforms to C99. */
 #undef HAVE_STDBOOL_H
@@ -563,14 +631,14 @@
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
 
-/* Define to 1 if you have the `strcasecmp' function. */
-#undef HAVE_STRCASECMP
-
 /* Define if you have strchr (always for CVS). */
-#undef HAVE_STRCHR
+#define HAVE_STRCHR 1
+
+/* Define to 1 if you have the `strdup' function. */
+#define HAVE_STRDUP 1
 
 /* Define to 1 if you have the `strerror' function. */
-#undef HAVE_STRERROR
+#define HAVE_STRERROR 1
 
 /* Define to 1 if you have the `strerror_r' function. */
 #undef HAVE_STRERROR_R
@@ -587,20 +655,21 @@
 /* Define to 1 if you have the `strncasecmp' function. */
 #undef HAVE_STRNCASECMP
 
-/* Define to 1 if you have the `strstr' function. */
-#undef HAVE_STRSTR
-
 /* Define to 1 if you have the `strtol' function. */
 #define HAVE_STRTOL 1
 
 /* Define to 1 if you have the `strtoul' function. */
-#undef HAVE_STRTOUL
+#define HAVE_STRTOUL 1
+
+/* Define if there is a member named d_type in the struct describing directory
+   headers. */
+#undef HAVE_STRUCT_DIRENT_D_TYPE
 
 /* Define to 1 if `st_blksize' is member of `struct stat'. */
 #undef HAVE_STRUCT_STAT_ST_BLKSIZE
 
 /* Define to 1 if `st_rdev' is member of `struct stat'. */
-#undef HAVE_STRUCT_STAT_ST_RDEV
+#define HAVE_STRUCT_STAT_ST_RDEV 1
 
 /* Define if struct timespec is declared in <time.h>. */
 #undef HAVE_STRUCT_TIMESPEC
@@ -613,6 +682,9 @@
 
 /* Define to 1 if you have the <sys/bsdtypes.h> header file. */
 #undef HAVE_SYS_BSDTYPES_H
+
+/* Define to 1 if you have the <sys/cdefs.h> header file. */
+#undef HAVE_SYS_CDEFS_H
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
@@ -649,6 +721,15 @@
 /* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
 #undef HAVE_SYS_WAIT_H
 
+/* Define to 1 if you have the `tcgetattr' function. */
+#undef HAVE_TCGETATTR
+
+/* Define to 1 if you have the `tcsetattr' function. */
+#undef HAVE_TCSETATTR
+
+/* Define to 1 if you have the <termios.h> header file. */
+#undef HAVE_TERMIOS_H
+
 /* Define to 1 if you have the `timezone' function. */
 #undef HAVE_TIMEZONE
 
@@ -668,10 +749,10 @@
 
 /* Define to 1 if you don't have `tm_zone' but do have the external array
    `tzname'. */
-#undef HAVE_TZNAME
+#define HAVE_TZNAME 1
 
 /* Define to 1 if you have the `tzset' function. */
-#undef HAVE_TZSET
+#define HAVE_TZSET 1
 
 /* Define if you have the 'uintmax_t' type in <stdint.h> or <inttypes.h>. */
 #undef HAVE_UINTMAX_T
@@ -721,20 +802,26 @@
 /* Define if you have the 'wchar_t' type. */
 #define HAVE_WCHAR_T 1
 
+/* Define to 1 if you have the `wcrtomb' function. */
+#define HAVE_WCRTOMB 1
+
+/* Define to 1 if you have the `wcscoll' function. */
+#define HAVE_WCSCOLL 1
+
 /* Define to 1 if you have the `wcslen' function. */
-#undef HAVE_WCSLEN
+#define HAVE_WCSLEN 1
 
 /* Define to 1 if you have the <wctype.h> header file. */
-#undef HAVE_WCTYPE_H
+#define HAVE_WCTYPE_H 1
 
 /* Define if you have the 'wint_t' type. */
-#undef HAVE_WINT_T
+#define HAVE_WINT_T 1
 
 /* Define to 1 if you have the `wmemchr' function. */
-#undef HAVE_WMEMCHR
+#define HAVE_WMEMCHR 1
 
 /* Define to 1 if you have the `wmemcpy' function. */
-#undef HAVE_WMEMCPY
+#define HAVE_WMEMCPY 1
 
 /* Define to 1 if you have the `wmempcpy' function. */
 #undef HAVE_WMEMPCPY
@@ -753,6 +840,9 @@
 
 /* Define to 1 if you have the `__fpending' function. */
 #undef HAVE___FPENDING
+
+/* Define to 1 if you have the `__fsetlocking' function. */
+#undef HAVE___FSETLOCKING
 
 /* Define to 1 if you have the `__secure_getenv' function. */
 #undef HAVE___SECURE_GETENV
@@ -775,7 +865,7 @@
    like this code disabled, you can disable it by passing the
    "--disable-lock-compatibility" option to configure or by commenting out the
    lines below. */
-#undef LOCK_COMPATIBILITY
+#define LOCK_COMPATIBILITY
 
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */
@@ -797,13 +887,13 @@
 #undef NO_MINUS_C_MINUS_O
 
 /* Define to the address where bug reports for this package should be sent. */
-#undef PACKAGE_BUGREPORT
+#define PACKAGE_BUGREPORT "bug-cvs@nongnu.org"
 
 /* Define to the full name of this package. */
 #undef PACKAGE_NAME
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "Concurrent Versions System (CVS) 1.12.12"
+#define PACKAGE_STRING "Concurrent Versions System (CVS) 1.12.13"
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
@@ -831,8 +921,8 @@
 /* Define to force lib/regex.c to use malloc instead of alloca. */
 #define REGEX_MALLOC 1
 
-/* Define if rename does not work for source paths with a trailing slash, like
-   the one from SunOS 4.1.1_U1. */
+/* Define if rename does not work for source file names with a trailing slash,
+   like the one from SunOS 4.1.1_U1. */
 #undef RENAME_TRAILING_SLASH_BUG
 
 /* Define as the return type of signal handlers (`int' or `void'). */
@@ -866,40 +956,40 @@
 #undef SERVER_SUPPORT
 
 /* The size of a `char', as computed by sizeof. */
-#undef SIZEOF_CHAR
+#define SIZEOF_CHAR 1
 
 /* The size of a `double', as computed by sizeof. */
-#undef SIZEOF_DOUBLE
+#define SIZEOF_DOUBLE 8
 
 /* The size of a `float', as computed by sizeof. */
-#undef SIZEOF_FLOAT
+#define SIZEOF_FLOAT 4
 
 /* The size of a `int', as computed by sizeof. */
-#undef SIZEOF_INT
+#define SIZEOF_INT 4
 
 /* The size of a `intmax_t', as computed by sizeof. */
 #undef SIZEOF_INTMAX_T
 
 /* The size of a `long', as computed by sizeof. */
-#undef SIZEOF_LONG
+#define SIZEOF_LONG 4
 
 /* The size of a `long double', as computed by sizeof. */
-#undef SIZEOF_LONG_DOUBLE
+#define SIZEOF_LONG_DOUBLE 8
 
 /* The size of a `long long', as computed by sizeof. */
 #undef SIZEOF_LONG_LONG
 
 /* The size of a `ptrdiff_t', as computed by sizeof. */
-#undef SIZEOF_PTRDIFF_T
+#define SIZEOF_PTRDIFF_T 4
 
 /* The size of a `short', as computed by sizeof. */
-#undef SIZEOF_SHORT
+#define SIZEOF_SHORT 2
 
 /* The size of a `size_t', as computed by sizeof. */
-#undef SIZEOF_SIZE_T
+#define SIZEOF_SIZE_T 4
 
 /* The size of a `wint_t', as computed by sizeof. */
-#undef SIZEOF_WINT_T
+#define SIZEOF_WINT_T 2
 
 /* Define as the maximum value of type 'size_t', if the system doesn't define
    it. */
@@ -921,10 +1011,6 @@
 
 /* Define to 1 if strerror_r returns char *. */
 #undef STRERROR_R_CHAR_P
-
-/* Define to be the nanoseconds member of struct stat's st_mtim, if it exists.
-   */
-#undef ST_MTIM_NSEC
 
 /* Enable support for the pre 1.12.1 *info scripting hook format strings.
    Disable this option for a smaller executable once your scripting hooks have
@@ -1048,6 +1134,9 @@
 /* Define to 1 if you need to in order for `stat' and other things to work. */
 #undef _POSIX_SOURCE
 
+/* Define if you want regoff_t to be at least as wide POSIX requires. */
+#undef _REGEX_LARGE_OFFSETS
+
 /* Define to force lib/regex.c to define re_comp et al. */
 #define _REGEX_RE_COMP 1
 
@@ -1059,6 +1148,9 @@
 /* Enable extensions on Solaris.  */
 #ifndef __EXTENSIONS__
 # undef __EXTENSIONS__
+#endif
+#ifndef _POSIX_PTHREAD_SEMANTICS
+# undef _POSIX_PTHREAD_SEMANTICS
 #endif
 
 /* Define to rpl_ if the getcwd replacement function should be used. */
@@ -1087,7 +1179,7 @@
 #undef gettimeofday
 
 /* Define to `int' if <sys/types.h> doesn't define. */
-#define gid_t int
+#undef gid_t
 
 /* Define to rpl_gmtime if the replacement function should be used. */
 #undef gmtime
@@ -1126,10 +1218,10 @@
 #define my_strftime nstrftime
 
 /* Define to rpl_nanosleep if the replacement function should be used. */
-#undef nanosleep
+#define nanosleep woe32_nanosleep
 
 /* Define to `int' if <sys/types.h> does not define. */
-#define pid_t int
+#undef pid_t
 
 /* Define to rpl_realloc if the replacement function should be used. */
 #define realloc rpl_realloc
@@ -1153,11 +1245,14 @@
 /* Define as a signed type of the same size as size_t. */
 #define ssize_t int
 
+/* Define to rpl_strcasecmp always. */
+#define strcasecmp rpl_strcasecmp
+
 /* Define to rpl_tzset if the wrapper function should be used. */
 #undef tzset
 
 /* Define to `int' if <sys/types.h> doesn't define. */
-#define uid_t int
+#undef uid_t
 
 /* Define to the type of a unsigned integer type of width exactly 32 bits if
    such a type exists and the standard includes do not define it. */
@@ -1178,58 +1273,35 @@
    and use ../cvsnt.mak for your project.  Thus, this is the right place to
    put configuration information for Windows NT.  */
 
+/* This file is getting chaotic and will be organized as follows:
+
+		Macros appears first alphabetized in case sensitive order.
+		Typedefs appear next alphabetized in case sensitive order.
+		Function prototypes alphabetized in case sensitive order.
+
+	Reorgnized by Conrad T. Pino <Conrad@Pino.com> May 25, 2005 */
+
+/* just one time please */
+#ifdef _MSC_VER
+#pragma once
+#endif
+
+/* ======================= Macro Definnitions Follow ====================== */
+
 /* Under Windows NT, mkdir only takes one argument.  */
 #define CVS_MKDIR wnt_mkdir
-int wnt_mkdir (const char *PATH, int MODE);
-
-#define CVS_STAT wnt_stat
-int wnt_stat ();
-
-#define CVS_LSTAT wnt_lstat
-int wnt_lstat ();
 
 #define CVS_RENAME wnt_rename
-int wnt_rename (const char *, const char *);
-
-/* This function doesn't exist under Windows NT; we
-   provide a stub.  */
-int readlink (char *path, char *buf, int buf_size);
-
-/* This is just a call to GetCurrentProcessID.  */
-pid_t getpid (void);
-
-/* This is just a call to the Win32 Sleep function.  */
-unsigned int sleep (unsigned int);
-
-/* Don't worry, Microsoft, it's okay for these functions to
-   be in our namespace.  */
-#define popen _popen
-#define pclose _pclose
-
-/* Diff needs us to define this.  I think it could always be
-   -1 for CVS, because we pass temporary files to diff, but
-   config.h seems like the easiest place to put this, so for
-   now we put it here.  */
-#define same_file(s,t) (-1)
 
 /* This is where old bits go to die under Windows NT.  */
 #define DEVNULL "nul"
 
-#define START_SERVER wnt_start_server
-void wnt_start_server (int *tofd, int *fromfd,
-		       char *client_user,
-		       char *server_user,
-		       char *server_host,
-		       char *server_cvsroot);
+/* Windows has no ELOOP value in errno.h */
+#define ELOOP EMLINK
 
-#define SHUTDOWN_SERVER wnt_shutdown_server
-void wnt_shutdown_server (int fd);
-
-#define SYSTEM_INITIALIZE(pargc,pargv) init_winsock()
-void init_winsock();
-
-#define SYSTEM_CLEANUP wnt_cleanup
-void wnt_cleanup (void);
+/* Windows has _snprintf function.
+   HAVE_DECL__SNPRINTF used in ../lib/vasnprintf.c */
+#define HAVE_DECL__SNPRINTF 1
 
 #define HAVE_WINSOCK_H
 
@@ -1237,6 +1309,15 @@ void wnt_cleanup (void);
    server if it is connected to the server via a socket; Win95 needs
    it because _open_osfhandle doesn't work.  */
 #define NO_SOCKET_TO_FD 1
+
+/* Is this true on NT?  Seems like I remember reports that NT 3.51 has
+   problems with 200K writes (of course, the issue of large writes is
+   moot since the use of buffer.c ensures that writes will only be as big
+   as the buffers).  */
+#define SEND_NEVER_PARTIAL 1
+
+/* Stop server macro */
+#define SHUTDOWN_SERVER wnt_shutdown_server
 
 /* This tells the client that, in addition to needing to use
    send()/recv() to do socket I/O, the error codes for send()/recv()
@@ -1249,7 +1330,9 @@ void wnt_cleanup (void);
    and other socket operations are not known to strerror.  Instead,
    this macro should be used to convert the error codes to strings. */
 #define SOCK_STRERROR sock_strerror
-char *sock_strerror (int errnum);
+
+/* Start server macro */
+#define START_SERVER wnt_start_server
 
 /* The internal rsh client uses sockets not file descriptors.  Note
    that as the code stands now, it often takes values from a SOCKET and
@@ -1257,12 +1340,113 @@ char *sock_strerror (int errnum);
    (SOCKET) <= sizeof (int) on win32, even the 64-bit variants.  */
 #define START_SERVER_RETURNS_SOCKET 1
 
-/* Is this true on NT?  Seems like I remember reports that NT 3.51 has
-   problems with 200K writes (of course, the issue of large writes is
-   moot since the use of buffer.c ensures that writes will only be as big
-   as the buffers).  */
-#define SEND_NEVER_PARTIAL 1
+/* Macro name tells the story */
+#define SYSTEM_CLEANUP woe32_cleanup
 
-/* getpagesize is missing on Windows, but 4096 seems to do the right
-   thing. */
+/* Macro name tells the story */
+#define SYSTEM_INITIALIZE(pargc,pargv) woe32_init_winsock()
+
+/*
+ * According to GNU conventions, we should avoid referencing any macro
+ * containing "WIN" as a reference to Microsoft Windows, as we would like to
+ * avoid any implication that we consider Microsoft Windows any sort of "win".
+ *
+ * FIXME: As of 2003-06-09, folks on the GNULIB project were discussing
+ * defining a configure macro to define WOE32 appropriately.  If they ever do
+ * write such a beast, we should use it, though in most cases it would be
+ * preferable to avoid referencing any OS or compiler anyhow, per Autoconf
+ * convention, and reference only tested features of the system.
+ *
+ * re FIXME: This definition would still be necessary since systems which run
+ * configure do not use this config.h and vice-versa.
+ */
+#define WOE32 1
+
+/* Define POSIX name to Microsoft name */
+#define dup _dup
+
+/* getpagesize is missing on Windows, 4096 does the right thing. */
 #define getpagesize() 4096
+
+/* Define to a substitute for the `lstat' function. */
+#define lstat stat
+
+/* Define POSIX name to Microsoft name */
+#define popen _popen
+
+/* Define POSIX name to Microsoft name */
+#define pclose _pclose
+
+/* Diff needs us to define this.  I think it could always be
+   -1 for CVS, because we pass temporary files to diff, but
+   config.h seems like the easiest place to put this, so for
+   now we put it here.  */
+#define same_file(s,t) (-1)
+
+/* Define to a substitute for the stat function. */
+#define stat wnt_stat
+
+/* ====================== Typedef Declarations Follow ===================== */
+
+/* ====================== Function Prototypes Follow ====================== */
+
+#include <woe32.h>
+
+/* #define SOCK_STRERROR sock_strerror */
+char *sock_strerror (int errnum);
+
+/* #define CVS_MKDIR wnt_mkdir */
+int wnt_mkdir (const char *PATH, int MODE);
+
+/* #define CVS_RENAME wnt_rename */
+int wnt_rename (const char *, const char *);
+
+/* #define SHUTDOWN_SERVER wnt_shutdown_server */
+void wnt_shutdown_server (int fd);
+
+/* #define START_SERVER wnt_start_server */
+void wnt_start_server (int *tofd, int *fromfd,
+		       char *client_user,
+		       char *server_user,
+		       char *server_host,
+		       char *server_cvsroot);
+
+/* #define stat wnt_stat and #define lstat wnt_stat */
+int wnt_stat (const char *file, struct wnt_stat *sb);
+
+/* =============== Special mkdir Prototype Handling Follows =============== */
+
+#include <direct.h>
+#define mkdir wnt_mkdir
+
+/* ===================== Special Function Definitions ===================== */
+
+/*
+	Microsoft defines "mbinit" in <wchar.h> for C++ code only.
+
+	Expect link errors for versions:
+
+		earlier than Visual C++ 5.0
+
+		later than Visual C++ .NET 2003
+
+	and Visual C++ .NET is just a guess which might be wrong.
+*/
+
+#if _MSC_VER >= 1100 && _MSC_VER <= 1200
+
+/* If within Visual C++ 5.0 to Visual C++ 6.0 */
+
+inline int mbsinit (const void * arg)
+	{ return 1; }
+
+#elif _MSC_VER >= 1300 && _MSC_VER <= 1310
+
+/* If within Visual C++ .NET to Visual C++ .NET 2003 */
+
+inline int mbsinit (const int * arg)
+        { return arg == NULL || ! *arg; }
+
+#endif
+
+/* =========================== End Of This File =========================== */
