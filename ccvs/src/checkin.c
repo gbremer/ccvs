@@ -46,8 +46,8 @@ Checkin (int type, struct file_info *finfo, char *rev, char *tag,
      */
     assert (finfo->rcs != NULL);
 
-    switch (RCS_checkin (finfo->rcs, finfo->file, message, rev,
-                         RCS_FLAGS_KEEPFILE))
+    switch (RCS_checkin (finfo->rcs, finfo->update_dir, finfo->file, message,
+			 rev, 0, RCS_FLAGS_KEEPFILE))
     {
 	case 0:			/* everything normal */
 
@@ -69,12 +69,14 @@ Checkin (int type, struct file_info *finfo, char *rev, char *tag,
                call RCS_checkout here, compare the resulting files
                using xcmp, and rename if necessary.  I think this
                should be fixed in RCS_cmp_file.  */
-	    if( ( ! preserve_perms
-		  && options != NULL
-		  && ( strcmp( options, "-ko" ) == 0
-		       || strcmp( options, "-kb" ) == 0 ) )
-		|| RCS_cmp_file( finfo->rcs, rev, (char **)NULL, (char *)NULL,
-	                         options, finfo->file ) == 0 )
+	    if ((1
+#ifdef PRESERVE_PERMISSIONS_SUPPORT
+		 !config->preserve_perms
+#endif /* PRESERVE_PERMISSIONS_SUPPORT */
+		 && options
+		 && (!strcmp (options, "-ko") || !strcmp (options, "-kb")))
+		|| !RCS_cmp_file (finfo->rcs, rev, NULL, NULL,
+	                          options, finfo->file))
 	    {
 		/* The existing file is correct.  We don't have to do
                    anything.  */

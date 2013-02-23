@@ -34,7 +34,8 @@ cvs_SOURCES = \
 	client.c \
 	commit.c \
 	create_adm.c \
-	cvsrc.c diff.c \
+	cvsrc.c \
+	diff.c \
 	edit.c \
 	entries.c \
 	error.c \
@@ -57,9 +58,10 @@ cvs_SOURCES = \
 	main.c \
 	mkmodules.c \
 	modules.c \
+	ms-buffer.c ms-buffer.h \
 	myndbm.c \
 	no_diff.c \
-	parseinfo.c \
+	parseinfo.c parseinfo.h \
 	patch.c \
 	rcs.c \
 	rcscmds.c \
@@ -123,7 +125,7 @@ EXTRA_DIST = \
 	build_src.com \
 	sanity.sh
 
-check-local: localcheck remotecheck
+check-local: localcheck remotecheck proxycheck
 
 .PHONY: localcheck
 localcheck: sanity.config.sh
@@ -133,9 +135,13 @@ localcheck: sanity.config.sh
 remotecheck: all sanity.config.sh
 	$(SHELL) $(srcdir)/sanity.sh -r `pwd`/cvs$(EXEEXT)
 
+.PHONY: proxycheck
+proxycheck: all sanity.config.sh
+	$(SHELL) $(srcdir)/sanity.sh -p `pwd`/cvs$(EXEEXT)
+
 # Our distclean targets
 distclean-local:
-	rm -f check.log check.plog
+	rm -f check.log check.plog check.plog~
 
 ## MAINTAINER Targets
 

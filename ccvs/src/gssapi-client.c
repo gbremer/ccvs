@@ -149,7 +149,8 @@ connect_to_gserver (cvsroot_t *root, int sock, struct hostent *hostinfo)
 
 	    if (need > sizeof buf)
 	    {
-		int got;
+		ssize_t got;
+		size_t total;
 
 		/* This usually means that the server sent us an error
 		   message.  Read it byte by byte and print it out.
@@ -158,13 +159,19 @@ connect_to_gserver (cvsroot_t *root, int sock, struct hostent *hostinfo)
 		   want to do this to work with older servers.  */
 		buf[0] = cbuf[0];
 		buf[1] = cbuf[1];
-		got = recv (sock, buf + 2, sizeof buf - 2, 0);
-		if (got < 0)
-		    error (1, 0, "recv() from server %s: %s",
-			   root->hostname, SOCK_STRERROR (SOCK_ERRNO));
-		buf[got + 2] = '\0';
-		if (buf[got + 1] == '\n')
-		    buf[got + 1] = '\0';
+		total = 2;
+		while ((got = recv (sock, buf + total, sizeof buf - total, 0)))
+		{
+		    if (got < 0)
+			error (1, 0, "recv() from server %s: %s",
+			       root->hostname, SOCK_STRERROR (SOCK_ERRNO));
+		    total += got;
+		    if (strrchr (buf + total - got, '\n'))
+			break;
+		}
+		buf[total] = '\0';
+		if (buf[total - 1] == '\n')
+		    buf[total - 1] = '\0';
 		error (1, 0, "error from server %s: %s", root->hostname,
 		       buf);
 	    }
@@ -197,36 +204,12 @@ struct cvs_gssapi_wrap_data
     gss_ctx_id_t gcontext;
 };
 
-static int cvs_gssapi_wrap_input (void *, const char *, char *, int);
-static int cvs_gssapi_wrap_output (void *, const char *, char *, int,
-					 int *);
-
-/* Create a GSSAPI wrapping buffer.  We use a packetizing buffer with
-   GSSAPI wrapping routines.  */
-
-struct buffer *
-cvs_gssapi_wrap_buffer_initialize (struct buffer *buf, int input,
-                                   gss_ctx_id_t gcontext,
-                                   void (*memory) ( struct buffer * ))
-{
-    struct cvs_gssapi_wrap_data *gd;
-
-    gd = xmalloc (sizeof *gd);
-    gd->gcontext = gcontext;
-
-    return packetizing_buffer_initialize (buf,
-                                          input ? cvs_gssapi_wrap_input : NULL,
-                                          input ? NULL : cvs_gssapi_wrap_output,
-                                          gd, memory);
-}
-
 
 
 /* Unwrap data using GSSAPI.  */
-
 static int
 cvs_gssapi_wrap_input (void *fnclosure, const char *input, char *output,
-                       int size)
+                       size_t size)
 {
     struct cvs_gssapi_wrap_data *gd = fnclosure;
     gss_buffer_desc inbuf, outbuf;
@@ -258,10 +241,9 @@ cvs_gssapi_wrap_input (void *fnclosure, const char *input, char *output,
 
 
 /* Wrap data using GSSAPI.  */
-
 static int
 cvs_gssapi_wrap_output (void *fnclosure, const char *input, char *output,
-                        int size, int *translated)
+                        size_t size, size_t *translated)
 {
     struct cvs_gssapi_wrap_data *gd = fnclosure;
     gss_buffer_desc inbuf, outbuf;
@@ -295,6 +277,28 @@ cvs_gssapi_wrap_output (void *fnclosure, const char *input, char *output,
     gss_release_buffer (&stat_min, &outbuf);
 
     return 0;
+}
+
+
+
+/* Create a GSSAPI wrapping buffer.  We use a packetizing buffer with
+   GSSAPI wrapping routines.  */
+struct buffer *
+cvs_gssapi_wrap_buffer_initialize (struct buffer *buf, int input,
+                                   gss_ctx_id_t gcontext,
+                                   void (*memory) ( struct buffer * ))
+{
+    struct cvs_gssapi_wrap_data *gd;
+
+    gd = xmalloc (sizeof *gd);
+    gd->gcontext = gcontext;
+
+    return packetizing_buffer_initialize (buf,
+                                          input ? cvs_gssapi_wrap_input
+						: NULL,
+                                          input ? NULL
+						: cvs_gssapi_wrap_output,
+                                          gd, memory);
 }
 
 

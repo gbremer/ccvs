@@ -1,3 +1,199 @@
+2004-11-15  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (stamp-gdt): Replace dependency on Makefile with
+	dependency on configure.
+
+2004-11-15  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (EXTRA_DIST): s/getdate.text/getdate.texi/.
+
+2004-11-15  Derek Price  <derek@ximbiot.com>
+
+	* .cvsignore: Ignore intermediate cvs.vrs.
+
+2004-11-11  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (cvs.dvi): Make dependent on getdate-cvs.texi.
+
+2004-11-01  Derek Price  <derek@ximbiot.com>
+
+	* .cvsignore: Add stamp-gdt & getdate-cvs.texi.
+	* Makefile.am (EXTRA_DIST): Distribute getdate.texi.
+	(getdate-cvs.texi, stamp-gdt): New targets.
+	(cvs.html, cvs.info, cvs.pdf, cvs.ps, cvs.txt): Depend on
+	getdate-cvs.texi.
+	* cvs.texinfo: Include getdate-cvs.texi.
+	(Common options): Reference new section rather than describing valid
+	dates.
+	* getdate.texi: New file from GNULIB.
+	* mkman.pl:  Ignore include lines.
+
+2004-10-29  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Write proxies): Mention PrimaryServer name resolution.
+
+2004-10-29  Mark D. Baushke  <mdb@cvshome.org>
+
+	* cvs.texinfo (Common options): The -r TAG option works with
+	the cvs annotate command.
+	(Original patch from Ville Skytta <scop@cvshome.org>.)
+
+2004-10-20  Mark D. Baushke  <mdb@cvshome.org>
+
+	* Makefile.in: Regenerate for new configure.in.
+
+2004-10-04  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (assorted edit and commit related sections): Add
+	information about new '-c' and '-f' options for reservations
+	patch.  The code (not documentation) for this feature was
+	originally from Noel Yap <yap_noel@yahoo.com>, originally ported
+	forward and enhanced by Matthew Ogilvie <mmo9317bd@mailcan.com>.)
+
+	* cvsclient.texi (Requests): Add "Hostname", "LocalDir", and "edit".
+	(Responses): Add "Edit-file".
+
+2004-10-04  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (syntax): Note referrer format string.
+	* cvsclient.texi (Requests): Describe Referrer request.
+	(Responses): Note that a client should sent Referrer to the new server
+	after a Redirect.
+
+2004-10-01  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Write proxies, Global options): Detail operation of
+	global --allow-root option, Remove references to global --primary-root.
+
+2004-09-25  Derek Price  <derek@ximbiot.com>
+
+	* mkman.in: Move to...
+	* mkman.pl: ...here.
+	* Makefile.am (cvs.1): mkman is in build dir, not src dir.
+
+2004-09-24  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (cvs.1): Add paths in hopes of getting more consistent
+	behavior.
+
+2004-09-14  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Keyword list, config): Note new config options and how
+	they effect the Log keyword.
+
+2004-08-17  Derek Price  <derek@ximbiot.com>
+
+	* cvsclient.texi (Requests): s/Command-prenotify/Command-prep/.
+
+2004-08-16  Derek Price  <derek@ximbiot.com>
+
+	* cvsclient.texi (Requests): Document the new `Command-prenotify'
+	request.
+	(Responses): Document the new `Redirect' response.
+
+2004-07-14  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Write proxies): Document recent changes in
+	implementation.
+
+2004-07-13  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (script hooks/*): Tidy.  Document new hooks as
+	implemented.
+
+2004-06-10  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (config): Note that PrimaryServer hostname must match
+	that returned by uname on the primary server.
+
+2004-06-10  Derek Price  <derek@ximbiot.com>
+
+	* writeproxy.rtf: Update with latest modifications.
+
+2004-06-10  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Write proxies): Reference new script hooks.
+	(Administrative files): Move relevant parts of FIXME and references to
+	*info files...
+	(commit files): ...and most of the menu items from this node...
+	(script hooks): ...to this new node.
+	(postadmin, posttag, postwatch, preproxy, postproxy): New nodes.
+	(syntax, taginfo): Point at "script hooks" rather than
+	"Administrative files" node.
+
+2004-06-07  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Write proxies): New node.
+	(config): Note new PrimaryServer option.
+
+2004-06-04  Derek Price  <derek@ximbiot.com>
+
+	* writeproxy.rtf: Documentation for new writeproxy design.
+
+2004-07-13  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (script hooks/*): Tidy.  Document new hooks as
+	implemented.
+
+2004-06-10  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Write proxies): Reference new script hooks.
+	(Administrative files): Move relevant parts of FIXME and references to
+	*info files...
+	(commit files): ...and most of the menu items from this node...
+	(script hooks): ...to this new node.
+	(postadmin, posttag, postwatch): New nodes.
+	(syntax, taginfo): Point at "script hooks" rather than
+	"Administrative files" node.
+
+2004-07-17  Mark D. Baushke  <mdb@cvshome.org>
+
+	* cvs.texinfo (config): Document ImportNewFilesToVendorBranchOnly
+	option.
+	(import options): Mention that ImportNewFilesToVendorBranchOnly
+	can force 'cvs import -X' behaviour for all imports.
+	(New feature from Chris Demetriou <cgd@broadcom.com>.)
+
+2004-07-17  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Update imports, import): Add notes on requirement that
+	release tags be unique.
+	(Original patch from Ilya N. Golubev <gin@mo.msk.ru>.)
+
+2004-07-17  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Password authentication server): Added documentation for
+	the now required session configuration for PAM.
+	(Patch from Brian Murphy <brian@murphy.dk>.)
+
+2004-06-29  Derek Price  <derek@ximbiot.com>
+
+	* cvsclient.texi (Requests): Note new `Relative-directory request' as
+	well as new semantics for `Directory'.
+	(Response pathnames): Detail previously undocumented client
+	functionality with regards to pathnames specified in responses.
+
+2004-06-26  Mark D. Baushke  <mdb@cvshome.org>
+
+	* cvs.texinfo (Vendor branch): Document that sometimes
+	the default branch won't be set to the vendor branch.
+	(import options): Add -X.
+	* cvsclient.texi (MT importmergecmd tag): Document that this
+	can also be used with the 'cvs import -X' command, and
+	that it can occur when there are no conflicts.
+	(New feature from Chris Demetriou <cgd@broadcom.com>.)
+
+2004-06-21  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Password authentication server): Search for system user
+	rather than system password.  Closes issue #185.
+	(Reported by Fred Maranhao <fred.maranhao@click21.com.br>.)
+
+2004-06-10  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (commit files): Remove reference to the obsolete -i
+	module option.
+
 2004-05-28  Derek Price  <derek@ximbiot.com>
 
 	* cvs.texinfo (Global options): Remove reference to global -l option.

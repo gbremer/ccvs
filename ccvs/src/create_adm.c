@@ -50,7 +50,7 @@ Create_Admin (const char *dir, const char *update_dir, const char *repository,
 	/* We want to print out the entire update_dir, since a lot of
 	   our code calls this function with dir == "." or dir ==
 	   NULL.  I hope that gives enough information in cases like
-	   absolute pathnames; printing out xgetwd or something would
+	   absolute pathnames; printing out xgetcwd() or something would
 	   be way too verbose in the common cases.  */
 
 	if (warn)
@@ -72,7 +72,7 @@ Create_Admin (const char *dir, const char *update_dir, const char *repository,
 
     /* record the current cvs root for later use */
 
-    Create_Root (dir, current_parsed_root->original);
+    Create_Root (dir, original_parsed_root->original);
     if (dir != NULL)
 	(void) sprintf (tmp, "%s/%s", dir, CVSADM_REP);
     else

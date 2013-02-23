@@ -13,13 +13,22 @@ detect many programming errors.  This is not the default because it
 might cause spurious warnings, but at least on some machines, there
 should be no spurious warnings.  For example:
 
-	$ CFLAGS="-g -Wall" ./configure
+	$ ./configure CPPFLAGS=-Wall
 
-Configure is not very good at remembering this setting; it will get
-wiped out whenever you do a ./config.status --recheck, so you'll need
-to use:
+* Backwards Compatibility
 
-	$ CFLAGS="-g -Wall" ./config.status --recheck
+Only bug fixes are accepted into the stable branch.  New features should be
+applied to the trunk.
+
+If it is not inextricable from a bug fix, CVS's output (to stdout/stderr)
+should not be changed on the stable branch in order to best support scripts and
+other tools which parse CVS's output.  It is ok to change output between
+feature releases (on the trunk), though such changes should be noted in the
+NEWS file.
+
+Changes in the way CVS responds to command line options, config options, etc.
+should be accompanied by deprecation warnings for an entire stable series of
+releases before being changed permanently, if at all possible.
 
 * Indentation style
 
@@ -110,6 +119,8 @@ assuming its existance.
 CVS has also been assuming <pwd.h> for some time.  I am unsure of the
 rationale.
 
+GNULIB also assumes <sys/stat.h>.  I am unsure of the rationale.
+
 A substitute POSIX.2 <fnmatch.h> header and fnmatch() function is provided for
 systems that lack them.  Similarly for the non-standard <alloca.h> header and
 alloca() function.  Other substitute headers and functions are also provided
@@ -172,13 +183,9 @@ Generally speaking the GNU coding standards are mostly used by CVS
 and perhaps an exception or two we haven't mentioned).  This is the
 file standards.text at the GNU FTP sites.
 
-Filenames for .c and .h files may contain _ but should not contain -
-(the latter causes Visual C++ 2.1 to create makefiles which Visual C++
-4.0 cannot use).
-
 * Regenerating Build Files (UNIX)
 
-On UNIX, if you wish to change the Build files, you will need Autoconf and
+On UNIX, if you wish to change the build files, you will need Autoconf and
 Automake.
 
 Some combinations of Automake and Autoconf versions may break the
@@ -187,8 +194,8 @@ have the same versions the developers do, so the rules to run them
 automatically aren't included in the generated Makefiles unless you run
 configure with --enable-maintainer-mode.
 
-The CVS Makefiles and configure script were built using Automake 1.7.9 and
-Autoconf 2.58, respectively.
+The CVS Makefiles and configure script were built using Automake 1.9.3 and
+Autoconf 2.59, respectively.
 
 There is a known bug in Autoconf 2.57 that will prevent the configure
 scripts it generates from working on some platforms.  Other combinations of

@@ -1,3 +1,240 @@
+2004-11-16  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (EXTRA_DIST): Remove stamp-chi.
+	($(srcdir)/stamp-chi, $(srcdir)/config.h.in): Rename to...
+	(stamp-chi, config.h.in): Respectively, including associated required
+	target changes.
+
+2004-11-16  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (stamp-ch): Replace dependency on Makefile with a
+	dependency on configure.
+
+2004-11-16  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (stamp-chi, config.h.in): Rename to...
+	($(srcdir)/stamp-chi, $(srcdir)/config.h.in): Respectively, including
+	associated required target changes.
+
+2004-11-16  Derek Price  <derek@ximbiot.com>
+
+	* mkconfig.pl (save_copy): Revert previous change.
+	(make_config_h): Don't output full paths to generated comment.
+
+2004-11-15  Derek Price  <derek@ximbiot.com>
+
+	* mkconfig.pl (save_copy): Try to deal with not having write
+	permissions.
+
+2004-11-15  Derek Price  <derek@ximbiot.com>
+
+	* mkconfig.pl: Improve diagnostic messages.
+	(make_config_h): Don't use dir when creating temp file.
+	(save_copy): Use File::Copy::move to portably rename the file, possibly
+	across device boundries.
+
+2004-11-15  Derek Price  <derek@ximbiot.com>
+
+	* mkconfig.pl (make_config_h): Improve diagnostic message.
+
+2004-11-11  Mark D. Baushke  <mdb@cvshome.org>
+
+	* config.h.in.in (opterr): Define as rpl_opterr for consistency.
+	* config.h.in, config.h: Regenerated.
+
+2004-11-05  Mark D. Baushke  <mdb@cvshome.org>
+
+	* filesubr.c (readlink): Removed. Use lib/readlink.c instead.
+
+2004-11-03  Mark D. Baushke  <mdb@cvshome.org>
+
+	* config.h.in.in (_UINT32_T): Add from top-level config.h.in file.
+	* Makefile.in, config.h.in, config.h, stamp-chi: Regenerated.
+		
+2004-11-02  Mark D. Baushke  <mdb@cvshome.org>
+
+	* config.h.in.in (HAVE_DECL_FLOCKFILE, HAVE_DECL_FUNLOCKFILE,
+	HAVE_ENVIRON_DECL, HAVE_ERRNO_DECL, HAVE_SEARCH_H, HAVE_SETENV,
+	HAVE_TSEARCH, HAVE_UNSETENV, MALLOC_0_IS_NONNULL, VOID_UNSETENV):
+	Add new config options from top-level config.h.in using #undef.
+	Some of these probably exist under Windows and need to be defined.
+	(nanosleep): Move into alphabetical order.
+	(TRUST_OS_FILE_CACHE): Removed as obsolete.
+	* config.h.in, config.h, stamp-chi: Regenerated.
+	
+2004-10-30  Mark D. Baushke  <mdb@juniper.net>
+
+	* config.h.in.in, config.h.in, config.h: Regenerated
+
+2004-10-26  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (config.h.in): Allow this file to be built even when not
+	in maintainer mode when it is actually missing.  Add comment.
+	(stamp-chi): Remove maintainer mode restriction.  Add comments.
+
+2004-10-25  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in (HAVE_RPMATCH): Undef this irrelevant macro on WOE32.
+
+2004-10-23  Conrad T. Pino  <Conrad@Pino.com>
+
+	* config.h.in.in: Change #undef HAVE_STDINT_H to #define ... 1.
+	Change #undef HAVE_STDINT_H_WITH_UINTMAX to #define ... 1.
+	* config.h.in: Regenerated for "config.h.in.in" change.
+	* config.h Regenerated for "config.h.in.in" change.
+
+2004-10-22  Mark D. Baushke  <mdb@cvshome.org>
+
+	* .cvsignore: Ignore stamp-sh2
+
+2004-10-22  Mark D. Baushke  <mdb@cvshome.org>
+
+	* Makefile.am (EXTRA_DIST): Add stdint.h.
+	* stdint.h: Regenerated.
+	* Makefile.in: Ditto.
+	
+	* config.h.in.in (HAVE_SYS_INTTYPES_H): Update from GNULIB.
+	* Makefile.am (stamp-sh2): Add stdint from GNULIB.
+
+2004-10-22  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in (UINT32_MAX, WORDS_BIGENDIAN, uint32_t): Guess that
+	these should all be undef on WOE32.
+
+2004-10-22  Mark D. Baushke  <mdb@cvshome.org>
+
+	* config.h.in.footer (getpagesize): Define as 4096 because GNULIB
+	assumes it can include <sys/param.h> which is not available.
+	* config.h.in, config.h, stamp-chi: Regenerated.
+	
+2004-10-21  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in (HAVE_OS_H): Undef this on Windoze.
+
+2004-10-20  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in (select): Undef this for new sunos57-select.
+
+2004-10-20  Mark D. Baushke  <mdb@cvshome.org>
+
+	* Makefile.in: Regenerate for new configure.in.
+
+2004-10-15  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in (HAVE_VASPRINTF): Define this for GNULIB.
+
+2004-10-11  Conrad T. Pino  <Conrad@Pino.com>
+
+	* config.h.in.in: Add #undef for "HAVE_STDIO_EXT_H", "HAVE_STRCASECMP",
+	"HAVE_STRNCASECMP", "HAVE_WMEMCHR" and "HAVE_WMEMCPY".
+
+2004-10-09  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in (HAVE_DECL_FREE): Remove this define.
+
+2004-10-09  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in (optopt, optind, optarg): Define these for GNULIB.
+
+2004-10-07  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (EXTRA_DIST): Remove stripslash.c.
+
+2004-10-06  Derek Price  <derek@ximbiot.com>
+
+	* mkconfig.pl: Check definition is defined, not false, before deciding
+	not to print it.
+
+2004-10-06  Derek Price  <derek@ximbiot.com>
+
+	Use getpass proto from getpass.h.
+	* config.h.in.in: Undo last defn.
+	* unistd.h (getpass): Remove proto.
+
+2004-10-06  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in: Tell compiler we have a decl for getpass().
+
+2004-10-06  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in: Define use of replacement getopt functions.
+
+2004-10-06  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in: Undef HAVE_GETOPT_H and HAVE_GETOPT_LONG_ONLY.  It
+	sounds like a fairly safe bet that Windoze doesn't have them.
+
+2004-10-06  Mark D. Baushke  <mdb@cvshome.org>
+
+	* unistd.h: Add prototype entries for chdir and close
+
+2004-10-05  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in: s/FILESYSTEM/FILE_SYSTEM/ in keeping with GNULIB.
+	
+2004-10-05  Conrad T. Pino  <Conrad@Pino.com>
+
+	* config.h.in.in: Add #define EOVERFLOW, HAVE_GETCWD, HAVE_GETCWD_NULL.
+	* config.h.in: Regenerated for "config.h.in.in" change.
+
+2004-10-05  Derek Price  <derek@ximbiot.com>
+
+	* filesubr.c (xresolvepath): s/xgetwd/xgetcwd/.
+
+2004-10-05  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in: #undef USE_UNLOCKED_IO.
+
+2004-09-17  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in: Remove TRUST_OS_FILE_CACHE.
+
+2004-09-17  Derek Price  <derek@ximbiot.com>
+
+	* stripslash.c: Remove file.
+
+2004-09-14  Mark D. Baushke  <mdb@cvshome.org>
+
+	* filesubr.c (cvs_casecmp): Moved to src/subr.c
+
+2004-09-09  Mark D. Baushke  <mdb@cvshome.org>
+
+	* filesubr.c (check_statbuf): Remove unused variables.
+
+2004-09-08  Derek Price  <derek@ximbiot.com>
+
+	* JmgStat.c, JmgStat.h: Convert to use UNIX line endings on UNIX.
+	(Thanks to report from Conrad T. Pino <conrad@pino.com>.)
+
+2004-09-07  Derek Price  <derek@ximbiot.com>
+
+	* JmgStat.c, JmgStat.h: New files.
+	* filesubr.c (check_statbuf): Use new Windows mod time routine.
+	(Thanks to a report from Chris Bohn <cbohn@rrinc.com>, help from J. C.
+	Hamlin <jchamlin@ibsys.com>, and a published patch from Jonathan
+	Gilligan.)
+
+2004-09-02  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in (PROXY_SUPPORT, TRUST_OS_FILE_CACHE): New defines.
+
+2004-06-24  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in (restrict): Define empty for Windows.
+	(Patch submitted by Conrad T. Pino <Conrad@Pino.com>.)
+
+2004-06-24  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.in (HAVE_RUN_TZSET_TEST, my_strftime): Define to values
+	more appropriate for Windows.
+	(Original patch submitted by Conrad T. Pino <Conrad@Pino.com>.)
+
+2004-06-22  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in: Add "inline" & "SIZE_MAX" macros for "xsize.h" header.
+	* config.h: Regenerated for "config.h.in" change.
+	(Original patch from Conrad T. Pino <Conrad@Pino.com>.)
+
 2004-06-09  Derek Price  <derek@ximbiot.com>
 
 	* Makefile.am (EXTRA_DIST): Remove some files that are included by

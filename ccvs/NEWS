@@ -1,5 +1,144 @@
-Changes since 1.12.8:
+Changes since 1.12.9:
 *********************
+
+NEW FEATURES
+
+* The date formats which CVS accepts are now documented more fully in the
+  manual.
+
+* CVS commands which accept dates now understand some more time zones,
+  including those which are some hours plus some fraction of an hour off of
+  universal coordinated time.
+
+* `cvs ls filename' no longer causes an assertion failure.
+
+* The maximum length of the discovered comment leader used in a Log keyword
+  substitution is now limited to 20 characters by default.  If a longer leader
+  is discovered, then the keyword is not expanded.  This default behavior may
+  be altered using the new MaxCommentLeaderLength & UseArchiveCommentLeader
+  config options.
+
+* Commit messages once again include the full relative path to the file being
+  committed.
+ 
+* Thanks to funding from Juniper Networks <http://juniper.net>, "write proxy"
+  functionality has been added to the CVS server.  Write proxy functionality
+  allows any of multiple, read-only "secondary" servers to relay write requests
+  from clients to a single primary CVS server, allowing for a massive
+  redistribution of server load which is transparent to all known CVS clients.
+
+* Thanks to funding from Juniper Networks <http://juniper.net>, some code has
+  been added which second-guesses the system file cache for a performance
+  boost.
+
+* The loginfo scripting hook now runs after the administrative files in CVSROOT
+  are rebuilt, rather than before.
+
+* Misc error message improvements.
+
+* Thanks to funding from Juniper Networks <http://juniper.net>, new scripting
+  hooks have been added to the CVS server.  These are the postadmin, posttag,
+  and postwatch hooks.  See the manual for more info.
+
+* Thanks to funding from Juniper Networks <http://juniper.net>, all the
+  existing scripting hooks may now optionally be passed a command name
+  argument.
+
+* Thanks to funding from Juniper Networks <http://juniper.net>, new tags are
+  cached in the val-tags file at the time of tag creation.
+
+* Thanks to a patch from Brian Murphy <brian@murphy.dk>, CVS now supports PAM
+  session management.
+
+* Thanks to a report from Brian Murphy <brian@murphy.dk>, the demo PAM
+  configuration files mentioned in the manual are actually being distributed.
+
+* Thanks again to Bart Robinson <lomew@pobox.com>, `cvs log' & `cvs ls' now
+  actually output local times when the server is version 1.12.9 or greater and
+  the client is version  1.12.10 or greater.  
+
+* The CVS server now sends paths to files relative to the repository.  CVS
+  clients have been able to handle this since at least the 10 year old
+  CVS 1.9.2 release, so no attempt at verifying compatibility of clients has
+  been made.  This saves a small amount of bandwidth and may enable some future
+  functionality.
+
+* The CVS client will send relative Directory requests if the server claims to
+  support it.  This saves a very small amount of bandwidth but may enable some
+  future functionality.
+
+* "cvs import" now has a new option, `-X', which causes new files to be
+  imported in a way that they appear only on the vendor branch, and do not
+  automatically appear on the main trunk.
+
+  This option may be made the default on a repository-wide basis
+  using the new ImportNewFilesToVendorBranchOnly=yes option in
+  CVSROOT/config.
+
+* contrib/cvs_acls.in has been revised. Users of the old version will
+  want to upgrade to use the new format. See the documentation in
+  contrib/cvs_acls.html for more information.
+
+* Thanks to Dan Peterson <dbpete@aol.com>, the contrib/validate_repo script now
+  accepts and logs corrupted revision numbers in RCS archives.
+
+BUG FIXES
+
+* Thanks to a report from Gottfried Ganssauge <gotti@cvshome.org>, CVS no
+  longer exits when it encounters links pointing to paths containing more
+  than 128 characters.
+
+* Thanks to a report from Dan Peterson <dbpete@aol.com>, error messages from
+  GSSAPI servers are no longer truncated.
+
+* Thanks to a report from Dan Peterson <dbpete@aol.com>, attempts to resurrect
+  a file on the trunk that was added on a branch no longer causes an assertion
+  failure.
+
+* Thanks to a report from Dan Peterson <dbpete@aol.com>, imports to branches
+  like "1.1." no longer create corrupt RCS archives.
+
+* Thanks to a report from Chris Bohn <cbohn@rrinc.com>, links from J.C. Hamlin
+  <jchamlin@ibsys.com>, and code posted by Jonathan Gilligan, we think we have
+  finally corrected the Windows "red-file" (daylight savings time) bug once and
+  for all.
+
+* Thanks to a patch from Jeroen Ruigrok/asmodai <asmodai@wxs.nl>, the
+  log_accum.pl script should no longer elicit warnings from Perl 5.8.5.
+
+* The r* commands (rlog, rls, etc.) can once again handle requests to run
+  against the entire repository (e.g. `cvs rlog .').  Thanks go to Dan Peterson
+  <dbpete@aol.com> for the report.
+
+* A problem where the attempted access of files via tags beginning with spaces
+  could cause the CVS server to hang has been fixed.  This was a particular
+  problem with WinCVS clients because users would sometimes accidentally
+  include spaces in tags pasted into a dialog box.  This fix also altered some
+  of the error messages generated by the use of invalid tags.  Thanks go to Dan
+  Peterson <dbpete@aol.com> for the report.
+
+* Thanks to James E Wilson <wilson@specifixinc.com> for a bug fix to
+  modules processing "gcc-core -a !gcc/f gcc" will no longer exclude
+  gcc/fortran by mistake.
+
+* Thanks to Conrad Pino <conrad@pino.com>, the Windows build works once again.
+
+* Misc updates to the manual.
+
+DEVELOPER ISSUES
+
+* We've standardized on Automake 1.9.3 to get some at new features that make
+  our jobs easier.  See the note below on the Autoconf upgrade for more
+  details.
+
+* We've standardized on Autoconf version 2.59 to get presumed bug fixes and
+  features, but nothing specific.  Mostly, once we decide to upgrade one of the
+  autotools we just figure it'll save time later to grab the most current
+  versions of the others too.  See the HACKING file for more on using the
+  autotools with CVS.
+
+Changes from 1.12.8 to 1.12.9:
+******************************
 
 SERVER SECURITY FIXES
 
@@ -16,7 +155,7 @@ SERVER SECURITY FIXES
 NEW FEATURES
 
 * `cvs log' & `cvs ls' now output local times when both the server and client
-  are 1.12.9 or greater.
+  are 1.12.9 or greater.  (Thanks to Bart Robinson <lomew@pobox.com>.)
 
 DEVELOPER NOTES
 

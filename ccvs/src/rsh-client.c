@@ -32,14 +32,15 @@
 
 # ifdef START_RSH_WITH_POPEN_RW
 
+
+
 /* This is actually a crock -- it's OS/2-specific, for no one else
    uses it.  If I get time, I want to make piped_child and all the
    other stuff in os2/run.c work right.  In the meantime, this gets us
    up and running, and that's most important. */
-
 void
-start_rsh_server( cvsroot_t *root, struct buffer **to_server_p,
-                  struct buffer **from_server_p )
+start_rsh_server (cvsroot_t *root, struct buffer **to_server_p,
+                  struct buffer **from_server_p)
 {
     int pipes[2];
     int child_pid;
@@ -99,7 +100,7 @@ start_rsh_server( cvsroot_t *root, struct buffer **to_server_p,
     rsh_argv[i++] = "server";
 
     /* Mark the end of the arg list. */
-    rsh_argv[i]   = (char *) NULL;
+    rsh_argv[i]   = NULL;
 
     if (trace)
     {
@@ -121,7 +122,8 @@ start_rsh_server( cvsroot_t *root, struct buffer **to_server_p,
 # else /* ! START_RSH_WITH_POPEN_RW */
 
 void
-start_rsh_server (cvsroot_t *root, struct buffer **to_server_p, struct buffer **from_server_p)
+start_rsh_server (cvsroot_t *root, struct buffer **to_server_p,
+                  struct buffer **from_server_p)
 {
     /* If you're working through firewalls, you can set the
        CVS_RSH environment variable to a script which uses rsh to
@@ -184,7 +186,8 @@ start_rsh_server (cvsroot_t *root, struct buffer **to_server_p, struct buffer **
     }
     free (command);
 
-    make_bufs_from_fds (tofd, fromfd, child_pid, to_server_p, from_server_p, 0);
+    make_bufs_from_fds (tofd, fromfd, child_pid, root, to_server_p,
+                        from_server_p, 0);
 }
 
 # endif /* START_RSH_WITH_POPEN_RW */

@@ -62,6 +62,9 @@
 /* Define to enable encryption support. */
 #undef ENCRYPTION
 
+/* Define as good substitute value for EOVERFLOW. */
+#define EOVERFLOW EINVAL
+
 /* Define if this executable will be running on case insensitive file systems.
    In the client case, this means that it will request that the server pretend
    to be case insensitive if it isn't already. */
@@ -70,11 +73,11 @@
 /* Define on systems for which file names may have a so-called `drive letter'
    prefix, define this to compute the length of that prefix, including the
    colon. */
-#define FILESYSTEM_ACCEPTS_DRIVE_LETTER_PREFIX 1
+#define FILE_SYSTEM_ACCEPTS_DRIVE_LETTER_PREFIX 1
 
 /* Define if the backslash character may also serve as a file name component
    separator. */
-#define FILESYSTEM_BACKSLASH_IS_FILE_NAME_SEPARATOR 1
+#define FILE_SYSTEM_BACKSLASH_IS_FILE_NAME_SEPARATOR 1
 
 /* When committing or importing files, you must enter a log message. Normally,
    you can do this either via the -m flag on the command line, the -F flag on
@@ -96,11 +99,12 @@
 /* Define to 1 if you have the `alarm' function. */
 #undef HAVE_ALARM
 
-/* Define to 1 if you have `alloca', as a function or macro. */
+/* Define to 1 if you have `alloca' after including <alloca.h>, a header that
+   may be supplied by this distribution. */
 #undef HAVE_ALLOCA
 
-/* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
-   */
+/* Define HAVE_ALLOCA_H for backward compatibility with older code that
+   includes <alloca.h> only if HAVE_ALLOCA_H is defined. */
 #define HAVE_ALLOCA_H 1
 
 /* Define to 1 if you have the `atexit' function. */
@@ -145,6 +149,10 @@
    you don't. */
 #undef HAVE_DECL_FGETS_UNLOCKED
 
+/* Define to 1 if you have the declaration of `flockfile', and to 0 if you
+   don't. */
+#undef HAVE_DECL_FLOCKFILE
+
 /* Define to 1 if you have the declaration of `fputc_unlocked', and to 0 if
    you don't. */
 #undef HAVE_DECL_FPUTC_UNLOCKED
@@ -157,9 +165,9 @@
    you don't. */
 #undef HAVE_DECL_FREAD_UNLOCKED
 
-/* Define to 1 if you have the declaration of `free', and to 0 if you don't.
-   */
-#undef HAVE_DECL_FREE
+/* Define to 1 if you have the declaration of `funlockfile', and to 0 if you
+   don't. */
+#undef HAVE_DECL_FUNLOCKFILE
 
 /* Define to 1 if you have the declaration of `fwrite_unlocked', and to 0 if
    you don't. */
@@ -176,6 +184,10 @@
 /* Define to 1 if you have the declaration of `getenv', and to 0 if you don't.
    */
 #undef HAVE_DECL_GETENV
+
+/* Define to 1 if you have the declaration of `getpass', and to 0 if you
+   don't. */
+#define HAVE_DECL_GETPASS 0
 
 /* Define to 1 if you have the declaration of `nanosleep', and to 0 if you
    don't. */
@@ -203,6 +215,12 @@
 /* Define to 1 if you have the `dup2' function. */
 #undef HAVE_DUP2
 
+/* Define if you have the declaration of environ. */
+#undef HAVE_ENVIRON_DECL
+
+/* Define if you have the declaration of errno. */
+#undef HAVE_ERRNO_DECL
+
 /* Define to 1 if you have the `fchdir' function. */
 #undef HAVE_FCHDIR
 
@@ -227,6 +245,12 @@
 /* Define to 1 if you have the `ftruncate' function. */
 #undef HAVE_FTRUNCATE
 
+/* Define to 1 if you have the `getcwd' function. */
+#define HAVE_GETCWD 1
+
+/* Define if getcwd (NULL, 0) allocates memory for result. */
+#define HAVE_GETCWD_NULL 1
+
 /* Define to 1 if you have the `getdelim' function. */
 #undef HAVE_GETDELIM
 
@@ -238,6 +262,12 @@
 
 /* Define to 1 if you have the `gethostname' function. */
 #undef HAVE_GETHOSTNAME
+
+/* Define to 1 if you have the <getopt.h> header file. */
+#undef HAVE_GETOPT_H
+
+/* Define to 1 if you have the `getopt_long_only' function. */
+#undef HAVE_GETOPT_LONG_ONLY
 
 /* Define to 1 if you have the `getpagesize' function. */
 #undef HAVE_GETPAGESIZE
@@ -263,6 +293,9 @@
 /* Define to 1 if you have the <gssapi.h> header file. */
 #undef HAVE_GSSAPI_H
 
+/* Define if you have the hstrerror function. */
+#undef HAVE_HSTRERROR
+
 /* Define if you have the iconv() function. */
 #undef HAVE_ICONV
 
@@ -272,7 +305,7 @@
 /* Define if you have the 'intmax_t' type in <stdint.h> or <inttypes.h>. */
 #undef HAVE_INTMAX_T
 
-/* Define to 1 if you have the <inttypes.h> header file. */
+/* Define if <inttypes.h> exists and doesn't clash with <sys/types.h>. */
 #undef HAVE_INTTYPES_H
 
 /* Define if <inttypes.h> exists, doesn't clash with <sys/types.h>, and
@@ -368,6 +401,9 @@
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #define HAVE_NDIR_H 1
 
+/* Define to 1 if you have the <OS.h> header file. */
+#undef HAVE_OS_H
+
 /* Define to enable system authentication with PAM instead of using the simple
    getpwnam interface. This allows authentication (in theory) with any PAM
    module, e.g. on systems with shadow passwords or via LDAP */
@@ -405,8 +441,17 @@
 /* Define to 1 if you have the `rename' function. */
 #undef HAVE_RENAME
 
+/* Define to 1 if you have the `rpmatch' function. */
+#undef HAVE_RPMATCH
+
 /* Define to 1 if you have run the test for working tzset. */
-#undef HAVE_RUN_TZSET_TEST
+#define HAVE_RUN_TZSET_TEST 1
+
+/* Define to 1 if you have the <search.h> header file. */
+#undef HAVE_SEARCH_H
+
+/* Define to 1 if you have the `setenv' function. */
+#undef HAVE_SETENV
 
 /* Define if the diff library should use setmode for binary files. */
 #define HAVE_SETMODE 1
@@ -437,14 +482,20 @@
 #undef HAVE_STDBOOL_H
 
 /* Define to 1 if you have the <stdint.h> header file. */
-#undef HAVE_STDINT_H
+#define HAVE_STDINT_H 1
 
 /* Define if <stdint.h> exists, doesn't clash with <sys/types.h>, and declares
    uintmax_t. */
-#undef HAVE_STDINT_H_WITH_UINTMAX
+#define HAVE_STDINT_H_WITH_UINTMAX 1
+
+/* Define to 1 if you have the <stdio_ext.h> header file. */
+#undef HAVE_STDIO_EXT_H
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
+
+/* Define to 1 if you have the `strcasecmp' function. */
+#undef HAVE_STRCASECMP
 
 /* Define if you have strchr (always for CVS). */
 #undef HAVE_STRCHR
@@ -463,6 +514,9 @@
 
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
+
+/* Define to 1 if you have the `strncasecmp' function. */
+#undef HAVE_STRNCASECMP
 
 /* Define to 1 if you have the `strstr' function. */
 #undef HAVE_STRSTR
@@ -494,6 +548,9 @@
 
 /* Define to 1 if you have the <sys/file.h> header file. */
 #undef HAVE_SYS_FILE_H
+
+/* Define to 1 if you have the <sys/inttypes.h> header file. */
+#undef HAVE_SYS_INTTYPES_H
 
 /* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
    */
@@ -534,6 +591,9 @@
    `HAVE_STRUCT_TM_TM_ZONE' instead. */
 #undef HAVE_TM_ZONE
 
+/* Define to 1 if you have the `tsearch' function. */
+#undef HAVE_TSEARCH
+
 /* Define to 1 if you don't have `tm_zone' but do have the external array
    `tzname'. */
 #undef HAVE_TZNAME
@@ -550,6 +610,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
 
+/* Define to 1 if you have the `unsetenv' function. */
+#undef HAVE_UNSETENV
+
 /* Define if you have the 'unsigned long long' type. */
 #undef HAVE_UNSIGNED_LONG_LONG
 
@@ -564,6 +627,9 @@
 
 /* Define to 1 if you have the `vasnprintf' function. */
 #undef HAVE_VASNPRINTF
+
+/* Define to 1 if you have the `vasprintf' function. */
+#undef HAVE_VASPRINTF
 
 /* Define to 1 if you have the `vfork' function. */
 #undef HAVE_VFORK
@@ -594,6 +660,12 @@
 
 /* Define if you have the 'wint_t' type. */
 #undef HAVE_WINT_T
+
+/* Define to 1 if you have the `wmemchr' function. */
+#undef HAVE_WMEMCHR
+
+/* Define to 1 if you have the `wmemcpy' function. */
+#undef HAVE_WMEMCPY
 
 /* Define to 1 if you have the `wmempcpy' function. */
 #undef HAVE_WMEMPCPY
@@ -631,6 +703,9 @@
    slash. */
 #undef LSTAT_FOLLOWS_SLASHED_SYMLINK
 
+/* If malloc(0) is != NULL, define this to 1. Otherwise define this to 0. */
+#undef MALLOC_0_IS_NONNULL
+
 /* By default, CVS stores its modules and other such items in flat text files
    (MY_NDBM enables this). Turning off MY_NDBM causes CVS to look for a
    system-supplied ndbm database library and use it instead. That may speed
@@ -660,6 +735,11 @@
    as. Otherwise, define to a double-quoted literal string, such as `"cvs"'.
    */
 #undef PAM_SERVICE_NAME
+
+/* Define if you want CVS to be able to serve as a transparent proxy for write
+   operations. Disabling this may produce a slight performance gain on some
+   systems, at the expense of write proxy support. */
+#undef PROXY_SUPPORT
 
 /* Path to the pr utility */
 #undef PR_PROGRAM
@@ -780,6 +860,10 @@
 /* Define if tzset clobbers localtime's static buffer. */
 #undef TZSET_CLOBBERS_LOCALTIME_BUFFER
 
+/* Define to its maximum value if an unsigned integer type of width exactly 32
+   bits exists and the standard includes do not define UINT32_MAX. */
+#undef UINT32_MAX
+
 /* The default umask to use when creating or otherwise setting file or
    directory permissions in the repository. Must be a value in the range of 0
    through 0777. For example, a value of 002 allows group rwx access and world
@@ -829,9 +913,21 @@
 /* Define if setmode is required when writing binary data to stdout. */
 #define USE_SETMODE_STDOUT 1
 
+/* Define to 1 if you want getc etc. to use unlocked I/O if available.
+   Unlocked I/O can improve performance in unithreaded apps, but it is not
+   safe for multithreaded apps. */
+#undef USE_UNLOCKED_IO
+
 /* Define if utime requires write access to the file (true on Windows, but not
    Unix). */
 #define UTIME_EXPECTS_WRITABLE
+
+/* Define if unsetenv() returns void, not int. */
+#undef VOID_UNSETENV
+
+/* Define to 1 if your processor stores words with the most significant byte
+   first (like Motorola and SPARC, unlike Intel and VAX). */
+#undef WORDS_BIGENDIAN
 
 /* Define to 1 if on AIX 3.
    System headers sometimes define this.
@@ -867,6 +963,11 @@
 /* Define to force lib/regex.c to define re_comp et al. */
 #define _REGEX_RE_COMP 1
 
+/* Define for Solaris 2.5.1 so uint32_t typedef from <sys/synch.h>,
+   <pthread.h>, or <semaphore.h> is not used. If the typedef was allowed, the
+   #define below would cause a syntax error. */
+#undef _UINT32_T
+
 /* Enable extensions on Solaris.  */
 #ifndef __EXTENSIONS__
 # undef __EXTENSIONS__
@@ -880,6 +981,16 @@
 
 /* Define to a replacement function name for getline(). */
 #undef getline
+
+/* Define to rpl_getopt if the replacement function should be used. */
+#define getopt rpl_getopt
+
+/* Define to rpl_getopt_long if the replacement function should be used. */
+#define getopt_long rpl_getopt_long
+
+/* Define to rpl_getopt_long_only if the replacement function should be used.
+   */
+#define getopt_long_only rpl_getopt_long_only
 
 /* We want to always use the GNULIB version of getpass which we have in lib,
    so define getpass to something that won't conflict with any existing system
@@ -923,10 +1034,22 @@
 #define mode_t int
 
 /* Define to the name of the strftime replacement function. */
-#undef my_strftime
+#define my_strftime nstrftime
 
 /* Define to rpl_nanosleep if the replacement function should be used. */
 #undef nanosleep
+
+/* Define to rpl_optarg if the replacement variable should be used. */
+#define optarg rpl_optarg
+
+/* Define to rpl_opterr if the replacement variable should be used. */
+#define opterr rpl_opterr
+
+/* Define to rpl_optind if the replacement variable should be used. */
+#define optind rpl_optind
+
+/* Define to rpl_optopt if the replacement variable should be used. */
+#define optopt rpl_optopt
 
 /* Define to `int' if <sys/types.h> does not define. */
 #define pid_t int
@@ -936,7 +1059,10 @@
 
 /* Define to equivalent of C99 restrict keyword, or to nothing if this is not
    supported. Do not define if restrict is supported directly. */
-#undef restrict
+#define restrict
+
+/* Define to rpl_select if the replacement function should be used. */
+#undef select
 
 /* Define to empty if the C compiler doesn't support this keyword. */
 #undef signed
@@ -952,6 +1078,10 @@
 
 /* Define to `int' if <sys/types.h> doesn't define. */
 #define uid_t int
+
+/* Define to the type of a unsigned integer type of width exactly 32 bits if
+   such a type exists and the standard includes do not define it. */
+#undef uint32_t
 
 /* Define to unsigned long or unsigned long long if <stdint.h> and
    <inttypes.h> don't define. */

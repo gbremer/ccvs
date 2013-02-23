@@ -20,6 +20,7 @@ cvs.toc
 cvs.tp
 cvs.txt
 cvs.vr
+cvs.vrs
 cvsclient.info
 cvsclient.aux
 cvsclient.cp
@@ -37,4 +38,6 @@ cvsclient.toc
 cvsclient.tp
 cvsclient.txt
 cvsclient.vr
+getdate-cvs.texi
+stamp-gdt
 mkman

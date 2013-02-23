@@ -37,6 +37,17 @@
 /* TODO: change this to something with a marginal degree of
    efficiency, like maybe a hash table.  Yeah. */
 
+
+
+static void
+delhardlist (Node *p)
+{
+    if (p->data)
+	dellist ((List **)&p->data);
+}
+
+
+
 List *hardlist;		/* Record hardlink information for working files */
 char *working_dir;	/* The top-level working directory, used for
 			   constructing full pathnames. */
@@ -48,7 +59,8 @@ char *working_dir;	/* The top-level working directory, used for
 Node *
 lookup_file_by_inode (const char *filepath)
 {
-    char *inodestr, *file;
+    char *inodestr;
+    const char *file;
     struct stat sb;
     Node *hp, *p;
 
@@ -57,7 +69,7 @@ lookup_file_by_inode (const char *filepath)
     if (file)
 	++file;
     else
-	file = (char *) filepath;
+	file = filepath;
 
     /* inodestr contains the hexadecimal representation of an
        inode, so it requires two bytes of text to represent
@@ -87,7 +99,7 @@ lookup_file_by_inode (const char *filepath)
 	hp->type = NT_UNKNOWN;
 	hp->key = inodestr;
 	hp->data = getlist();
-	hp->delproc = dellist;
+	hp->delproc = delhardlist;
 	(void) addnode (hardlist, hp);
     }
     else
@@ -125,7 +137,7 @@ update_hardlink_info (const char *file)
     {
 	/* file is a relative pathname; assume it's from the current
 	   working directory. */
-	char *dir = xgetwd();
+	char *dir = xgetcwd ();
 	path = xmalloc (strlen(dir) + strlen(file) + 2);
 	sprintf (path, "%s/%s", dir, file);
 	free (dir);
@@ -172,7 +184,7 @@ list_linked_files_on_disk (char *file)
 	path = xstrdup (file);
     else
     {
-	char *dir = xgetwd();
+	char *dir = xgetcwd ();
 	path = (char *) xmalloc (strlen(dir) + strlen(file) + 2);
 	sprintf (path, "%s/%s", dir, file);
 	free (dir);
@@ -261,7 +273,7 @@ find_checkedout_proc (Node *node, void *data)
 {
     Node **uptodate = (Node **) data;
     Node *link;
-    char *dir = xgetwd();
+    char *dir = xgetcwd ();
     char *path;
     struct hardlink_info *hlinfo;
 

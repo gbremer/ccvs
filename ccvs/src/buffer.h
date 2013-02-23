@@ -19,7 +19,7 @@ struct buffer
     struct buffer_data *last;
 
     /* Nonzero if the buffer is in nonblocking mode.  */
-    int nonblocking;
+    bool nonblocking;
 
     /* Functions must be provided to transfer data in and out of the
        buffer.  Either the input or output field must be set, but not
@@ -35,14 +35,14 @@ struct buffer
        
        If there are a nonzero number of bytes available, less than NEED,
        followed by end of file, just read those bytes and return 0.  */
-    int (*input) (void *closure, char *data, int need, int size,
-			int *got);
+    int (*input) (void *closure, char *data, size_t need, size_t size,
+		  size_t *got);
 
     /* Write data.  This should write up to HAVE bytes from DATA.
        This should return 0 on success, or an errno code.  It should
        set the number of bytes written in *WROTE.  */
-    int (*output) (void *closure, const char *data, int have,
-			 int *wrote);
+    int (*output) (void *closure, const char *data, size_t have,
+		   size_t *wrote);
 
     /* Flush any data which may be buffered up after previous calls to
        OUTPUT.  This should return 0 on success, or an errno code.  */
@@ -53,7 +53,12 @@ struct buffer
        blocking mode.  Otherwise, it should be placed into
        non-blocking mode.  This should return 0 on success, or an
        errno code.  */
-    int (*block) (void *closure, int block);
+    int (*block) (void *closure, bool block);
+
+    /* Return the file descriptor underlying this buffer, if any, or -1
+     * otherwise.
+     */
+    int (*get_fd) (void *closure);
 
     /* Shut down the communication stream.  This does not mean that it
        should be closed.  It merely means that no more data will be
@@ -84,7 +89,7 @@ struct buffer_data
     char *bufp;
 
     /* The number of data bytes found at BUFP.  */
-    int size;
+    size_t size;
 
     /*
      * Actual buffer.  This never changes after the structure is
@@ -99,56 +104,70 @@ struct buffer_data
 /* The type of a function passed as a memory error handler.  */
 typedef void (*BUFMEMERRPROC) (struct buffer *);
 
-extern struct buffer *buf_initialize (int (*) (void *, char *, int,
-						     int, int *),
-					    int (*) (void *, const char *,
-						     int, int *),
-					    int (*) (void *),
-					    int (*) (void *, int),
-					    int (*) (struct buffer *),
-					    void (*) (struct buffer *),
-					    void *);
-extern void buf_free (struct buffer *);
-extern struct buffer *buf_nonio_initialize (void (*) (struct buffer *));
-extern struct buffer *stdio_buffer_initialize
-  (FILE *, int, int, void (*) (struct buffer *));
-extern FILE *stdio_buffer_get_file (struct buffer *);
-extern struct buffer *compress_buffer_initialize
-  (struct buffer *, int, int, void (*) (struct buffer *));
-extern struct buffer *packetizing_buffer_initialize
-  (struct buffer *, int (*) (void *, const char *, char *, int),
-	 int (*) (void *, const char *, char *, int, int *), void *,
+struct buffer *buf_initialize (int (*) (void *, char *, size_t, size_t,
+					size_t *),
+			       int (*) (void *, const char *, size_t, size_t *),
+			       int (*) (void *),
+			       int (*) (void *, bool),
+			       int (*) (void *),
+			       int (*) (struct buffer *),
+			       void (*) (struct buffer *),
+			       void *);
+void buf_free (struct buffer *);
+struct buffer *buf_nonio_initialize (void (*) (struct buffer *));
+struct buffer *compress_buffer_initialize (struct buffer *, int, int,
+					   void (*) (struct buffer *));
+struct buffer *packetizing_buffer_initialize
+	(struct buffer *, int (*) (void *, const char *, char *, size_t),
+	 int (*) (void *, const char *, char *, size_t, size_t *), void *,
 	 void (*) (struct buffer *));
-extern int buf_empty (struct buffer *);
-extern int buf_empty_p (struct buffer *);
-extern void buf_output (struct buffer *, const char *, int);
-extern void buf_output0 (struct buffer *, const char *);
-extern void buf_append_char (struct buffer *, int);
-extern int buf_send_output (struct buffer *);
-extern int buf_flush (struct buffer *, int);
-extern int set_nonblock (struct buffer *);
-extern int set_block (struct buffer *);
-extern int buf_send_counted (struct buffer *);
-extern int buf_send_special_count (struct buffer *, int);
-extern void buf_append_data (struct buffer *,
-				   struct buffer_data *,
-				   struct buffer_data *);
-extern void buf_append_buffer (struct buffer *, struct buffer *);
-extern int buf_read_file (FILE *, long, struct buffer_data **,
-				struct buffer_data **);
-extern int buf_read_file_to_eof (FILE *, struct buffer_data **,
-				       struct buffer_data **);
-extern int buf_input_data (struct buffer *, int *);
-extern int buf_read_line (struct buffer *, char **, int *);
-extern int buf_read_data (struct buffer *, int, char **, int *);
-extern void buf_copy_lines (struct buffer *, struct buffer *, int);
-extern int buf_copy_counted (struct buffer *, struct buffer *, int *);
-extern int buf_chain_length (struct buffer_data *);
-extern int buf_length (struct buffer *);
-extern int buf_shutdown (struct buffer *);
+int buf_empty (struct buffer *);
+int buf_empty_p (struct buffer *);
+void buf_output (struct buffer *, const char *, size_t);
+void buf_output0 (struct buffer *, const char *);
+void buf_append_char (struct buffer *, int);
+int buf_send_output (struct buffer *);
+int buf_flush (struct buffer *, bool);
+int set_nonblock (struct buffer *);
+int set_block (struct buffer *);
+int buf_send_counted (struct buffer *);
+int buf_send_special_count (struct buffer *, int);
+void buf_append_data (struct buffer *, struct buffer_data *,
+		      struct buffer_data *);
+void buf_append_buffer (struct buffer *, struct buffer *);
+int buf_read_file (FILE *, long, struct buffer_data **, struct buffer_data **);
+int buf_read_file_to_eof (FILE *, struct buffer_data **,
+			  struct buffer_data **);
+int buf_input_data (struct buffer *, size_t *);
+int buf_read_line (struct buffer *, char **, size_t *);
+int buf_read_short_line (struct buffer *buf, char **line, size_t *lenp,
+                         size_t max);
+int buf_read_data (struct buffer *, size_t, char **, size_t *);
+void buf_copy_lines (struct buffer *, struct buffer *, int);
+int buf_copy_counted (struct buffer *, struct buffer *, int *);
+int buf_chain_length (struct buffer_data *);
+int buf_length (struct buffer *);
+int buf_get_fd (struct buffer *);
+int buf_shutdown (struct buffer *);
+#ifdef PROXY_SUPPORT
+void buf_copy_data (struct buffer *buf, struct buffer_data *data,
+                    struct buffer_data *last);
+void buf_free_data (struct buffer *);
+#endif /* PROXY_SUPPORT */
 
 #ifdef SERVER_FLOWCONTROL
-extern int buf_count_mem (struct buffer *);
+int buf_count_mem (struct buffer *);
 #endif /* SERVER_FLOWCONTROL */
 
+struct buffer *
+fd_buffer_initialize (int fd, pid_t child_pid, cvsroot_t *root, bool input,
+                      void (*memory) (struct buffer *));
+
+/* EWOULDBLOCK is not defined by POSIX, but some BSD systems will
+   return it, rather than EAGAIN, for nonblocking writes.  */
+# ifdef EWOULDBLOCK
+#   define blocking_error(err) ((err) == EWOULDBLOCK || (err) == EAGAIN)
+# else
+#   define blocking_error(err) ((err) == EAGAIN)
+# endif
 #endif /* defined (SERVER_SUPPORT) || defined (CLIENT_SUPPORT) */

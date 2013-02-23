@@ -45,12 +45,9 @@ CLEAN :
 	-@erase "$(INTDIR)\crc32.obj"
 	-@erase "$(INTDIR)\deflate.obj"
 	-@erase "$(INTDIR)\gzio.obj"
-	-@erase "$(INTDIR)\infblock.obj"
-	-@erase "$(INTDIR)\infcodes.obj"
 	-@erase "$(INTDIR)\inffast.obj"
 	-@erase "$(INTDIR)\inflate.obj"
 	-@erase "$(INTDIR)\inftrees.obj"
-	-@erase "$(INTDIR)\infutil.obj"
 	-@erase "$(INTDIR)\trees.obj"
 	-@erase "$(INTDIR)\uncompr.obj"
 	-@erase "$(INTDIR)\vc60.idb"
@@ -73,12 +70,9 @@ LIB32_OBJS= \
 	"$(INTDIR)\crc32.obj" \
 	"$(INTDIR)\deflate.obj" \
 	"$(INTDIR)\gzio.obj" \
-	"$(INTDIR)\infblock.obj" \
-	"$(INTDIR)\infcodes.obj" \
 	"$(INTDIR)\inffast.obj" \
 	"$(INTDIR)\inflate.obj" \
 	"$(INTDIR)\inftrees.obj" \
-	"$(INTDIR)\infutil.obj" \
 	"$(INTDIR)\trees.obj" \
 	"$(INTDIR)\uncompr.obj" \
 	"$(INTDIR)\zutil.obj"
@@ -105,12 +99,9 @@ CLEAN :
 	-@erase "$(INTDIR)\crc32.obj"
 	-@erase "$(INTDIR)\deflate.obj"
 	-@erase "$(INTDIR)\gzio.obj"
-	-@erase "$(INTDIR)\infblock.obj"
-	-@erase "$(INTDIR)\infcodes.obj"
 	-@erase "$(INTDIR)\inffast.obj"
 	-@erase "$(INTDIR)\inflate.obj"
 	-@erase "$(INTDIR)\inftrees.obj"
-	-@erase "$(INTDIR)\infutil.obj"
 	-@erase "$(INTDIR)\trees.obj"
 	-@erase "$(INTDIR)\uncompr.obj"
 	-@erase "$(INTDIR)\vc60.idb"
@@ -133,12 +124,9 @@ LIB32_OBJS= \
 	"$(INTDIR)\crc32.obj" \
 	"$(INTDIR)\deflate.obj" \
 	"$(INTDIR)\gzio.obj" \
-	"$(INTDIR)\infblock.obj" \
-	"$(INTDIR)\infcodes.obj" \
 	"$(INTDIR)\inffast.obj" \
 	"$(INTDIR)\inflate.obj" \
 	"$(INTDIR)\inftrees.obj" \
-	"$(INTDIR)\infutil.obj" \
 	"$(INTDIR)\trees.obj" \
 	"$(INTDIR)\uncompr.obj" \
 	"$(INTDIR)\zutil.obj"
@@ -216,16 +204,6 @@ SOURCE=.\gzio.c
 "$(INTDIR)\gzio.obj" : $(SOURCE) "$(INTDIR)"
 
 
-SOURCE=.\infblock.c
-
-"$(INTDIR)\infblock.obj" : $(SOURCE) "$(INTDIR)"
-
-
-SOURCE=.\infcodes.c
-
-"$(INTDIR)\infcodes.obj" : $(SOURCE) "$(INTDIR)"
-
-
 SOURCE=.\inffast.c
 
 "$(INTDIR)\inffast.obj" : $(SOURCE) "$(INTDIR)"
@@ -239,11 +217,6 @@ SOURCE=.\inflate.c
 SOURCE=.\inftrees.c
 
 "$(INTDIR)\inftrees.obj" : $(SOURCE) "$(INTDIR)"
-
-
-SOURCE=.\infutil.c
-
-"$(INTDIR)\infutil.obj" : $(SOURCE) "$(INTDIR)"
 
 
 SOURCE=.\trees.c

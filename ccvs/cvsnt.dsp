@@ -184,6 +184,10 @@ SOURCE=.\src\import.c
 # End Source File
 # Begin Source File
 
+SOURCE=".\windows-NT\JmgStat.c"
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\lock.c
 # End Source File
 # Begin Source File
@@ -388,6 +392,10 @@ SOURCE=.\diff\diffrun.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\lib\dirname.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\edit.h
 # End Source File
 # Begin Source File
@@ -421,6 +429,10 @@ SOURCE=.\lib\getnline.h
 # Begin Source File
 
 SOURCE=.\lib\getopt.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\lib\getpass.h
 # End Source File
 # Begin Source File
 
@@ -460,6 +472,10 @@ SOURCE=.\zlib\infutil.h
 # End Source File
 # Begin Source File
 
+SOURCE=".\windows-NT\JmgStat.h"
+# End Source File
+# Begin Source File
+
 SOURCE=".\src\log-buffer.h"
 # End Source File
 # Begin Source File
@@ -468,11 +484,19 @@ SOURCE=.\lib\md5.h
 # End Source File
 # Begin Source File
 
+SOURCE=".\src\ms-buffer.h"
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\myndbm.h
 # End Source File
 # Begin Source File
 
 SOURCE=".\windows-NT\ndir.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\parseinfo.h
 # End Source File
 # Begin Source File
 
@@ -512,6 +536,10 @@ SOURCE=".\src\rsh-client.h"
 # End Source File
 # Begin Source File
 
+SOURCE=".\lib\save-cwd.h"
+# End Source File
+# Begin Source File
+
 SOURCE=.\lib\savecwd.h
 # End Source File
 # Begin Source File
@@ -529,6 +557,18 @@ SOURCE=.\src\stack.h
 # Begin Source File
 
 SOURCE=".\windows-NT\stdbool.h"
+# End Source File
+# Begin Source File
+
+SOURCE=".\windows-NT\stdint.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\lib\strcase.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\lib\strftime.h
 # End Source File
 # Begin Source File
 
@@ -556,6 +596,10 @@ SOURCE=.\lib\vasnprintf.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\lib\vasprintf.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\lib\wait.h
 # End Source File
 # Begin Source File
@@ -568,7 +612,23 @@ SOURCE=.\lib\xalloc.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\lib\xgetcwd.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\lib\xreadlink.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\lib\xsize.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\lib\xtime.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\lib\yesno.h
 # End Source File
 # Begin Source File
 

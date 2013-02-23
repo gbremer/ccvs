@@ -1,0 +1,1159 @@
+This is cvs.info, produced by makeinfo version 4.5 from cvs.texinfo.
+
+INFO-DIR-SECTION GNU Packages
+START-INFO-DIR-ENTRY
+* CVS: (cvs).                   Concurrent Versions System
+END-INFO-DIR-ENTRY
+INFO-DIR-SECTION Individual utilities
+START-INFO-DIR-ENTRY
+* cvs: (cvs)CVS commands.       Concurrent Versions System
+END-INFO-DIR-ENTRY
+
+
+File: cvs.info,  Node: Global options,  Next: Common options,  Prev: ~/.cvsrc,  Up: CVS commands
+
+Global options
+==============
+
+   The available `cvs_options' (that are given to the left of
+`cvs_command') are:
+
+`--allow-root=ROOTDIR'
+     May be invoked multiple times to specify one legal CVSROOT
+     directory with each invocation.  Also causes CVS to preparse the
+     configuration file for each specified root, which can be useful
+     when configuring write proxies,  See *Note Password authentication
+     server:: & *Note Write proxies::.
+
+`-a'
+     Authenticate all communication between the client and the server.
+     Only has an effect on the CVS client.  As of this writing, this is
+     only implemented when using a GSSAPI connection (*note GSSAPI
+     authenticated::).  Authentication prevents certain sorts of attacks
+     involving hijacking the active TCP connection.  Enabling
+     authentication does not enable encryption.
+
+`-b BINDIR'
+     In CVS 1.9.18 and older, this specified that RCS programs are in
+     the BINDIR directory.  Current versions of CVS do not run RCS
+     programs; for compatibility this option is accepted, but it does
+     nothing.
+
+`-T TEMPDIR'
+     Use TEMPDIR as the directory where temporary files are located.
+     Overrides the setting of the `$TMPDIR' environment variable and
+     any precompiled directory.  This parameter should be specified as
+     an absolute pathname.  (When running client/server, `-T' affects
+     only the local process; specifying `-T' for the client has no
+     effect on the server and vice versa.)
+
+`-d CVS_ROOT_DIRECTORY'
+     Use CVS_ROOT_DIRECTORY as the root directory pathname of the
+     repository.  Overrides the setting of the `$CVSROOT' environment
+     variable.  *Note Repository::.
+
+`-e EDITOR'
+     Use EDITOR to enter revision log information.  Overrides the
+     setting of the `$CVSEDITOR' and `$EDITOR' environment variables.
+     For more information, see *Note Committing your changes::.
+
+`-f'
+     Do not read the `~/.cvsrc' file.  This option is most often used
+     because of the non-orthogonality of the CVS option set.  For
+     example, the `cvs log' option `-N' (turn off display of tag names)
+     does not have a corresponding option to turn the display on.  So
+     if you have `-N' in the `~/.cvsrc' entry for `log', you may need
+     to use `-f' to show the tag names.
+
+`-H'
+`--help'
+     Display usage information about the specified `cvs_command' (but
+     do not actually execute the command).  If you don't specify a
+     command name, `cvs -H' displays overall help for CVS, including a
+     list of other help options.
+
+`-R'
+     Turns on read-only repository mode.  This allows one to check out
+     from a read-only repository, such as within an anoncvs server, or
+     from a CD-ROM repository.
+
+     Same effect as if the `CVSREADONLYFS' environment variable is set.
+     Using `-R' can also considerably speed up checkouts over NFS.
+
+`-n'
+     Do not change any files.  Attempt to execute the `cvs_command',
+     but only to issue reports; do not remove, update, or merge any
+     existing files, or create any new files.
+
+     Note that CVS will not necessarily produce exactly the same output
+     as without `-n'.  In some cases the output will be the same, but
+     in other cases CVS will skip some of the processing that would
+     have been required to produce the exact same output.
+
+`-Q'
+     Cause the command to be really quiet; the command will only
+     generate output for serious problems.
+
+`-q'
+     Cause the command to be somewhat quiet; informational messages,
+     such as reports of recursion through subdirectories, are
+     suppressed.
+
+`-r'
+     Make new working files read-only.  Same effect as if the
+     `$CVSREAD' environment variable is set (*note Environment
+     variables::).  The default is to make working files writable,
+     unless watches are on (*note Watches::).
+
+`-s VARIABLE=VALUE'
+     Set a user variable (*note Variables::).
+
+`-t'
+     Trace program execution; display messages showing the steps of CVS
+     activity.  Particularly useful with `-n' to explore the potential
+     impact of an unfamiliar command.
+
+`-v'
+
+`--version'
+     Display version and copyright information for CVS.
+
+`-w'
+     Make new working files read-write.  Overrides the setting of the
+     `$CVSREAD' environment variable.  Files are created read-write by
+     default, unless `$CVSREAD' is set or `-r' is given.
+
+`-x'
+     Encrypt all communication between the client and the server.  Only
+     has an effect on the CVS client.  As of this writing, this is only
+     implemented when using a GSSAPI connection (*note GSSAPI
+     authenticated::) or a Kerberos connection (*note Kerberos
+     authenticated::).  Enabling encryption implies that message
+     traffic is also authenticated.  Encryption support is not
+     available by default; it must be enabled using a special configure
+     option, `--enable-encryption', when you build CVS.
+
+`-z GZIP-LEVEL'
+     Set the compression level.  Valid levels are 1 (high speed, low
+     compression) to 9 (low speed, high compression), or 0 to disable
+     compression (the default).  Only has an effect on the CVS client.
+
+
+
+File: cvs.info,  Node: Common options,  Next: Date input formats,  Prev: Global options,  Up: CVS commands
+
+Common command options
+======================
+
+   This section describes the `command_options' that are available
+across several CVS commands.  These options are always given to the
+right of `cvs_command'. Not all commands support all of these options;
+each option is only supported for commands where it makes sense.
+However, when a command has one of these options you can almost always
+count on the same behavior of the option as in other commands.  (Other
+command options, which are listed with the individual commands, may have
+different behavior from one CVS command to the other).
+
+   *Note: the `history' command is an exception; it supports many
+options that conflict even with these standard options.*
+
+`-D DATE_SPEC'
+     Use the most recent revision no later than DATE_SPEC.  DATE_SPEC
+     is a single argument, a date description specifying a date in the
+     past.
+
+     The specification is "sticky" when you use it to make a private
+     copy of a source file; that is, when you get a working file using
+     `-D', CVS records the date you specified, so that further updates
+     in the same directory will use the same date (for more information
+     on sticky tags/dates, *note Sticky tags::).
+
+     `-D' is available with the `annotate', `checkout', `diff',
+     `export', `history', `ls', `rdiff', `rls', `rtag', `tag', and
+     `update' commands.  (The `history' command uses this option in a
+     slightly different way; *note history options::).
+
+     For a complete description of the date formats accepted by CVS,
+     *Note Date input formats::.
+
+     Remember to quote the argument to the `-D' flag so that your shell
+     doesn't interpret spaces as argument separators.  A command using
+     the `-D' flag can look like this:
+
+          $ cvs diff -D "1 hour ago" cvs.texinfo
+
+`-f'
+     When you specify a particular date or tag to CVS commands, they
+     normally ignore files that do not contain the tag (or did not
+     exist prior to the date) that you specified.  Use the `-f' option
+     if you want files retrieved even when there is no match for the
+     tag or date.  (The most recent revision of the file will be used).
+
+     Note that even with `-f', a tag that you specify must exist (that
+     is, in some file, not necessary in every file).  This is so that
+     CVS will continue to give an error if you mistype a tag name.
+
+     `-f' is available with these commands: `annotate', `checkout',
+     `export', `rdiff', `rtag', and `update'.
+
+     *WARNING:  The `commit' and `remove' commands also have a `-f'
+     option, but it has a different behavior for those commands.  See
+     *Note commit options::, and *Note Removing files::.*
+
+`-k KFLAG'
+     Override the default processing of RCS keywords other than `-kb'.
+     *Note Keyword substitution::, for the meaning of KFLAG.  Used with
+     the `checkout' and `update' commands, your KFLAG specification is
+     "sticky"; that is, when you use this option with a `checkout' or
+     `update' command, CVS associates your selected KFLAG with any files
+     it operates on, and continues to use that KFLAG with future
+     commands on the same files until you specify otherwise.
+
+     The `-k' option is available with the `add', `checkout', `diff',
+     `export', `import' and `update' commands.
+
+     *WARNING: Prior to CVS version 1.12.2, the `-k' flag overrode the
+     `-kb' indication for a binary file.  This could sometimes corrupt
+     binary files.  *Note Merging and keywords::, for more.*
+
+`-l'
+     Local; run only in current working directory, rather than
+     recursing through subdirectories.
+
+     Available with the following commands: `annotate', `checkout',
+     `commit', `diff', `edit', `editors', `export', `log', `rdiff',
+     `remove', `rtag', `status', `tag', `unedit', `update', `watch',
+     and `watchers'.
+
+`-m MESSAGE'
+     Use MESSAGE as log information, instead of invoking an editor.
+
+     Available with the following commands: `add', `commit' and
+     `import'.
+
+`-n'
+     Do not run any tag program.  (A program can be specified to run in
+     the modules database (*note modules::); this option bypasses it).
+
+     *Note: this is not the same as the `cvs -n' program option, which
+     you can specify to the left of a cvs command!*
+
+     Available with the `checkout', `commit', `export', and `rtag'
+     commands.
+
+`-P'
+     Prune empty directories.  See *Note Removing directories::.
+
+`-p'
+     Pipe the files retrieved from the repository to standard output,
+     rather than writing them in the current directory.  Available with
+     the `checkout' and `update' commands.
+
+`-R'
+     Process directories recursively.  This is the default for all CVS
+     commands, with the exception of `ls' & `rls'.
+
+     Available with the following commands: `annotate', `checkout',
+     `commit', `diff', `edit', `editors', `export', `ls', `rdiff',
+     `remove', `rls', `rtag', `status', `tag', `unedit', `update',
+     `watch', and `watchers'.
+
+`-r TAG'
+     Use the revision specified by the TAG argument instead of the
+     default "head" revision.  As well as arbitrary tags defined with
+     the `tag' or `rtag' command, two special tags are always
+     available: `HEAD' refers to the most recent version available in
+     the repository, and `BASE' refers to the revision you last checked
+     out into the current working directory.
+
+     The tag specification is sticky when you use this with `checkout'
+     or `update' to make your own copy of a file: CVS remembers the tag
+     and continues to use it on future update commands, until you
+     specify otherwise (for more information on sticky tags/dates,
+     *note Sticky tags::).
+
+     The tag can be either a symbolic or numeric tag, as described in
+     *Note Tags::, or the name of a branch, as described in *Note
+     Branching and merging::.
+
+     Specifying the `-q' global option along with the `-r' command
+     option is often useful, to suppress the warning messages when the
+     RCS file does not contain the specified tag.
+
+     *Note: this is not the same as the overall `cvs -r' option, which
+     you can specify to the left of a CVS command!*
+
+     `-r' is available with the `annotate', `checkout', `commit',
+     `diff', `history', `export', `rdiff', `rtag', and `update'
+     commands.
+
+`-W'
+     Specify file names that should be filtered.  You can use this
+     option repeatedly.  The spec can be a file name pattern of the
+     same type that you can specify in the `.cvswrappers' file.
+     Available with the following commands: `import', and `update'.
+
+
+   * getdate.texi file.   *  * *** DO NOT EDIT THIS FILE DIRECTLY ***  *
+* Edit getdate.texi instead.   */
+
+
+File: cvs.info,  Node: Date input formats,  Next: admin,  Prev: Common options,  Up: CVS commands
+
+Date input formats
+==================
+
+   First, a quote:
+
+     Our units of temporal measurement, from seconds on up to months,
+     are so complicated, asymmetrical and disjunctive so as to make
+     coherent mental reckoning in time all but impossible.  Indeed, had
+     some tyrannical god contrived to enslave our minds to time, to
+     make it all but impossible for us to escape subjection to sodden
+     routines and unpleasant surprises, he could hardly have done
+     better than handing down our present system.  It is like a set of
+     trapezoidal building blocks, with no vertical or horizontal
+     surfaces, like a language in which the simplest thought demands
+     ornate constructions, useless particles and lengthy
+     circumlocutions.  Unlike the more successful patterns of language
+     and science, which enable us to face experience boldly or at least
+     level-headedly, our system of temporal calculation silently and
+     persistently encourages our terror of time.
+
+     ...  It is as though architects had to measure length in feet,
+     width in meters and height in ells; as though basic instruction
+     manuals demanded a knowledge of five different languages.  It is
+     no wonder then that we often look into our own immediate past or
+     future, last Tuesday or a week from Sunday, with feelings of
+     helpless confusion.  ...
+
+     -- Robert Grudin, `Time and the Art of Living'.
+
+   This section describes the textual date representations that GNU
+programs accept.  These are the strings you, as a user, can supply as
+arguments to the various programs.  The C interface (via the `get_date'
+function) is not described here.
+
+* Menu:
+
+* General date syntax::            Common rules.
+* Calendar date items::            19 Dec 1994.
+* Time of day items::              9:20pm.
+* Time zone items::                EST, PDT, GMT.
+* Day of week items::              Monday and others.
+* Relative items in date strings:: next tuesday, 2 years ago.
+* Pure numbers in date strings::   19931219, 1440.
+* Seconds since the Epoch::        @1078100502.
+* Specifying time zone rules::     TZ="America/New_York", TZ="UTC0".
+* Authors of get_date::            Bellovin, Eggert, Salz, Berets, et al.
+
+
+File: cvs.info,  Node: General date syntax,  Next: Calendar date items,  Up: Date input formats
+
+General date syntax
+-------------------
+
+   A "date" is a string, possibly empty, containing many items
+separated by whitespace.  The whitespace may be omitted when no
+ambiguity arises.  The empty string means the beginning of today (i.e.,
+midnight).  Order of the items is immaterial.  A date string may contain
+many flavors of items:
+
+   * calendar date items
+
+   * time of day items
+
+   * time zone items
+
+   * day of the week items
+
+   * relative items
+
+   * pure numbers.
+
+We describe each of these item types in turn, below.
+
+   A few numbers may be written out in words in most contexts.  This is
+most useful for specifying day of the week items or relative items (see
+below).  Here is the list: `first' for 1, `next' for 2, `third' for 3,
+`fourth' for 4, `fifth' for 5, `sixth' for 6, `seventh' for 7, `eighth'
+for 8, `ninth' for 9, `tenth' for 10, `eleventh' for 11 and `twelfth'
+for 12.  Also, `last' means exactly -1.
+
+   When a month is written this way, it is still considered to be
+written numerically, instead of being "spelled in full"; this changes
+the allowed strings.
+
+   In the current implementation, only English is supported for words
+and abbreviations like `AM', `DST', `EST', `first', `January',
+`Sunday', `tomorrow', and `year'.
+
+   The output of the `date' command is not always acceptable as a date
+string, not only because of the language problem, but also because
+there is no standard meaning for time zone items like `IST'.  When using
+`date' to generate a date string intended to be parsed later, specify a
+date format that is independent of language and that does not use time
+zone items other than `UTC' and `Z'.  Here are some ways to do this:
+
+     $ LC_ALL=C TZ=UTC0 date
+     Mon Mar  1 00:21:42 UTC 2004
+     $ TZ=UTC0 date +'%Y-%m-%d %H:%M:%SZ'
+     2004-03-01 00:21:42Z
+     $ date --iso-8601=ns  # a GNU extension
+     2004-02-29T16:21:42,692722128-0800
+     $ date --rfc-2822  # a GNU extension
+     Sun, 29 Feb 2004 16:21:42 -0800
+     $ date +'%Y-%m-%d %H:%M:%S %z'  # %z is a GNU extension.
+     2004-02-29 16:21:42 -0800
+     $ date +'@%s.%N'  # %s and %N are GNU extensions.
+     @1078100502.692722128
+
+   Alphabetic case is completely ignored in dates.  Comments may be
+introduced between round parentheses, as long as included parentheses
+are properly nested.  Hyphens not followed by a digit are currently
+ignored.  Leading zeros on numbers are ignored.
+
+
+File: cvs.info,  Node: Calendar date items,  Next: Time of day items,  Prev: General date syntax,  Up: Date input formats
+
+Calendar date items
+-------------------
+
+   A "calendar date item" specifies a day of the year.  It is specified
+differently, depending on whether the month is specified numerically or
+literally.  All these strings specify the same calendar date:
+
+     1972-09-24     # ISO 8601.
+     72-9-24        # Assume 19xx for 69 through 99,
+                    # 20xx for 00 through 68.
+     72-09-24       # Leading zeros are ignored.
+     9/24/72        # Common U.S. writing.
+     24 September 1972
+     24 Sept 72     # September has a special abbreviation.
+     24 Sep 72      # Three-letter abbreviations always allowed.
+     Sep 24, 1972
+     24-sep-72
+     24sep72
+
+   The year can also be omitted.  In this case, the last specified year
+is used, or the current year if none.  For example:
+
+     9/24
+     sep 24
+
+   Here are the rules.
+
+   For numeric months, the ISO 8601 format `YEAR-MONTH-DAY' is allowed,
+where YEAR is any positive number, MONTH is a number between 01 and 12,
+and DAY is a number between 01 and 31.  A leading zero must be present
+if a number is less than ten.  If YEAR is 68 or smaller, then 2000 is
+added to it; otherwise, if YEAR is less than 100, then 1900 is added to
+it.  The construct `MONTH/DAY/YEAR', popular in the United States, is
+accepted.  Also `MONTH/DAY', omitting the year.
+
+   Literal months may be spelled out in full: `January', `February',
+`March', `April', `May', `June', `July', `August', `September',
+`October', `November' or `December'.  Literal months may be abbreviated
+to their first three letters, possibly followed by an abbreviating dot.
+It is also permitted to write `Sept' instead of `September'.
+
+   When months are written literally, the calendar date may be given as
+any of the following:
+
+     DAY MONTH YEAR
+     DAY MONTH
+     MONTH DAY YEAR
+     DAY-MONTH-YEAR
+
+   Or, omitting the year:
+
+     MONTH DAY
+
+
+File: cvs.info,  Node: Time of day items,  Next: Time zone items,  Prev: Calendar date items,  Up: Date input formats
+
+Time of day items
+-----------------
+
+   A "time of day item" in date strings specifies the time on a given
+day.  Here are some examples, all of which represent the same time:
+
+     20:02:00.000000
+     20:02
+     8:02pm
+     20:02-0500      # In EST (U.S. Eastern Standard Time).
+
+   More generally, the time of day may be given as
+`HOUR:MINUTE:SECOND', where HOUR is a number between 0 and 23, MINUTE
+is a number between 0 and 59, and SECOND is a number between 0 and 59
+possibly followed by `.' or `,' and a fraction containing one or more
+digits.  Alternatively, `:SECOND' can be omitted, in which case it is
+taken to be zero.
+
+   If the time is followed by `am' or `pm' (or `a.m.' or `p.m.'), HOUR
+is restricted to run from 1 to 12, and `:MINUTE' may be omitted (taken
+to be zero).  `am' indicates the first half of the day, `pm' indicates
+the second half of the day.  In this notation, 12 is the predecessor of
+1: midnight is `12am' while noon is `12pm'.  (This is the zero-oriented
+interpretation of `12am' and `12pm', as opposed to the old tradition
+derived from Latin which uses `12m' for noon and `12pm' for midnight.)
+
+   The time may alternatively be followed by a time zone correction,
+expressed as `SHHMM', where S is `+' or `-', HH is a number of zone
+hours and MM is a number of zone minutes.  When a time zone correction
+is given this way, it forces interpretation of the time relative to
+Coordinated Universal Time (UTC), overriding any previous specification
+for the time zone or the local time zone.  The MINUTE part of the time
+of day may not be elided when a time zone correction is used.  This is
+the best way to specify a time zone correction by fractional parts of
+an hour.
+
+   Either `am'/`pm' or a time zone correction may be specified, but not
+both.
+
+
+File: cvs.info,  Node: Time zone items,  Next: Day of week items,  Prev: Time of day items,  Up: Date input formats
+
+Time zone items
+---------------
+
+   A "time zone item" specifies an international time zone, indicated
+by a small set of letters, e.g., `UTC' or `Z' for Coordinated Universal
+Time.  Any included periods are ignored.  By following a
+non-daylight-saving time zone by the string `DST' in a separate word
+(that is, separated by some white space), the corresponding daylight
+saving time zone may be specified.
+
+   Time zone items other than `UTC' and `Z' are obsolescent and are not
+recommended, because they are ambiguous; for example, `EST' has a
+different meaning in Australia than in the United States.  Instead,
+it's better to use unambiguous numeric time zone corrections like
+`-0500', as described in the previous section.
+
+   If neither a time zone item nor a time zone correction is supplied,
+time stamps are interpreted using the rules of the default time zone
+(*note Specifying time zone rules::).
+
+
+File: cvs.info,  Node: Day of week items,  Next: Relative items in date strings,  Prev: Time zone items,  Up: Date input formats
+
+Day of week items
+-----------------
+
+   The explicit mention of a day of the week will forward the date
+(only if necessary) to reach that day of the week in the future.
+
+   Days of the week may be spelled out in full: `Sunday', `Monday',
+`Tuesday', `Wednesday', `Thursday', `Friday' or `Saturday'.  Days may
+be abbreviated to their first three letters, optionally followed by a
+period.  The special abbreviations `Tues' for `Tuesday', `Wednes' for
+`Wednesday' and `Thur' or `Thurs' for `Thursday' are also allowed.
+
+   A number may precede a day of the week item to move forward
+supplementary weeks.  It is best used in expression like `third
+monday'.  In this context, `last DAY' or `next DAY' is also acceptable;
+they move one week before or after the day that DAY by itself would
+represent.
+
+   A comma following a day of the week item is ignored.
+
+
+File: cvs.info,  Node: Relative items in date strings,  Next: Pure numbers in date strings,  Prev: Day of week items,  Up: Date input formats
+
+Relative items in date strings
+------------------------------
+
+   "Relative items" adjust a date (or the current date if none) forward
+or backward.  The effects of relative items accumulate.  Here are some
+examples:
+
+     1 year
+     1 year ago
+     3 years
+     2 days
+
+   The unit of time displacement may be selected by the string `year'
+or `month' for moving by whole years or months.  These are fuzzy units,
+as years and months are not all of equal duration.  More precise units
+are `fortnight' which is worth 14 days, `week' worth 7 days, `day'
+worth 24 hours, `hour' worth 60 minutes, `minute' or `min' worth 60
+seconds, and `second' or `sec' worth one second.  An `s' suffix on
+these units is accepted and ignored.
+
+   The unit of time may be preceded by a multiplier, given as an
+optionally signed number.  Unsigned numbers are taken as positively
+signed.  No number at all implies 1 for a multiplier.  Following a
+relative item by the string `ago' is equivalent to preceding the unit
+by a multiplier with value -1.
+
+   The string `tomorrow' is worth one day in the future (equivalent to
+`day'), the string `yesterday' is worth one day in the past (equivalent
+to `day ago').
+
+   The strings `now' or `today' are relative items corresponding to
+zero-valued time displacement, these strings come from the fact a
+zero-valued time displacement represents the current time when not
+otherwise changed by previous items.  They may be used to stress other
+items, like in `12:00 today'.  The string `this' also has the meaning
+of a zero-valued time displacement, but is preferred in date strings
+like `this thursday'.
+
+   When a relative item causes the resulting date to cross a boundary
+where the clocks were adjusted, typically for daylight saving time, the
+resulting date and time are adjusted accordingly.
+
+   The fuzz in units can cause problems with relative items.  For
+example, `2003-07-31 -1 month' might evaluate to 2003-07-01, because
+2003-06-31 is an invalid date.  To determine the previous month more
+reliably, you can ask for the month before the 15th of the current
+month.  For example:
+
+     $ date -R
+     Thu, 31 Jul 2003 13:02:39 -0700
+     $ date --date='-1 month' +'Last month was %B?'
+     Last month was July?
+     $ date --date="$(date +%Y-%m-15) -1 month" +'Last month was %B!'
+     Last month was June!
+
+   Also, take care when manipulating dates around clock changes such as
+daylight saving leaps.  In a few cases these have added or subtracted
+as much as 24 hours from the clock, so it is often wise to adopt
+universal time by setting the `TZ' environment variable to `UTC0'
+before embarking on calendrical calculations.
+
+
+File: cvs.info,  Node: Pure numbers in date strings,  Next: Seconds since the Epoch,  Prev: Relative items in date strings,  Up: Date input formats
+
+Pure numbers in date strings
+----------------------------
+
+   The precise interpretation of a pure decimal number depends on the
+context in the date string.
+
+   If the decimal number is of the form YYYYMMDD and no other calendar
+date item (*note Calendar date items::) appears before it in the date
+string, then YYYY is read as the year, MM as the month number and DD as
+the day of the month, for the specified calendar date.
+
+   If the decimal number is of the form HHMM and no other time of day
+item appears before it in the date string, then HH is read as the hour
+of the day and MM as the minute of the hour, for the specified time of
+day.  MM can also be omitted.
+
+   If both a calendar date and a time of day appear to the left of a
+number in the date string, but no relative item, then the number
+overrides the year.
+
+
+File: cvs.info,  Node: Seconds since the Epoch,  Next: Specifying time zone rules,  Prev: Pure numbers in date strings,  Up: Date input formats
+
+Seconds since the Epoch
+-----------------------
+
+   If you precede a number with `@', it represents an internal time
+stamp as a count of seconds.  The number can contain an internal
+decimal point (either `.' or `,'); any excess precision not supported
+by the internal representation is truncated toward minus infinity.
+Such a number cannot be combined with any other date item, as it
+specifies a complete time stamp.
+
+   Internally, computer times are represented as a count of seconds
+since an epoch--a well-defined point of time.  On GNU and POSIX
+systems, the epoch is 1970-01-01 00:00:00 UTC, so `@0' represents this
+time, `@1' represents 1970-01-01 00:00:01 UTC, and so forth.  GNU and
+most other POSIX-compliant systems support such times as an extension
+to POSIX, using negative counts, so that `@-1' represents 1969-12-31
+23:59:59 UTC.
+
+   Traditional Unix systems count seconds with 32-bit two's-complement
+integers and can represent times from 1901-12-13 20:45:52 through
+2038-01-19 03:14:07 UTC.  More modern systems use 64-bit counts of
+seconds with nanosecond subcounts, and can represent all the times in
+the known lifetime of the universe to a resolution of 1 nanosecond.
+
+   On most systems, these counts ignore the presence of leap seconds.
+For example, on most systems `@915148799' represents 1998-12-31
+23:59:59 UTC, `@915148800' represents 1999-01-01 00:00:00 UTC, and
+there is no way to represent the intervening leap second 1998-12-31
+23:59:60 UTC.
+
+
+File: cvs.info,  Node: Specifying time zone rules,  Next: Authors of get_date,  Prev: Seconds since the Epoch,  Up: Date input formats
+
+Specifying time zone rules
+--------------------------
+
+   Normally, dates are interpreted using the rules of the current time
+zone, which in turn are specified by the `TZ' environment variable, or
+by a system default if `TZ' is not set.  To specify a different set of
+default time zone rules that apply just to one date, start the date
+with a string of the form `TZ="RULE"'.  The two quote characters (`"')
+must be present in the date, and any quotes or backslashes within RULE
+must be escaped by a backslash.
+
+   For example, with the GNU `date' command you can answer the question
+"What time is it in New York when a Paris clock shows 6:30am on October
+31, 2004?" by using a date beginning with `TZ="Europe/Paris"' as shown
+in the following shell transcript:
+
+     $ export TZ="America/New_York"
+     $ date --date='TZ="Europe/Paris" 2004-10-31 06:30'
+     Sun Oct 31 01:30:00 EDT 2004
+
+   In this example, the `--date' operand begins with its own `TZ'
+setting, so the rest of that operand is processed according to
+`Europe/Paris' rules, treating the string `2004-10-31 06:30' as if it
+were in Paris.  However, since the output of the `date' command is
+processed according to the overall time zone rules, it uses New York
+time.  (Paris was normally six hours ahead of New York in 2004, but
+this example refers to a brief Halloween period when the gap was five
+hours.)
+
+   A `TZ' value is a rule that typically names a location in the `tz'
+database (http://www.twinsun.com/tz/tz-link.htm).  A recent catalog of
+location names appears in the TWiki Date and Time Gateway
+(http://twiki.org/cgi-bin/xtra/tzdate).  A few non-GNU hosts require a
+colon before a location name in a `TZ' setting, e.g.,
+`TZ=":America/New_York"'.
+
+   The `tz' database includes a wide variety of locations ranging from
+`Arctic/Longyearbyen' to `Antarctica/South_Pole', but if you are at sea
+and have your own private time zone, or if you are using a non-GNU host
+that does not support the `tz' database, you may need to use a POSIX
+rule instead.  Simple POSIX rules like `UTC0' specify a time zone
+without daylight saving time; other rules can specify simple daylight
+saving regimes.  *Note Specifying the Time Zone with `TZ': (libc)TZ
+Variable.
+
+
+File: cvs.info,  Node: Authors of get_date,  Prev: Specifying time zone rules,  Up: Date input formats
+
+Authors of `get_date'
+---------------------
+
+   `get_date' was originally implemented by Steven M. Bellovin
+(<smb@research.att.com>) while at the University of North Carolina at
+Chapel Hill.  The code was later tweaked by a couple of people on
+Usenet, then completely overhauled by Rich $alz (<rsalz@bbn.com>) and
+Jim Berets (<jberets@bbn.com>) in August, 1990.  Various revisions for
+the GNU system were made by David MacKenzie, Jim Meyering, Paul Eggert
+and others.
+
+   This chapter was originally produced by Franc,ois Pinard
+(<pinard@iro.umontreal.ca>) from the `getdate.y' source code, and then
+edited by K. Berry (<kb@cs.umb.edu>).
+
+
+File: cvs.info,  Node: admin,  Next: annotate,  Prev: Date input formats,  Up: CVS commands
+
+admin--Administration
+=====================
+
+   * Requires: repository, working directory.
+
+   * Changes: repository.
+
+   * Synonym: rcs
+
+   This is the CVS interface to assorted administrative facilities.
+Some of them have questionable usefulness for CVS but exist for
+historical purposes.  Some of the questionable options are likely to
+disappear in the future.  This command _does_ work recursively, so
+extreme care should be used.
+
+   On unix, if there is a group named `cvsadmin', only members of that
+group can run `cvs admin' commands, except for those specified using the
+`UserAdminOptions' configuration option in the `CVSROOT/config' file.
+Options specified using `UserAdminOptions' can be run by any user.  See
+*Note config:: for more on `UserAdminOptions'.
+
+   The `cvsadmin' group should exist on the server, or any system
+running the non-client/server CVS.  To disallow `cvs admin' for all
+users, create a group with no users in it.  On NT, the `cvsadmin'
+feature does not exist and all users can run `cvs admin'.
+
+* Menu:
+
+* admin options::               admin options
+
+
+File: cvs.info,  Node: admin options,  Up: admin
+
+admin options
+-------------
+
+   Some of these options have questionable usefulness for CVS but exist
+for historical purposes.  Some even make it impossible to use CVS until
+you undo the effect!
+
+`-AOLDFILE'
+     Might not work together with CVS.  Append the access list of
+     OLDFILE to the access list of the RCS file.
+
+`-aLOGINS'
+     Might not work together with CVS.  Append the login names
+     appearing in the comma-separated list LOGINS to the access list of
+     the RCS file.
+
+`-b[REV]'
+     Set the default branch to REV.  In CVS, you normally do not
+     manipulate default branches; sticky tags (*note Sticky tags::) are
+     a better way to decide which branch you want to work on.  There is
+     one reason to run `cvs admin -b': to revert to the vendor's
+     version when using vendor branches (*note Reverting local
+     changes::).  There can be no space between `-b' and its argument.
+
+`-cSTRING'
+     Sets the comment leader to STRING.  The comment leader is not used
+     by current versions of CVS or RCS 5.7.  Therefore, you can almost
+     surely not worry about it.  *Note Keyword substitution::.
+
+`-e[LOGINS]'
+     Might not work together with CVS.  Erase the login names appearing
+     in the comma-separated list LOGINS from the access list of the RCS
+     file.  If LOGINS is omitted, erase the entire access list.  There
+     can be no space between `-e' and its argument.
+
+`-I'
+     Run interactively, even if the standard input is not a terminal.
+     This option does not work with the client/server CVS and is likely
+     to disappear in a future release of CVS.
+
+`-i'
+     Useless with CVS.  This creates and initializes a new RCS file,
+     without depositing a revision.  With CVS, add files with the `cvs
+     add' command (*note Adding files::).
+
+`-kSUBST'
+     Set the default keyword substitution to SUBST.  *Note Keyword
+     substitution::.  Giving an explicit `-k' option to `cvs update',
+     `cvs export', or `cvs checkout' overrides this default.
+
+`-l[REV]'
+     Lock the revision with number REV.  If a branch is given, lock the
+     latest revision on that branch.  If REV is omitted, lock the
+     latest revision on the default branch.  There can be no space
+     between `-l' and its argument.
+
+     This can be used in conjunction with the `rcslock.pl' script in
+     the `contrib' directory of the CVS source distribution to provide
+     reserved checkouts (where only one user can be editing a given
+     file at a time).  See the comments in that file for details (and
+     see the `README' file in that directory for disclaimers about the
+     unsupported nature of contrib).  According to comments in that
+     file, locking must set to strict (which is the default).
+
+`-L'
+     Set locking to strict.  Strict locking means that the owner of an
+     RCS file is not exempt from locking for checkin.  For use with
+     CVS, strict locking must be set; see the discussion under the `-l'
+     option above.
+
+`-mREV:MSG'
+     Replace the log message of revision REV with MSG.
+
+`-NNAME[:[REV]]'
+     Act like `-n', except override any previous assignment of NAME.
+     For use with magic branches, see *Note Magic branch numbers::.
+
+`-nNAME[:[REV]]'
+     Associate the symbolic name NAME with the branch or revision REV.
+     It is normally better to use `cvs tag' or `cvs rtag' instead.
+     Delete the symbolic name if both `:' and REV are omitted;
+     otherwise, print an error message if NAME is already associated
+     with another number.  If REV is symbolic, it is expanded before
+     association.  A REV consisting of a branch number followed by a
+     `.' stands for the current latest revision in the branch.  A `:'
+     with an empty REV stands for the current latest revision on the
+     default branch, normally the trunk.  For example, `cvs admin
+     -nNAME:' associates NAME with the current latest revision of all
+     the RCS files; this contrasts with `cvs admin -nNAME:$' which
+     associates NAME with the revision numbers extracted from keyword
+     strings in the corresponding working files.
+
+`-oRANGE'
+     Deletes ("outdates") the revisions given by RANGE.
+
+     Note that this command can be quite dangerous unless you know
+     _exactly_ what you are doing (for example see the warnings below
+     about how the REV1:REV2 syntax is confusing).
+
+     If you are short on disc this option might help you.  But think
+     twice before using it--there is no way short of restoring the
+     latest backup to undo this command!  If you delete different
+     revisions than you planned, either due to carelessness or (heaven
+     forbid) a CVS bug, there is no opportunity to correct the error
+     before the revisions are deleted.  It probably would be a good
+     idea to experiment on a copy of the repository first.
+
+     Specify RANGE in one of the following ways:
+
+    `REV1::REV2'
+          Collapse all revisions between rev1 and rev2, so that CVS
+          only stores the differences associated with going from rev1
+          to rev2, not intermediate steps.  For example, after `-o
+          1.3::1.5' one can retrieve revision 1.3, revision 1.5, or the
+          differences to get from 1.3 to 1.5, but not the revision 1.4,
+          or the differences between 1.3 and 1.4.  Other examples: `-o
+          1.3::1.4' and `-o 1.3::1.3' have no effect, because there are
+          no intermediate revisions to remove.
+
+    `::REV'
+          Collapse revisions between the beginning of the branch
+          containing REV and REV itself.  The branchpoint and REV are
+          left intact.  For example, `-o ::1.3.2.6' deletes revision
+          1.3.2.1, revision 1.3.2.5, and everything in between, but
+          leaves 1.3 and 1.3.2.6 intact.
+
+    `REV::'
+          Collapse revisions between REV and the end of the branch
+          containing REV.  Revision REV is left intact but the head
+          revision is deleted.
+
+    `REV'
+          Delete the revision REV.  For example, `-o 1.3' is equivalent
+          to `-o 1.2::1.4'.
+
+    `REV1:REV2'
+          Delete the revisions from REV1 to REV2, inclusive, on the
+          same branch.  One will not be able to retrieve REV1 or REV2
+          or any of the revisions in between.  For example, the command
+          `cvs admin -oR_1_01:R_1_02 .' is rarely useful.  It means to
+          delete revisions up to, and including, the tag R_1_02.  But
+          beware!  If there are files that have not changed between
+          R_1_02 and R_1_03 the file will have _the same_ numerical
+          revision number assigned to the tags R_1_02 and R_1_03.  So
+          not only will it be impossible to retrieve R_1_02; R_1_03
+          will also have to be restored from the tapes!  In most cases
+          you want to specify REV1::REV2 instead.
+
+    `:REV'
+          Delete revisions from the beginning of the branch containing
+          REV up to and including REV.
+
+    `REV:'
+          Delete revisions from revision REV, including REV itself, to
+          the end of the branch containing REV.
+
+     None of the revisions to be deleted may have branches or locks.
+
+     If any of the revisions to be deleted have symbolic names, and one
+     specifies one of the `::' syntaxes, then CVS will give an error
+     and not delete any revisions.  If you really want to delete both
+     the symbolic names and the revisions, first delete the symbolic
+     names with `cvs tag -d', then run `cvs admin -o'.  If one
+     specifies the non-`::' syntaxes, then CVS will delete the
+     revisions but leave the symbolic names pointing to nonexistent
+     revisions.  This behavior is preserved for compatibility with
+     previous versions of CVS, but because it isn't very useful, in the
+     future it may change to be like the `::' case.
+
+     Due to the way CVS handles branches REV cannot be specified
+     symbolically if it is a branch.  *Note Magic branch numbers::, for
+     an explanation.
+
+     Make sure that no-one has checked out a copy of the revision you
+     outdate.  Strange things will happen if he starts to edit it and
+     tries to check it back in.  For this reason, this option is not a
+     good way to take back a bogus commit; commit a new revision
+     undoing the bogus change instead (*note Merging two revisions::).
+
+`-q'
+     Run quietly; do not print diagnostics.
+
+`-sSTATE[:REV]'
+     Useful with CVS.  Set the state attribute of the revision REV to
+     STATE.  If REV is a branch number, assume the latest revision on
+     that branch.  If REV is omitted, assume the latest revision on the
+     default branch.  Any identifier is acceptable for STATE.  A useful
+     set of states is `Exp' (for experimental), `Stab' (for stable),
+     and `Rel' (for released).  By default, the state of a new revision
+     is set to `Exp' when it is created.  The state is visible in the
+     output from CVS LOG (*note log::), and in the `$Log$' and
+     `$State$' keywords (*note Keyword substitution::).  Note that CVS
+     uses the `dead' state for its own purposes; to take a file to or
+     from the `dead' state use commands like `cvs remove' and `cvs
+     add', not `cvs admin -s'.
+
+`-t[FILE]'
+     Useful with CVS.  Write descriptive text from the contents of the
+     named FILE into the RCS file, deleting the existing text.  The
+     FILE pathname may not begin with `-'.  The descriptive text can be
+     seen in the output from `cvs log' (*note log::).  There can be no
+     space between `-t' and its argument.
+
+     If FILE is omitted, obtain the text from standard input,
+     terminated by end-of-file or by a line containing `.' by itself.
+     Prompt for the text if interaction is possible; see `-I'.
+
+`-t-STRING'
+     Similar to `-tFILE'. Write descriptive text from the STRING into
+     the RCS file, deleting the existing text.  There can be no space
+     between `-t' and its argument.
+
+`-U'
+     Set locking to non-strict.  Non-strict locking means that the
+     owner of a file need not lock a revision for checkin.  For use
+     with CVS, strict locking must be set; see the discussion under the
+     `-l' option above.
+
+`-u[REV]'
+     See the option `-l' above, for a discussion of using this option
+     with CVS.  Unlock the revision with number REV.  If a branch is
+     given, unlock the latest revision on that branch.  If REV is
+     omitted, remove the latest lock held by the caller.  Normally,
+     only the locker of a revision may unlock it; somebody else
+     unlocking a revision breaks the lock.  This causes the original
+     locker to be sent a `commit' notification (*note Getting
+     Notified::).  There can be no space between `-u' and its argument.
+
+`-VN'
+     In previous versions of CVS, this option meant to write an RCS
+     file which would be acceptable to RCS version N, but it is now
+     obsolete and specifying it will produce an error.
+
+`-xSUFFIXES'
+     In previous versions of CVS, this was documented as a way of
+     specifying the names of the RCS files.  However, CVS has always
+     required that the RCS files used by CVS end in `,v', so this
+     option has never done anything useful.
+
+
+
+File: cvs.info,  Node: annotate,  Next: checkout,  Prev: admin,  Up: CVS commands
+
+annotate--What revision modified each line of a file?
+=====================================================
+
+   * Synopsis: annotate [options] files...
+
+   * Requires: repository.
+
+   * Changes: nothing.
+
+   For each file in FILES, print the head revision of the trunk,
+together with information on the last modification for each line.
+
+* Menu:
+
+* annotate options::            annotate options
+* annotate example::            annotate example
+
+
+File: cvs.info,  Node: annotate options,  Next: annotate example,  Up: annotate
+
+annotate options
+----------------
+
+   These standard options are supported by `annotate' (*note Common
+options::, for a complete description of them):
+
+`-l'
+     Local directory only, no recursion.
+
+`-R'
+     Process directories recursively.
+
+`-f'
+     Use head revision if tag/date not found.
+
+`-F'
+     Annotate binary files.
+
+`-r REVISION'
+     Annotate file as of specified revision/tag.
+
+`-D DATE'
+     Annotate file as of specified date.
+
+
+File: cvs.info,  Node: annotate example,  Prev: annotate options,  Up: annotate
+
+annotate example
+----------------
+
+   For example:
+
+     $ cvs annotate ssfile
+     Annotations for ssfile
+     ***************
+     1.1          (mary     27-Mar-96): ssfile line 1
+     1.2          (joe      28-Mar-96): ssfile line 2
+
+   The file `ssfile' currently contains two lines.  The `ssfile line 1'
+line was checked in by `mary' on March 27.  Then, on March 28, `joe'
+added a line `ssfile line 2', without modifying the `ssfile line 1'
+line.  This report doesn't tell you anything about lines which have
+been deleted or replaced; you need to use `cvs diff' for that (*note
+diff::).
+
+   The options to `cvs annotate' are listed in *Note Invoking CVS::,
+and can be used to select the files and revisions to annotate.  The
+options are described in more detail there and in *Note Common
+options::.
+
+
+File: cvs.info,  Node: checkout,  Next: commit,  Prev: annotate,  Up: CVS commands
+
+checkout--Check out sources for editing
+=======================================
+
+   * Synopsis: checkout [options] modules...
+
+   * Requires: repository.
+
+   * Changes: working directory.
+
+   * Synonyms: co, get
+
+   Create or update a working directory containing copies of the source
+files specified by MODULES.  You must execute `checkout' before using
+most of the other CVS commands, since most of them operate on your
+working directory.
+
+   The MODULES are either symbolic names for some collection of source
+directories and files, or paths to directories or files in the
+repository.  The symbolic names are defined in the `modules' file.
+*Note modules::.
+
+   Depending on the modules you specify, `checkout' may recursively
+create directories and populate them with the appropriate source files.
+You can then edit these source files at any time (regardless of
+whether other software developers are editing their own copies of the
+sources); update them to include new changes applied by others to the
+source repository; or commit your work as a permanent change to the
+source repository.
+
+   Note that `checkout' is used to create directories.  The top-level
+directory created is always added to the directory where `checkout' is
+invoked, and usually has the same name as the specified module.  In the
+case of a module alias, the created sub-directory may have a different
+name, but you can be sure that it will be a sub-directory, and that
+`checkout' will show the relative path leading to each file as it is
+extracted into your private work area (unless you specify the `-Q'
+global option).
+
+   The files created by `checkout' are created read-write, unless the
+`-r' option to CVS (*note Global options::) is specified, the `CVSREAD'
+environment variable is specified (*note Environment variables::), or a
+watch is in effect for that file (*note Watches::).
+
+   Note that running `checkout' on a directory that was already built
+by a prior `checkout' is also permitted.  This is similar to specifying
+the `-d' option to the `update' command in the sense that new
+directories that have been created in the repository will appear in
+your work area.  However, `checkout' takes a module name whereas
+`update' takes a directory name.  Also to use `checkout' this way it
+must be run from the top level directory (where you originally ran
+`checkout' from), so before you run `checkout' to update an existing
+directory, don't forget to change your directory to the top level
+directory.
+
+   For the output produced by the `checkout' command see *Note update
+output::.
+
+* Menu:
+
+* checkout options::            checkout options
+* checkout examples::           checkout examples
+

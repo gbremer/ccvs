@@ -85,15 +85,15 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\argmatch.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\asnprintf.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\basename.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dirname.c
 # End Source File
 # Begin Source File
 
@@ -153,6 +153,10 @@ SOURCE=".\printf-parse.c"
 # End Source File
 # Begin Source File
 
+SOURCE=.\readlink.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\realloc.c
 # End Source File
 # Begin Source File
@@ -161,7 +165,15 @@ SOURCE=.\regex.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\savecwd.c
+SOURCE=.\rpmatch.c
+# End Source File
+# Begin Source File
+
+SOURCE=".\save-cwd.c"
+# End Source File
+# Begin Source File
+
+SOURCE=.\setenv.c
 # End Source File
 # Begin Source File
 
@@ -169,7 +181,23 @@ SOURCE=.\sighandle.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\strcasecmp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\strftime.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\stripslash.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\time_r.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\unsetenv.c
 # End Source File
 # Begin Source File
 
@@ -181,7 +209,15 @@ SOURCE=.\vasnprintf.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\xgetwd.c
+SOURCE=.\vasprintf.c
+# End Source File
+# Begin Source File
+
+SOURCE=".\xalloc-die.c"
+# End Source File
+# Begin Source File
+
+SOURCE=.\xgetcwd.c
 # End Source File
 # Begin Source File
 
@@ -189,7 +225,7 @@ SOURCE=.\xmalloc.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\xstrdup.c
+SOURCE=.\xreadlink.c
 # End Source File
 # Begin Source File
 
@@ -229,6 +265,10 @@ InputPath=.\alloca_.h
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\allocsa.h
 # End Source File
 # Begin Source File
 
@@ -299,6 +339,37 @@ SOURCE=.\getopt.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\getopt_.h
+
+!IF  "$(CFG)" == "libcvs - Win32 Release"
+
+# Begin Custom Build
+InputPath=.\getopt_.h
+
+".\getopt.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy .\getopt_.h .\getopt.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcvs - Win32 Debug"
+
+# Begin Custom Build
+InputPath=.\getopt_.h
+
+".\getopt.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy .\getopt_.h .\getopt.h
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\getopt_int.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\getpagesize.h
 # End Source File
 # Begin Source File
@@ -335,7 +406,11 @@ SOURCE=.\regex.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\savecwd.h
+SOURCE=".\save-cwd.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\setenv.h
 # End Source File
 # Begin Source File
 
@@ -343,7 +418,15 @@ SOURCE="..\windows-NT\stdbool.h"
 # End Source File
 # Begin Source File
 
+SOURCE="..\windows-NT\stdint.h"
+# End Source File
+# Begin Source File
+
 SOURCE=.\system.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\time_r.h
 # End Source File
 # Begin Source File
 
@@ -363,7 +446,19 @@ SOURCE=.\vasnprintf.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\vasprintf.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\xalloc.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\xgetcwd.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\xreadlink.h
 # End Source File
 # Begin Source File
 
@@ -372,6 +467,10 @@ SOURCE=.\xsize.h
 # Begin Source File
 
 SOURCE=.\xtime.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\yesno.h
 # End Source File
 # End Group
 # End Target

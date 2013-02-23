@@ -50,10 +50,11 @@ struct compress_buffer
 };
 
 static void compress_error (int, int, z_stream *, const char *);
-static int compress_buffer_input (void *, char *, int, int, int *);
-static int compress_buffer_output (void *, const char *, int, int *);
+static int compress_buffer_input (void *, char *, size_t, size_t, size_t *);
+static int compress_buffer_output (void *, const char *, size_t, size_t *);
 static int compress_buffer_flush (void *);
-static int compress_buffer_block (void *, int);
+static int compress_buffer_block (void *, bool);
+static int compress_buffer_get_fd (void *);
 static int compress_buffer_shutdown_input (struct buffer *);
 static int compress_buffer_shutdown_output (struct buffer *);
 
@@ -80,15 +81,17 @@ compress_error (int status, int zstatus, z_stream *zstr, const char *msg)
 	   "%s: %s", msg, zmsg);
 }
 
-/* Create a compression buffer.  */
 
+
+/* Create a compression buffer.  */
 struct buffer *
-compress_buffer_initialize (struct buffer *buf, int input, int level, void (*memory) (struct buffer *))
+compress_buffer_initialize (struct buffer *buf, int input, int level,
+                            void (*memory) (struct buffer *))
 {
     struct compress_buffer *n;
     int zstatus;
 
-    n = (struct compress_buffer *) xmalloc (sizeof *n);
+    n = xmalloc (sizeof *n);
     memset (n, 0, sizeof *n);
 
     n->buf = buf;
@@ -113,7 +116,7 @@ compress_buffer_initialize (struct buffer *buf, int input, int level, void (*mem
     return buf_initialize (input ? compress_buffer_input : NULL,
 			   input ? NULL : compress_buffer_output,
 			   input ? NULL : compress_buffer_flush,
-			   compress_buffer_block,
+			   compress_buffer_block, compress_buffer_get_fd,
 			   (input
 			    ? compress_buffer_shutdown_input
 			    : compress_buffer_shutdown_output),
@@ -121,16 +124,17 @@ compress_buffer_initialize (struct buffer *buf, int input, int level, void (*mem
 			   n);
 }
 
-/* Input data from a compression buffer.  */
 
+
+/* Input data from a compression buffer.  */
 static int
-compress_buffer_input (void *closure, char *data, int need, int size, int *got)
+compress_buffer_input (void *closure, char *data, size_t need, size_t size,
+		       size_t *got)
 {
-    struct compress_buffer *cb = (struct compress_buffer *) closure;
+    struct compress_buffer *cb = closure;
     struct buffer_data *bd;
 
-    if (cb->buf->input == NULL)
-	abort ();
+    assert (cb->buf->input);
 
     /* We use a single buffer_data structure to buffer up data which
        the z_stream structure won't use yet.  We can safely store this
@@ -143,10 +147,10 @@ compress_buffer_input (void *closure, char *data, int need, int size, int *got)
     bd = cb->buf->data;
     if (bd == NULL)
     {
-	bd = ((struct buffer_data *) xmalloc (sizeof (struct buffer_data)));
+	bd = xmalloc (sizeof (struct buffer_data));
 	if (bd == NULL)
 	    return -2;
-	bd->text = (char *) xmalloc (BUFFER_DATA_SIZE);
+	bd->text = xmalloc (BUFFER_DATA_SIZE);
 	if (bd->text == NULL)
 	{
 	    free (bd);
@@ -162,7 +166,8 @@ compress_buffer_input (void *closure, char *data, int need, int size, int *got)
 
     while (1)
     {
-	int zstatus, sofar, status, nread;
+	int zstatus, sofar, status;
+	size_t nread;
 
 	/* First try to inflate any data we already have buffered up.
 	   This is useful even if we don't have any buffered data,
@@ -235,12 +240,14 @@ compress_buffer_input (void *closure, char *data, int need, int size, int *got)
     return 0;
 }
 
-/* Output data to a compression buffer.  */
 
+
+/* Output data to a compression buffer.  */
 static int
-compress_buffer_output (void *closure, const char *data, int have, int *wrote)
+compress_buffer_output (void *closure, const char *data, size_t have,
+			size_t *wrote)
 {
-    struct compress_buffer *cb = (struct compress_buffer *) closure;
+    struct compress_buffer *cb = closure;
 
     cb->zstr.avail_in = have;
     cb->zstr.next_in = (unsigned char *) data;
@@ -273,12 +280,13 @@ compress_buffer_output (void *closure, const char *data, int have, int *wrote)
     return buf_send_output (cb->buf);
 }
 
-/* Flush a compression buffer.  */
 
+
+/* Flush a compression buffer.  */
 static int
 compress_buffer_flush (void *closure)
 {
-    struct compress_buffer *cb = (struct compress_buffer *) closure;
+    struct compress_buffer *cb = closure;
 
     cb->zstr.avail_in = 0;
     cb->zstr.next_in = NULL;
@@ -322,12 +330,13 @@ compress_buffer_flush (void *closure)
     return buf_flush (cb->buf, 0);
 }
 
-/* The block routine for a compression buffer.  */
 
+
+/* The block routine for a compression buffer.  */
 static int
-compress_buffer_block (void *closure, int block)
+compress_buffer_block (void *closure, bool block)
 {
-    struct compress_buffer *cb = (struct compress_buffer *) closure;
+    struct compress_buffer *cb = closure;
 
     if (block)
 	return set_block (cb->buf);
@@ -335,18 +344,30 @@ compress_buffer_block (void *closure, int block)
 	return set_nonblock (cb->buf);
 }
 
-/* Shut down an input buffer.  */
 
+
+/* Return the file descriptor underlying any child buffers.  */
+static int
+compress_buffer_get_fd (void *closure)
+{
+    struct compress_buffer *cb = closure;
+    return buf_get_fd (cb->buf);
+}
+
+
+
+/* Shut down an input buffer.  */
 static int
 compress_buffer_shutdown_input (struct buffer *buf)
 {
-    struct compress_buffer *cb = (struct compress_buffer *) buf->closure;
+    struct compress_buffer *cb = buf->closure;
     int zstatus;
 
     /* Pick up any trailing data, such as the checksum.  */
     while (1)
     {
-	int status, nread;
+	int status;
+	size_t nread;
 	char buf[100];
 
 	status = compress_buffer_input (cb, buf, 0, sizeof buf, &nread);
@@ -366,12 +387,13 @@ compress_buffer_shutdown_input (struct buffer *buf)
     return buf_shutdown (cb->buf);
 }
 
-/* Shut down an output buffer.  */
 
+
+/* Shut down an output buffer.  */
 static int
 compress_buffer_shutdown_output (struct buffer *buf)
 {
-    struct compress_buffer *cb = (struct compress_buffer *) buf->closure;
+    struct compress_buffer *cb = buf->closure;
     int zstatus, status;
 
     do
@@ -433,7 +455,8 @@ compress_buffer_shutdown_output (struct buffer *buf)
    it is an error we can't recover from.  */
 
 int
-gunzip_and_write (int fd, char *fullname, unsigned char *buf, size_t size)
+gunzip_and_write (int fd, const char *fullname, unsigned char *buf,
+		  size_t size)
 {
     size_t pos;
     z_stream zstr;

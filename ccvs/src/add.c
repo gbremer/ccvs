@@ -26,7 +26,7 @@
 
 #include <assert.h>
 #include "cvs.h"
-#include "savecwd.h"
+#include "save-cwd.h"
 #include "fileattr.h"
 
 static int add_directory (struct file_info *finfo);
@@ -198,7 +198,7 @@ add (int argc, char **argv)
 		char *filedir;
 
 		if (save_cwd (&cwd))
-		    exit (EXIT_FAILURE);
+		    error (1, errno, "Failed to save current directory.");
 
 		filedir = xstrdup (argv[j]);
                 /* Deliberately discard the const below since we know we just
@@ -245,8 +245,10 @@ add (int argc, char **argv)
 		if (found_slash)
 		    send_a_repository ("", repository, update_dir);
 
-		if (restore_cwd (&cwd, NULL))
-		    exit (EXIT_FAILURE);
+		if (restore_cwd (&cwd))
+		    error (1, errno,
+		           "Failed to restore current directory, `%s'.",
+		           cwd.name);
 		free_cwd (&cwd);
 
 		if (tag)
@@ -287,7 +289,7 @@ add (int argc, char **argv)
 	memset (&finfo, 0, sizeof finfo);
 
 	if (save_cwd (&cwd))
-	    exit (EXIT_FAILURE);
+	    error (1, errno, "Failed to save current directory.");
 
 	finfo.fullname = xstrdup (argv[i]);
 	filename = xstrdup (argv[i]);
@@ -466,7 +468,25 @@ add (int argc, char **argv)
 			    char *prev = previous_rev (vers->srcfile,
 			                               vers->vn_rcs);
 			    int status;
-			    assert (prev != NULL);
+			    if (prev == NULL)
+			    {
+				/* There is no previous revision.  Either:
+				 *
+				 *  * Revision 1.1 was dead, as when a file was
+				 *    inititially added on a branch, 
+				 *
+				 * or
+				 *
+				 *  * All previous revisions have been deleted.
+				 *    For instance, via `admin -o'.
+				 */
+				if (!really_quiet)
+				    error (0, 0,
+"File `%s' has no previous revision to resurrect.",
+			                   finfo.fullname);
+				free (prev);
+				goto skip_this_file;
+			    }
 			    if (!quiet)
 				error (0, 0,
 "Resurrecting file `%s' from revision %s.",
@@ -591,7 +611,7 @@ add (int argc, char **argv)
 					   vers->vn_user, vers->tag,
 					   vers->options, RUN_TTY,
 					   NULL, NULL);
-		    xchmod (finfo.file, 1);
+		    xchmod (finfo.file, cvswrite);
 		    if (status != 0)
 		    {
 			error (0, 0, "Failed to resurrect revision %s.",
@@ -663,18 +683,21 @@ add (int argc, char **argv)
 		server_checked_in (finfo.file, finfo.update_dir, repository);
 #endif
 	}
+
+skip_this_file:
 	free (repository);
 	Entries_Close (entries);
 
-	if (restore_cwd (&cwd, NULL))
-	    exit (EXIT_FAILURE);
+	if (restore_cwd (&cwd))
+	    error (1, errno, "Failed to restore current directory, `%s'.",
+	           cwd.name);
 	free_cwd (&cwd);
 
 	/* It's okay to discard the const to free this - we allocated this
 	 * above.  The const is for everybody else.
 	 */
 	free ((char *) finfo.fullname);
-	free ((char *) filename);
+	free (filename);
     }
     if (added_files && !really_quiet)
 	error (0, 0, "use `%s commit' to add %s permanently",
@@ -736,7 +759,10 @@ add_directory (struct file_info *finfo)
 
     /* now, remember where we were, so we can get back */
     if (save_cwd (&cwd))
+    {
+	error (0, errno, "Failed to save current directory.");
 	return 1;
+    }
     if (CVS_CHDIR (dir) < 0)
     {
 	error (0, errno, "cannot chdir to %s", finfo->fullname);
@@ -847,8 +873,9 @@ add_directory (struct file_info *finfo)
     if (date)
 	free (date);
 
-    if (restore_cwd (&cwd, NULL))
-	exit (EXIT_FAILURE);
+    if (restore_cwd (&cwd))
+	error (1, errno, "Failed to restore current directory, `%s'.",
+	       cwd.name);
     free_cwd (&cwd);
 
     Subdir_Register (entries, (char *) NULL, dir);
@@ -862,8 +889,9 @@ add_directory (struct file_info *finfo)
     return 0;
 
 out:
-    if (restore_cwd (&cwd, NULL))
-	exit (EXIT_FAILURE);
+    if (restore_cwd (&cwd))
+	error (1, errno, "Failed to restore current directory, `%s'.",
+	       cwd.name);
     free_cwd (&cwd);
     if (rcsdir != NULL)
 	free (rcsdir);

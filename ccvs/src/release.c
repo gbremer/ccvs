@@ -6,8 +6,9 @@
  */
 
 #include "cvs.h"
-#include "savecwd.h"
+#include "save-cwd.h"
 #include "getline.h"
+#include "yesno.h"
 
 static const char *const release_usage[] =
 {
@@ -115,14 +116,15 @@ release (int argc, char **argv)
     /* Construct the update command.  Be sure to add authentication and
        encryption if we are using them currently, else our child process may
        not be able to communicate with the server.  */
-    update_cmd = xmalloc (strlen (program_path)
-                        + strlen (current_parsed_root->original)
-                        + 1 + 3 + 3 + 16 + 1);
-    sprintf (update_cmd, "%s %s%s-n -q -d %s update",
-             program_path,
-             cvsauthenticate ? "-a " : "",
-             cvsencrypt ? "-x " : "",
-             current_parsed_root->original);
+    update_cmd = Xasprintf ("%s %s%s-n -q -d %s update",
+			    program_path,
+#if defined (CLIENT_SUPPORT) || defined (SERVER_SUPPORT)
+			    cvsauthenticate ? "-a " : "",
+			    cvsencrypt ? "-x " : "",
+#else
+			    "", "",
+#endif
+			    original_parsed_root->original);
 
 #ifdef CLIENT_SUPPORT
     /* Start the server; we'll close it after looping. */
@@ -137,7 +139,7 @@ release (int argc, char **argv)
        all args are relative to this directory and we chdir around.
        */
     if (save_cwd (&cwd))
-        exit (EXIT_FAILURE);
+	error (1, errno, "Failed to save current directory.");
 
     arg_start_idx = 0;
 
@@ -157,8 +159,10 @@ release (int argc, char **argv)
 	    {
 		if (!really_quiet)
 		    error (0, 0, "no repository directory: %s", thisarg);
-		if (restore_cwd (&cwd, NULL))
-		    exit (EXIT_FAILURE);
+		if (restore_cwd (&cwd))
+		    error (1, errno,
+		           "Failed to restore current directory, `%s'.",
+		           cwd.name);
 		continue;
 	    }
 	}
@@ -204,8 +208,10 @@ release (int argc, char **argv)
 	    {
 		error (0, 0, "unable to release `%s'", thisarg);
 		free (repository);
-		if (restore_cwd (&cwd, NULL))
-		    exit (EXIT_FAILURE);
+		if (restore_cwd (&cwd))
+		    error (1, errno,
+		           "Failed to restore current directory, `%s'.",
+		           cwd.name);
 		continue;
 	    }
 
@@ -213,14 +219,18 @@ release (int argc, char **argv)
 		    c);
 	    printf ("Are you sure you want to release %sdirectory `%s': ",
 		    delete_flag ? "(and delete) " : "", thisarg);
+	    fflush (stderr);
+	    fflush (stdout);
 	    c = !yesno ();
 	    if (c)			/* "No" */
 	    {
 		(void) fprintf (stderr, "** `%s' aborted by user choice.\n",
 				cvs_cmd_name);
 		free (repository);
-		if (restore_cwd (&cwd, NULL))
-		    exit (EXIT_FAILURE);
+		if (restore_cwd (&cwd))
+		    error (1, errno,
+		           "Failed to restore current directory, `%s'.",
+		           cwd.name);
 		continue;
 	    }
 	}
@@ -233,16 +243,14 @@ release (int argc, char **argv)
            through release-23. */
 
         free (repository);
-	if (restore_cwd (&cwd, NULL))
-	    exit (EXIT_FAILURE);
+	if (restore_cwd (&cwd))
+	    error (1, errno, "Failed to restore current directory, `%s'.",
+		   cwd.name);
 
-	if (1
 #ifdef CLIENT_SUPPORT
-	    && !(current_parsed_root->isremote
-		 && (!supported_request ("noop")
-		     || !supported_request ("Notify")))
+	if (!current_parsed_root->isremote
+	    || (supported_request ("noop") && supported_request ("Notify")))
 #endif
-	    )
 	{
 	    int argc = 2;
 	    char *argv[3];
@@ -250,8 +258,9 @@ release (int argc, char **argv)
 	    argv[1] = thisarg;
 	    argv[2] = NULL;
 	    err += unedit (argc, argv);
-            if (restore_cwd (&cwd, NULL))
-                exit (EXIT_FAILURE);
+            if (restore_cwd (&cwd))
+		error (1, errno, "Failed to restore current directory, `%s'.",
+		       cwd.name);
 	}
 
 #ifdef CLIENT_SUPPORT
@@ -288,14 +297,16 @@ release (int argc, char **argv)
 	     */
             err += get_server_responses ();
 
-            if (restore_cwd (&cwd, NULL))
-                exit (EXIT_FAILURE);
+            if (restore_cwd (&cwd))
+		error (1, errno, "Failed to restore current directory, `%s'.",
+		       cwd.name);
         }
 #endif /* CLIENT_SUPPORT */
     }
 
-    if (restore_cwd (&cwd, NULL))
-	exit (EXIT_FAILURE);
+    if (restore_cwd (&cwd))
+	error (1, errno, "Failed to restore current directory, `%s'.",
+	       cwd.name);
     free_cwd (&cwd);
 
 #ifdef CLIENT_SUPPORT

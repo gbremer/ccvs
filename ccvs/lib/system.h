@@ -53,11 +53,9 @@
  */
 #include <stdbool.h>
 
-/* Ditto for this POSIX.2 header.  */
+/* Ditto for these POSIX.2 headers.  */
 #include <fnmatch.h>
-
-/* For struct timespec.  */
-#include "timespec.h"
+#include <getopt.h>	/* Has GNU extensions,  */
 
 
 
@@ -82,11 +80,18 @@
 /* Assume these headers. */
 #include <pwd.h>
 
+/* More GNULIB includes */
 /* This include enables the use of the *_unlocked IO functions from glibc. */
 #include "unlocked-io.h"
 
-/* GNULIB includes */
+/* For struct timespec.  */
+#include "timespec.h"
+
+/* This is a replacement stub for gettext provided by GNULIB when gettext is
+ * not available.
+ */
 #include <gettext.h>
+/* End GNULIB includes */
 
 #ifdef STAT_MACROS_BROKEN
 #undef S_ISBLK
@@ -227,11 +232,8 @@
 #endif /* !def S_IRUSR */
 #endif /* NEED_DECOY_PERMISSIONS */
 
-#if defined(POSIX) || defined(HAVE_UNISTD_H)
-# include <unistd.h>
-#else
-off_t lseek ();
-char *getcwd ();
+#ifndef DEVNULL
+# define	DEVNULL		"/dev/null"
 #endif
 
 #ifdef HAVE_IO_H
@@ -548,7 +550,7 @@ extern void fnfold (char *FILENAME);
  * a path as absolute.
  */
 #ifndef ISABSOLUTE
-# define ISABSOLUTE(s) ISSLASH(s[FILESYSTEM_PREFIX_LEN(s)])
+# define ISABSOLUTE(s) ISSLASH(s[FILE_SYSTEM_PREFIX_LEN(s)])
 #endif
 
 

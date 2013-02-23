@@ -14,6 +14,7 @@
  */
 
 #include "cvs.h"
+#include "strftime.h"
 
 #ifdef HAVE_WINSOCK_H
 # include <winsock.h>
@@ -44,13 +45,16 @@ int noexec = 0;
 int readonlyfs = 0;
 int logoff = 0;
 
-/* Set if we should be writing CVSADM directories at top level.  At
-   least for now we'll make the default be off (the CVS 1.9, not CVS
-   1.9.2, behavior). */
-int top_level_admin = 0;
-#ifdef SUPPORT_OLD_INFO_FMT_STRINGS
-int UseNewInfoFmtStrings = 0;
-#endif /* SUPPORT_OLD_INFO_FMT_STRINGS */
+
+
+/***
+ ***
+ ***   CVSROOT/config options
+ ***
+ ***/
+struct config *config;
+
+
 
 mode_t cvsumask = UMASK_DFLT;
 
@@ -67,18 +71,9 @@ char *Editor = EDITOR_DFLT;
    values in CVS/Root files, we maintain a list of them.  */
 List *root_directories = NULL;
 
-/* We step through the above values.  This variable is set to reflect
- * the currently active value.
- *
- * Now static.  FIXME - this variable should be removable (well, localizable)
- * with a little more work.
- */
-static char *current_root = NULL;
-
-
 static const struct cmd
 {
-    char *fullname;		/* Full name of the function (e.g. "commit") */
+    const char *fullname;	/* Full name of the function (e.g. "commit") */
 
     /* Synonyms for the command, nick1 and nick2.  We supply them
        mostly for two reasons: (1) CVS has always supported them, and
@@ -100,10 +95,10 @@ static const struct cmd
        accept only an explicit list of abbreviations and plan on
        supporting them in the future as well as now.  */
 
-    char *nick1;
-    char *nick2;
+    const char *nick1;
+    const char *nick2;
     
-    int (*func) ();		/* Function takes (argc, argv) arguments. */
+    int (*func) (int, char **);	/* Function takes (argc, argv) arguments. */
     unsigned long attr;		/* Attributes. */
 } cmds[] =
 
@@ -134,7 +129,7 @@ static const struct cmd
 #endif
     { "rannotate","rann",     "ra",        annotate,  0 },
     { "rdiff",    "patch",    "pa",        patch,     0 },
-    { "release",  "re",       "rel",       release,   0 },
+    { "release",  "re",       "rel",       release,   CVS_CMD_MODIFIES_REPOSITORY },
     { "remove",   "rm",       "delete",    cvsremove, CVS_CMD_MODIFIES_REPOSITORY | CVS_CMD_USES_WORK_DIR },
     { "rlog",     "rl",       NULL,        cvslog,    0 },
     { "rls",      "rdir",     "rlist",     ls,        0 },
@@ -280,9 +275,10 @@ static const char *const opt_usage[] =
 static int
 set_root_directory (Node *p, void *ignored)
 {
-    if (current_root == NULL && p->data == NULL)
+    if (current_parsed_root == NULL && p->data != NULL)
     {
-	current_root = p->key;
+	current_parsed_root = p->data;
+	original_parsed_root = current_parsed_root;
 	return 1;
     }
     return 0;
@@ -328,8 +324,9 @@ cmd_synonyms (void)
 }
 
 
+
 unsigned long int
-lookup_command_attribute (char *cmd_name)
+lookup_command_attribute (const char *cmd_name)
 {
     const struct cmd *cm;
 
@@ -362,6 +359,9 @@ lookup_command_attribute (char *cmd_name)
  *   Nothing.  This function will always exit.  It should exit with an exit
  *   status of 1, but might not, as noted in the ERRORS section above.
  */
+#ifndef DONT_USE_SIGNALS
+static RETSIGTYPE main_cleanup (int) __attribute__ ((__noreturn__));
+#endif /* DONT_USE_SIGNALS */
 static RETSIGTYPE
 main_cleanup (int sig)
 {
@@ -409,7 +409,12 @@ main_cleanup (int sig)
 	break;
     }
 
+    /* This always exits, which will cause our exit handlers to be called.  */
     error (1, 0, "received %s signal", name);
+    /* but make the exit explicit to silence warnings when gcc processes the
+     * noreturn attribute.
+     */
+    exit (EXIT_FAILURE);
 #endif /* !DONT_USE_SIGNALS */
 }
 
@@ -418,12 +423,12 @@ main_cleanup (int sig)
 int
 main (int argc, char **argv)
 {
-    char *CVSroot = CVSROOT_DFLT;
+    cvsroot_t *CVSroot_parsed = NULL;
+    bool cvsroot_update_env = true;
     char *cp, *end;
     const struct cmd *cm;
     int c, err = 0;
-    int tmpdir_update_env, cvs_update_env;
-    int free_CVSroot = 0;
+    int tmpdir_update_env;
     int free_Editor = 0;
     int free_Tmpdir = 0;
 
@@ -438,7 +443,9 @@ main (int argc, char **argv)
 	{"help-commands", 0, NULL, 1},
 	{"help-synonyms", 0, NULL, 2},
 	{"help-options", 0, NULL, 4},
+#ifdef SERVER_SUPPORT
 	{"allow-root", required_argument, NULL, 3},
+#endif /* SERVER_SUPPORT */
         {0, 0, 0, 0}
     };
     /* `getopt_long' stores the option index here, but right now we
@@ -479,7 +486,6 @@ main (int argc, char **argv)
      * Query the environment variables up-front, so that
      * they can be overridden by command line arguments
      */
-    cvs_update_env = 0;
     tmpdir_update_env = *Tmpdir;	/* TMPDIR_DFLT must be set */
     if ((cp = getenv (TMPDIR_ENV)) != NULL)
     {
@@ -492,11 +498,6 @@ main (int argc, char **argv)
 	Editor = cp;
     else if ((cp = getenv (EDITOR3_ENV)) != NULL)
 	Editor = cp;
-    if ((cp = getenv (CVSROOT_ENV)) != NULL)
-    {
-	CVSroot = cp;
-	cvs_update_env = 0;		/* it's already there */
-    }
     if (getenv (CVSREAD_ENV) != NULL)
 	cvswrite = 0;
     if (getenv (CVSREADONLYFS_ENV) != NULL) {
@@ -549,10 +550,12 @@ main (int argc, char **argv)
 		/* --help-options */
 		usage (opt_usage);
 		break;
+#ifdef SERVER_SUPPORT
 	    case 3:
 		/* --allow-root */
 		root_allow_add (optarg);
 		break;
+#endif /* SERVER_SUPPORT */
 	    case 'Q':
 		really_quiet = 1;
 		/* FALL THROUGH */
@@ -613,13 +616,6 @@ main (int argc, char **argv)
 		if (CVSroot_cmdline != NULL)
 		    free (CVSroot_cmdline);
 		CVSroot_cmdline = xstrdup (optarg);
-		if (free_CVSroot)
-		{
-		    free (CVSroot);
-		    free_CVSroot = 0;
-		}
-		CVSroot = CVSroot_cmdline;
-		cvs_update_env = 1;	/* need to update environment */
 		break;
 	    case 'H':
 	        help = 1;
@@ -784,7 +780,7 @@ cause intermittent sandbox corruption.");
 	else
 #endif
 	{
-	    CurDir = xgetwd ();
+	    CurDir = xgetcwd ();
             if (CurDir == NULL)
 		error (1, errno, "cannot get working directory");
 	}
@@ -829,65 +825,65 @@ cause intermittent sandbox corruption.");
 
 #ifdef SERVER_SUPPORT
 	/* Fiddling with CVSROOT doesn't make sense if we're running
-	       in server mode, since the client will send the repository
-	       directory after the connection is made. */
-
+	 * in server mode, since the client will send the repository
+	 * directory after the connection is made.
+	 */
 	if (!server_active)
 #endif
 	{
-	    char *CVSADM_Root;
-	    
-	    /* See if we are able to find a 'better' value for CVSroot
-	       in the CVSADM_ROOT directory. */
-
-	    CVSADM_Root = NULL;
-
-	    /* "cvs import" shouldn't check CVS/Root; in general it
-	       ignores CVS directories and CVS/Root is likely to
-	       specify a different repository than the one we are
-	       importing to.  */
-
-	    if (!(cm->attr & CVS_CMD_IGNORE_ADMROOT)
-
-		/* -d overrides CVS/Root, so don't give an error if the
-		   latter points to a nonexistent repository.  */
-		&& CVSroot_cmdline == NULL)
+	    /* First check if a root was set via the command line.  */
+	    if (CVSroot_cmdline)
 	    {
-		CVSADM_Root = Name_Root((char *) NULL, (char *) NULL);
+		 if (!(CVSroot_parsed = parse_cvsroot (CVSroot_cmdline)))
+		     error (1, 0, "Bad CVSROOT: `%s'.", CVSroot_cmdline);
 	    }
 
-	    if (CVSADM_Root != NULL)
+	    /* See if we are able to find a 'better' value for CVSroot
+	     * in the CVSADM_ROOT directory.
+	     *
+	     * "cvs import" shouldn't check CVS/Root; in general it
+	     * ignores CVS directories and CVS/Root is likely to
+	     * specify a different repository than the one we are
+	     * importing to, but if this is not import and no root was
+	     * specified on the command line, set the root from the
+	     * CVS/Root file.
+	     */
+	    if (!CVSroot_parsed
+		&& !(cm->attr & CVS_CMD_IGNORE_ADMROOT)
+	       )
+		CVSroot_parsed = Name_Root (NULL, NULL);
+
+	    /* Now, if there is no root on the command line and we didn't find
+	     * one in a file, set it via the $CVSROOT env var.
+	     */
+	    if (!CVSroot_parsed)
 	    {
-		if (CVSroot == NULL || !cvs_update_env)
+		char *tmp = getenv (CVSROOT_ENV);
+		if (tmp)
 		{
-		    CVSroot = CVSADM_Root;
-		    cvs_update_env = 1;	/* need to update environment */
+		    if (!(CVSroot_parsed = parse_cvsroot (tmp)))
+			error (1, 0, "Bad CVSROOT: `%s'.", tmp);
+		    cvsroot_update_env = false;
 		}
 	    }
+
+#ifdef CVSROOT_DFLT
+	    if (!CVSroot_parsed)
+	    {
+		if (!(CVSroot_parsed = parse_cvsroot (CVSROOT_DFLT)))
+		    error (1, 0, "Bad CVSROOT: `%s'.", CVSROOT_DFLT);
+	    }
+#endif /* CVSROOT_DFLT */
 
 	    /* Now we've reconciled CVSROOT from the command line, the
 	       CVS/Root file, and the environment variable.  Do the
 	       last sanity checks on the variable. */
-
-	    if (! CVSroot)
+	    if (!CVSroot_parsed)
 	    {
 		error (0, 0,
 		       "No CVSROOT specified!  Please use the `-d' option");
 		error (1, 0,
 		       "or set the %s environment variable.", CVSROOT_ENV);
-	    }
-	    
-	    if (! *CVSroot)
-	    {
-		error (0, 0,
-		       "CVSROOT is set but empty!  Make sure that the");
-		error (0, 0,
-		       "specification of CVSROOT is valid, either via the");
-		error (0, 0,
-		       "`-d' option, the %s environment variable, or the",
-		       CVSROOT_ENV);
-		error (1, 0,
-		       "CVS/Root file (if any).");
 	    }
 	}
 
@@ -900,19 +896,19 @@ cause intermittent sandbox corruption.");
 	root_directories = getlist ();
 
 	/* Prime it. */
-	if (CVSroot != NULL)
+	if (CVSroot_parsed)
 	{
 	    Node *n;
 	    n = getnode ();
 	    n->type = NT_UNKNOWN;
-	    n->key = xstrdup (CVSroot);
-	    n->data = NULL;
+	    n->key = xstrdup (CVSroot_parsed->original);
+	    n->data = CVSroot_parsed;
 
 	    if (addnode (root_directories, n))
 		error (1, 0, "cannot add initial CVSROOT %s", n->key);
 	}
 
-	assert (current_root == NULL);
+	assert (current_parsed_root == NULL);
 
 	/* If we're running the server, we want to execute this main
 	   loop once and only once (we won't be serving multiple roots
@@ -939,14 +935,10 @@ cause intermittent sandbox corruption.");
 		   variable.  Parse it to see if we're supposed to do
 		   remote accesses or use a special access method. */
 
-		if (current_parsed_root != NULL)
-		    free_cvsroot_t (current_parsed_root);
-		if ((current_parsed_root = parse_cvsroot (current_root)) == NULL)
-		    error (1, 0, "Bad CVSROOT: `%s'.", current_root);
-
-		TRACE ( TRACE_FUNCTION,
-			"main loop with CVSROOT=%s",
-			current_root ? current_root : "(null)");
+		TRACE (TRACE_FUNCTION,
+		       "main loop with CVSROOT=%s",
+		       current_parsed_root ? current_parsed_root->directory
+					   : "(null)");
 
 		/*
 		 * Check to see if the repository exists.
@@ -958,32 +950,28 @@ cause intermittent sandbox corruption.");
 		    char *path;
 		    int save_errno;
 
-		    path = xmalloc (strlen (current_parsed_root->directory)
-				    + sizeof (CVSROOTADM)
-				    + 2);
-		    (void) sprintf (path, "%s/%s", current_parsed_root->directory, CVSROOTADM);
+		    path = Xasprintf ("%s/%s", current_parsed_root->directory,
+				      CVSROOTADM);
 		    if (!isaccessible (path, R_OK | X_OK))
 		    {
 			save_errno = errno;
-			/* If this is "cvs init", the root need not exist yet.  */
-			if (strcmp (cvs_cmd_name, "init") != 0)
-			{
+			/* If this is "cvs init", the root need not exist yet.
+			 */
+			if (strcmp (cvs_cmd_name, "init"))
 			    error (1, save_errno, "%s", path);
-			}
 		    }
 		    free (path);
 		}
 
 #ifdef HAVE_PUTENV
-		/* Update the CVSROOT environment variable if necessary. */
-		/* FIXME (njc): should we always set this with the CVSROOT from the command line? */
-		if (cvs_update_env)
+		/* Update the CVSROOT environment variable.  */
+		if (cvsroot_update_env)
 		{
 		    static char *prev;
 		    char *env;
-		    env = xmalloc (strlen (CVSROOT_ENV) + strlen (CVSroot)
-				   + 1 + 1);
-		    (void) sprintf (env, "%s=%s", CVSROOT_ENV, CVSroot);
+
+		    env = Xasprintf ("%s=%s", CVSROOT_ENV,
+				     current_parsed_root->original);
 		    (void) putenv (env);
 		    /* do not free env yet, as putenv has control of it */
 		    /* but do free the previous value, if any */
@@ -997,7 +985,7 @@ cause intermittent sandbox corruption.");
 	    /* Parse the CVSROOT/config file, but only for local.  For the
 	       server, we parse it after we know $CVSROOT.  For the
 	       client, it doesn't get parsed at all, obviously.  The
-	       presence of the parse_config call here is not mean to
+	       presence of the parse_config call here is not meant to
 	       predetermine whether CVSROOT/config overrides things from
 	       read_cvsrc and other such places or vice versa.  That sort
 	       of thing probably needs more thought.  */
@@ -1014,7 +1002,8 @@ cause intermittent sandbox corruption.");
 		   already printed an error.  We keep going.  Why?  Because
 		   if we didn't, then there would be no way to check in a new
 		   CVSROOT/config file to fix the broken one!  */
-		parse_config (current_parsed_root->directory);
+		if (config) free_config (config);
+		config = parse_config (current_parsed_root->directory);
 	    }
 
 #ifdef CLIENT_SUPPORT
@@ -1040,10 +1029,11 @@ cause intermittent sandbox corruption.");
 		 */
 		server_active ||
 #endif
+	        (
 #ifdef CLIENT_SUPPORT
-		!current_parsed_root->isremote &&
+		 !current_parsed_root->isremote &&
 #endif
-		!lock_cleanup_setup)
+		 !lock_cleanup_setup))
 	    {
 		/* Set up to clean up any locks we might create on exit.  */
 		cleanup_register (Lock_Cleanup);
@@ -1054,21 +1044,21 @@ cause intermittent sandbox corruption.");
 	    err = (*(cm->func)) (argc, argv);
 	
 	    /* Mark this root directory as done.  When the server is
-               active, current_root will be NULL -- don't try and
+               active, our list will be empty -- don't try and
                remove it from the list. */
 
-	    if (current_root != NULL)
+#ifdef SERVER_SUPPORT
+	    if (!server_active)
+#endif /* SERVER_SUPPORT */
 	    {
-		Node *n = findnode (root_directories, current_root);
+		Node *n = findnode (root_directories,
+				    original_parsed_root->original);
 		assert (n != NULL);
-		n->data = (void *) 1;
-		current_root = NULL;
+		assert (n->data != NULL);
+		free_cvsroot_t (n->data);
+		n->data = NULL;
+		current_parsed_root = NULL;
 	    }
-	
-#if 0
-	    /* This will not work yet, since it tries to free (void *) 1. */
-	    dellist (&root_directories);
-#endif
 
 #ifdef SERVER_SUPPORT
 	    if (server_active)
@@ -1076,10 +1066,9 @@ cause intermittent sandbox corruption.");
 #endif
 	} /* end of loop for cvsroot values */
 
+	dellist (&root_directories);
     } /* end of stuff that gets done if the user DOESN'T ask for help */
 
-    if (free_CVSroot)
-	free (CVSroot);
     root_allow_free ();
 
     /* This is exit rather than return because apparently that keeps
@@ -1094,10 +1083,13 @@ cause intermittent sandbox corruption.");
 char *
 Make_Date (char *rawdate)
 {
-    time_t unixtime = get_date (rawdate, NULL);
-    if (unixtime == (time_t)-1)
+    struct timespec t;
+
+    if (!get_date (&t, rawdate, NULL))
 	error (1, 0, "Can't parse date/time: `%s'", rawdate);
-    return date_from_time_t (unixtime);
+
+    /* Truncate nanoseconds.  */
+    return date_from_time_t (t.tv_sec);
 }
 
 
@@ -1219,9 +1211,9 @@ format_time_t (time_t unixtime)
 {
     static char buf[sizeof ("yyyy-mm-dd HH:MM:SS -HHMM")];
     /* Convert to a time in the local time zone.  */
-    struct tm ltm = *(gmtime (&unixtime));
+    struct tm ltm = *(localtime (&unixtime));
 
-    if (my_strftime (buf, sizeof (buf), "%Y-%m-%d %H:%M:%S %z", &ltm) == 0)
+    if (!my_strftime (buf, sizeof (buf), "%Y-%m-%d %H:%M:%S %z", &ltm, 0, 0))
 	return NULL;
 
     return xstrdup (buf);
@@ -1238,7 +1230,7 @@ gmformat_time_t (time_t unixtime)
     /* Convert to a time in the local time zone.  */
     struct tm ltm = *(gmtime (&unixtime));
 
-    if (my_strftime (buf, sizeof (buf), "%Y-%m-%d %H:%M:%S %z", &ltm) == 0)
+    if (!my_strftime (buf, sizeof (buf), "%Y-%m-%d %H:%M:%S %z", &ltm, 0, 0))
 	return NULL;
 
     return xstrdup (buf);
@@ -1266,21 +1258,22 @@ gmformat_time_t (time_t unixtime)
 char *
 format_date_alloc (char *datestr)
 {
-    time_t unixtime;
+    struct timespec t;
     char *buf;
 
     TRACE (TRACE_FUNCTION, "format_date (%s)", datestr);
 
     /* Convert the date string to seconds since the epoch. */
-    unixtime = get_date (datestr, NULL);
-    if (unixtime == (time_t)-1)
+    if (!get_date (&t, datestr, NULL))
     {
 	error (0, 0, "Can't parse date/time: `%s'.", datestr);
 	goto as_is;
     }
 
-    /* Get the time into a string.  */
-    if ((buf = format_time_t (unixtime)) == NULL)
+    /* Get the time into a string, truncating any nanoseconds returned by
+     * getdate.
+     */
+    if ((buf = format_time_t (t.tv_sec)) == NULL)
     {
 	error (0, 0, "Unable to reformat date `%s'.", datestr);
 	goto as_is;

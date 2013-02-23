@@ -60,6 +60,9 @@ struct rcsnode
        (the various names might differ in case).  */
     char *path;
 
+    /* Use when printing paths.  */
+    char *print_path;
+
     /* Value for head keyword from RCS header, or NULL if empty.  */
     char *head;
 
@@ -207,7 +210,7 @@ int RCS_datecmp (const char *date1, const char *date2);
 time_t RCS_getrevtime (RCSNode * rcs, const char *rev, char *date, int fudge);
 List *RCS_symbols (RCSNode *rcs);
 void RCS_check_tag (const char *tag);
-int RCS_valid_rev (char *rev);
+int RCS_valid_rev (const char *rev);
 List *RCS_getlocks (RCSNode *rcs);
 void freercsnode (RCSNode ** rnodep);
 char *RCS_getbranch (RCSNode *rcs, const char *tag, int force_tag_match);
@@ -218,8 +221,9 @@ char *RCS_getexpand (RCSNode *);
 void RCS_setexpand (RCSNode *, const char *);
 int RCS_checkout (RCSNode *, const char *, const char *, const char *,
                   const char *, const char *, RCSCHECKOUTPROC, void *);
-int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message,
-		 const char *rev, int flags);
+int RCS_checkin (RCSNode *rcs, const char *update_dir, const char *workfile,
+		 const char *message, const char *rev, time_t citime,
+		 int flags);
 int RCS_cmp_file (RCSNode *, const char *, char **, const char *, const char *,
 		  const char * );
 int RCS_settag (RCSNode *, const char *, const char *);
@@ -238,14 +242,15 @@ int rcs_change_text (const char *, char *, size_t, const char *,
 void RCS_deltas (RCSNode *, FILE *, struct rcsbuffer *, const char *,
 		 enum rcs_delta_op, char **, size_t *,
 		 char **, size_t *);
-void RCS_setincexc (const char *arg);
-void RCS_setlocalid (const char *arg);
+void RCS_setincexc (void **, const char *arg);
+void RCS_setlocalid (void **, const char *arg);
 char *make_file_label (const char *, const char *, RCSNode *);
 
-extern int preserve_perms;
+extern bool preserve_perms;
 
 /* From import.c.  */
 extern int add_rcs_file (const char *, const char *, const char *,
                          const char *, const char *, const char *,
                          const char *, int, char **, const char *, size_t,
-                         FILE *);
+                         FILE *, bool);
+void free_keywords (void *keywords);

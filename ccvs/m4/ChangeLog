@@ -1,3 +1,164 @@
+2004-11-11  Mark D. Baushke  <mdb@cvshome.org>
+
+	* getopt.m4: Update from GNULIB.
+
+2004-11-09  Mark D. Baushke  <mdb@cvshome.org>
+
+	* strftime.m4: Update from GNULIB.
+
+2004-11-03  Mark D. Baushke  <mdb@cvshome.org>
+
+	* uint32_t.m4: Update from GNULIB.
+
+2004-11-03  Derek Price  <derek@ximbiot.com>
+
+	* bison.m4 (gl_BISON): Update comment to specify the correct Automake
+	version number.
+
+2004-11-03  Mark D. Baushke  <mdb@cvshome.org>
+
+	* readlink.m4, xreadlink.m4: New from GNULIB.
+	* uint32_t.m4: Update from GNULIB.
+	* gnulib.m4: Regenerated.
+
+2004-11-02  Mark D. Baushke  <mdb@cvshome.org>
+
+	* getpass.m4, setenv.m4: Update from GNULIB.
+
+2004-11-01  Derek Price  <derek@ximbiot.com>
+
+	* allocsa.m4, eealloc.m4, setenv.m4: New files from GNULIB.
+
+2004-10-26  Derek Price  <derek@ximbiot.com>
+
+	* bison.m4 (gl_BISON): Update comment to eliminate new spaces from
+	generated configure script.
+
+2004-10-26  Derek Price  <derek@ximbiot.com>
+
+	* bison.m4 (gl_BISON): Update comment to specify an Automake version
+	number, rather than Autoconf.
+
+2004-10-26  Derek Price  <derek@ximbiot.com>
+
+	* bison.m4 (gl_BISON): Comment reasons for forking form GNULIB.
+
+2004-10-25  Derek Price  <derek@ximbiot.com>
+
+	* rpmatch.m4, yesno.m4: New files from GNULIB.
+
+2004-10-22  Derek Price  <derek@ximbiot.com>
+
+	* md5.m4, uint32_t.m4: New files from GNULIB.
+
+2004-10-21  Derek Price  <derek@ximbiot.com>
+
+	* rpmatch.m4, yesno.m4: Back out addition.
+
+2004-10-21  Derek Price  <derek@ximbiot.com>
+
+	* rpmatch.m4, yesno.m4: New files from GNULIB.
+
+2004-10-21  Derek Price  <derek@ximbiot.com>
+
+	* getpagesize.m4: New file from GNULIB.
+
+2004-10-21  Derek Price  <derek@ximbiot.com>
+
+	* realloc.m4: Remove this file.
+
+2004-10-21  Derek Price  <derek@ximbiot.com>
+
+	* malloc.m4: Remove this file.
+
+2004-10-20  Mark D. Baushke  <mdb@cvshome.org>
+
+	* sunos57-select.m4: New file. Work around Solaris 7 select()
+	hang.
+
+2004-10-18  Derek Price  <derek@ximbiot.com>
+
+	* getopt.m4: Update file from GNULIB.
+
+2004-10-15  Derek Price  <derek@ximbiot.com>
+
+	* vasprintf.m4: New file from GNULIB.
+
+2004-10-09  Derek Price  <derek@ximbiot.com>
+
+	* lstat.m4: Update from GNULIB.
+
+2004-10-09  Derek Price  <derek@ximbiot.com>
+
+	* stat.m4: Update from GNULIB.
+
+2004-10-07  Derek Price  <derek@ximbiot.com>
+
+	* .cvsignore, Makefile.am, Makefile.in: Remove.
+
+2004-10-06  Derek Price  <derek@ximbiot.com>
+
+	* getpass.m4: Update from GNULIB.
+
+2004-10-06  Derek Price  <derek@ximbiot.com>
+
+	* strcase.m4: New file from GNULIB.
+
+2004-10-06  Derek Price  <derek@ximbiot.com>
+
+	* ssize_t.m4: Update from GNULIB.
+
+2004-10-06  Derek Price  <derek@ximbiot.com>
+
+	* stdbool.m4: Update from GNULIB.
+
+2004-10-06  Derek Price  <derek@ximbiot.com>
+
+	* getopt.m4: Update from GNULIB.
+
+2004-10-06  Derek Price  <derek@ximbiot.com>
+
+	* mkstemp.m4: Update from GNULIB.
+
+2004-10-05  Derek Price  <derek@ximbiot.com>
+
+	* fnmatch.m4: Update from GNULIB.
+
+2004-10-05  Derek Price  <derek@ximbiot.com>
+
+	* dirname.m4, dos.m4: Updated from GNULIB.
+
+2004-10-05  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (EXTRA_DIST): Add gnulib.m4.
+	* gnulib.m4: New file.
+	* xalloc.m4: Update from GNULIB.
+
+2004-10-05  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (EXTRA_DIST): Add new and previously missing files.
+	* eoverflow.m4, intmax.m4, printf-posix.m4: New files from GNULIB.
+	* gettext.m4, glibc21.m4, intmax_t.m4, inttypes_h.m4, lib-ld.m4,
+	lib-link.m4, lib-prefix.m4, longlong.m4, po.m4, stdint_h.m4,
+	uintmax_t.m4, ulonglong.m4, vasnprintf.m4: Import most recent versions
+	from GNULIB.
+
+2004-10-05  Derek Price  <derek@ximbiot.com>
+
+	* save-cwd.m4: New file from GNULIB.
+
+2004-10-05  Derek Price  <derek@ximbiot.com>
+
+	* alloca.m4: Import latest version from GNULIB.
+
+2004-10-05  Derek Price  <derek@ximbiot.com>
+
+	* unlocked-io.m4: Import most recent version from GNULIB.
+
+2004-10-05  Derek Price  <derek@ximbiot.com>
+
+	* regex.m4: Import most recent version from GNULIB.
+
 2004-05-20  Derek Price  <derek@ximbiot.com>
 
 	* Makefile.am (EXTRA_DIST): Add strftime.m4.

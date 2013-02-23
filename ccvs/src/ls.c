@@ -17,8 +17,6 @@ static int ls_proc (int argc, char **argv, char *xwhere, char *mwhere,
                     char *mfile, int shorten, int local, char *mname,
                     char *msg);
 
-static RCSNode *xrcsnode;
-
 static const char *const ls_usage[] =
 {
     "Usage: %s %s [-e | -l] [-RP] [-r rev] [-D date] [path...]\n",
@@ -321,6 +319,15 @@ long_format_data_delproc (Node *n)
 
 
 
+/* A delproc for a List Node containing a List *.  */
+static void
+ls_delproc (Node *p)
+{
+    dellist ((List **)&p->data);
+}
+
+
+
 /*
  * Add a file to our list of data to print for a directory.
  */
@@ -330,10 +337,9 @@ ls_fileproc (void *callerdat, struct file_info *finfo)
 {
     Vers_TS *vers;
     char *regex_err;
-    void *buf;
-    size_t length;
     Node *p, *n;
     bool isdead;
+    const char *filename;
 
     if (regexp_match)
     {
@@ -357,19 +363,43 @@ ls_fileproc (void *callerdat, struct file_info *finfo)
      */
     if (vers->vn_rcs && (!show_dead_revs || long_format))
 	isdead = RCS_isdead (finfo->rcs, vers->vn_rcs);
-    if (!vers->vn_rcs || !show_dead_revs && isdead)
+    else
+	isdead = false;
+    if (!vers->vn_rcs || (!show_dead_revs && isdead))
     {
         freevers_ts (&vers);
 	return 0;
     }
+
+    p = findnode (callerdat, finfo->update_dir);
+    if (!p)
+    {
+	/* This only occurs when a complete path to a file is specified on the
+	 * command line.  Put the file in the root list.
+	 */
+	filename = finfo->fullname;
+
+	/* Add update_dir node.  */
+	p = findnode (callerdat, ".");
+	if (!p)
+	{
+	    p = getnode ();
+	    p->key = xstrdup (".");
+	    p->data = getlist ();
+	    p->delproc = ls_delproc;
+	    addnode (callerdat, p);
+	}
+    }
+    else
+	filename = finfo->file;
 
     n = getnode();
     if (entries_format)
     {
 	char *outdate = entries_time (RCS_getrevtime (finfo->rcs, vers->vn_rcs,
                                                       0, 0));
-	n->data = asnprintf (NULL, &length, "/%s/%s/%s/%s/%s%s\n",
-                             finfo->file, vers->vn_rcs,
+	n->data = Xasprintf ("/%s/%s/%s/%s/%s%s\n",
+                             filename, vers->vn_rcs,
                              outdate, vers->options,
                              show_tag ? "T" : "", show_tag ? show_tag : "");
 	free (outdate);
@@ -378,39 +408,27 @@ ls_fileproc (void *callerdat, struct file_info *finfo)
     {
 	struct long_format_data *out =
 		xmalloc (sizeof (struct long_format_data));
-	out->header = asnprintf (NULL, &length, "%-5.5s",
+	out->header = Xasprintf ("%-5.5s",
                                  vers->options[0] != '\0' ? vers->options
                                                           : "----");
 	/* FIXME: Do we want to mimc the real `ls' command's date format?  */
 	out->time = gmformat_time_t (RCS_getrevtime (finfo->rcs, vers->vn_rcs,
                                                      0, 0));
-	out->footer = asnprintf (NULL, &length, " %-9.9s%s %s%s",
-                                 vers->vn_rcs,
+	out->footer = Xasprintf (" %-9.9s%s %s%s", vers->vn_rcs,
                                  strlen (vers->vn_rcs) > 9 ? "+" : " ",
                                  show_dead_revs ? (isdead ? "dead " : "     ")
-                                               : "",
-                                finfo->file);
+                                                : "",
+                                 filename);
 	n->data = out;
 	n->delproc = long_format_data_delproc;
     }
     else
-	n->data = asnprintf (NULL, &length, "%s\n", finfo->file);
+	n->data = Xasprintf ("%s\n", filename);
 
-    p = findnode (callerdat, finfo->update_dir);
-    assert (p);
     addnode (p->data, n);
 
     freevers_ts (&vers);
     return 0;
-}
-
-
-
-/* A delproc for a List Node containing a List *.  */
-static void
-ls_delproc (Node *p)
-{
-    dellist ((List **)&p->data);
 }
 
 
@@ -448,24 +466,23 @@ ls_direntproc (void *callerdat, const char *dir, const char *repos,
     if (p)
     {
 	/* Push this dir onto our parent directory's listing.  */
-	size_t length;
 	Node *n = getnode();
 
 	if (entries_format)
-	    n->data = asnprintf (NULL, &length, "D/%s////\n", dir);
+	    n->data = Xasprintf ("D/%s////\n", dir);
 	else if (long_format)
 	{
 	    struct long_format_data *out =
 		    xmalloc (sizeof (struct long_format_data));
 	    out->header = xstrdup ("d--- ");
 	    out->time = gmformat_time_t (unix_time_stamp (repos));
-	    out->footer = asnprintf (NULL, &length, "%12s%s%s", "",
+	    out->footer = Xasprintf ("%12s%s%s", "",
                                      show_dead_revs ? "     " : "", dir);
 	    n->data = out;
 	    n->delproc = long_format_data_delproc;
 	}
 	else
-	    n->data = asnprintf (NULL, &length, "%s\n", dir);
+	    n->data = Xasprintf ("%s\n", dir);
 
 	addnode (p->data, n);
     }
@@ -593,7 +610,7 @@ ls_proc (int argc, char **argv, char *xwhere, char *mwhere, char *mfile,
 	    }
 
 	    /* take care of the rest */
-	    path = asnprintf (NULL, NULL, "%s/%s", repository, mfile);
+	    path = Xasprintf ("%s/%s", repository, mfile);
 	    if (isdir (path))
 	    {
 		/* directory means repository gets the dir tacked on */
@@ -633,7 +650,8 @@ ls_proc (int argc, char **argv, char *xwhere, char *mwhere, char *mfile,
 
     if (show_tag != NULL && !tag_validated)
     {
-	tag_check_valid (show_tag, argc - 1, argv + 1, local, 0, repository);
+	tag_check_valid (show_tag, argc - 1, argv + 1, local, 0, repository,
+			 false);
 	tag_validated = true;
     }
 

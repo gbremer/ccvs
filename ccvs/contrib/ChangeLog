@@ -1,3 +1,60 @@
+2004-10-25  Derek Price  <derek@ximbiot.com>
+
+	* validate_repo.in: Loosen revision regex even more.
+
+2004-10-22  Derek Price  <derek@ximbiot.com>
+
+	* validate_repo.in: Loosen revision regex, trusting later verification.
+	(Patch from Dan Peterson <dbpete@aol.com>.)
+
+2004-10-20  Mark D. Baushke  <mdb@cvshome.org>
+
+	* Makefile.in: Regenerate for new configure.in.
+
+2004-10-20  Derek Price  <derek@ximbiot.com>
+
+	* validate_repo.in: Minor changes to help text.
+
+2004-10-20  Derek Price  <derek@ximbiot.com>
+
+	* validate_repo.in (get_ignore_files_from_cvsroot): Add new script
+	hooks to default ignore list and alphabetize.
+
+2004-10-20  Derek Price  <derek@ximbiot.com>
+
+	* validate_repo.in: Accept but log bad revision numbers.
+	(Patch from Dan Peterson <dbpete@aol.com>.)
+
+2004-09-13  Mark D. Baushke  <mdb@cvshome.org>
+
+	* cvs_acls.in: New version from
+	"Peter Connolly" <Peter.Connolly@cnet.com>.
+	* cvs_acls.html: New file from
+	"Peter Connolly" <Peter.Connolly@cnet.com>.
+	* Makefile.am (EXTRA_DIST): Add cvs_acls.html
+	(Close ccvs Issue #170.)
+	* Makefile.in: Regenerated.
+	
+2004-09-06  Mark D. Baushke  <mdb@cvshome.org>
+
+	* log_accum.in (UseNewFmtStrings, new_directory,
+	imported_sources): New variables to adapt command-line processings
+	to support use of UseNewFmtStrings=yes in the CVSROOT/config file.
+
+	* log_accum.in: Change Log processing state machine to avoid being
+	confused by user uses of the key phrases 'Modified *', 'Added *,
+	'Removed * and 'Log * in their log message.
+
+2004-08-30  Derek Price  <derek@ximbiot.com>
+
+	* log_accum.in: Changes to supress warnings under Perl 5.8.5.
+	(Patch from Jeroen Ruigrok/asmodai <asmodai@wxs.nl>.)
+
+2004-07-16  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (SUBDIRS): Add pam subdir.
+	(Thanks to a report from Brian Murphy <brian@murphy.dk>.)
+
 2004-06-09  Derek Price  <derek@ximbiot.com>
 
 	* Makefile.am (EXTRA_DIST): Undo previous change.
@@ -34,7 +91,7 @@
 
 	Close issue #155.
 	* log_accum.in: Remove unused variables.
-	(Patch from (Ville Skyttä <scop@cvshome.org>.)
+	(Patch from Ville Skyttä <scop@cvshome.org>.)
 
 2003-11-25  Mark D. Baushke  <mdb@cvshome.org>
 

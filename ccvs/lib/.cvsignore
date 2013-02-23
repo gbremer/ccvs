@@ -1,3 +1,6 @@
+*.bb
+*.bbg
+*.da
 *.plg
 .deps
 .pure
@@ -6,5 +9,6 @@ WinDebug
 WinRel
 alloca.h
 fnmatch.h
+getopt.h
 stdbool.h
 getdate

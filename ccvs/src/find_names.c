@@ -83,7 +83,8 @@ Find_Names (char *repository, int which, int aflag, List **optentries)
 	/* search the repository */
 	if (find_rcs (repository, files) != 0)
 	{
-	    error (0, errno, "cannot open directory %s", repository);
+	    error (0, errno, "cannot open directory %s",
+		   primary_root_inverse_translate (repository));
 	    goto error_exit;
 	}
 
@@ -97,7 +98,8 @@ Find_Names (char *repository, int which, int aflag, List **optentries)
 		&& !existence_error (errno))
 		/* For now keep this a fatal error, seems less useful
 		   for access control than the case above.  */
-		error (1, errno, "cannot open directory %s", dir);
+		error (1, errno, "cannot open directory %s",
+		       primary_root_inverse_translate (dir));
 	    free (dir);
 	}
     }

@@ -44,15 +44,6 @@ struct verifymsg_proc_data
     struct stat pre_stbuf;
 };
 
-/* 
- * Should the logmsg be re-read during the do_verify phase?
- * RereadLogAfterVerify=no|stat|yes
- * LOGMSG_REREAD_NEVER  - never re-read the logmsg
- * LOGMSG_REREAD_STAT   - re-read the logmsg only if it has changed
- * LOGMSG_REREAD_ALWAYS - always re-read the logmsg
- */
-int RereadLogAfterVerify = LOGMSG_REREAD_ALWAYS;
-
 /*
  * Puts a standard header on the output which is either being prepared for an
  * editor session, or being sent to a logfile program.  The modified, added,
@@ -447,8 +438,8 @@ do_verify (char **messagep, const char *repository)
     /* Get the mod time and size of the possibly new log message
      * in always and stat modes.
      */
-    if (RereadLogAfterVerify == LOGMSG_REREAD_ALWAYS ||
-	RereadLogAfterVerify == LOGMSG_REREAD_STAT)
+    if (config->RereadLogAfterVerify == LOGMSG_REREAD_ALWAYS ||
+	config->RereadLogAfterVerify == LOGMSG_REREAD_STAT)
     {
 	if(CVS_STAT (data.fname, &post_stbuf) != 0)
 	    error (1, errno, "cannot find size of temp file %s", data.fname);
@@ -457,8 +448,8 @@ do_verify (char **messagep, const char *repository)
     /* And reread the log message in `always' mode or in `stat' mode when it's
      * changed.
      */
-    if (RereadLogAfterVerify == LOGMSG_REREAD_ALWAYS ||
-	(RereadLogAfterVerify == LOGMSG_REREAD_STAT &&
+    if (config->RereadLogAfterVerify == LOGMSG_REREAD_ALWAYS ||
+	(config->RereadLogAfterVerify == LOGMSG_REREAD_STAT &&
 	  (data.pre_stbuf.st_mtime != post_stbuf.st_mtime ||
 	    data.pre_stbuf.st_size != post_stbuf.st_size)))
     {
@@ -599,7 +590,7 @@ Update_Logfile (const char *repository, const char *xmessage, FILE *xlogfp,
 static int
 update_logfile_proc (const char *repository, const char *filter, void *closure)
 {
-    struct ulp_data *udp = (struct ulp_data *)closure;
+    struct ulp_data *udp = closure;
     TRACE (TRACE_FUNCTION, "update_logfile_proc(%s,%s)", repository, filter);
     return logfile_write (repository, filter, udp->message, udp->logfp,
                           udp->changes);
@@ -785,21 +776,26 @@ logfile_write (const char *repository, const char *filter, const char *message,
        Why this duplicates the old behavior when the format string is
        `%s' is left as an exercise for the reader. */
 
-    /* %p = shortrepos
+    /* %c = cvs_cmd_name
+     * %p = shortrepos
      * %r = repository
      * %{sVv} = file name, old revision (precommit), new revision (postcommit)
      */
-    cmdline = format_cmdline(
+    cmdline = format_cmdline (
 #ifdef SUPPORT_OLD_INFO_FMT_STRINGS
-	                      !UseNewInfoFmtStrings, srepos,
+	                      !config->UseNewInfoFmtStrings, srepos,
 #endif /* SUPPORT_OLD_INFO_FMT_STRINGS */
 	                      filter,
+	                      "c", "s", cvs_cmd_name,
+#ifdef SERVER_SUPPORT
+	                      "R", "s", referrer ? referrer->original : "NONE",
+#endif /* SERVER_SUPPORT */
 	                      "p", "s", srepos,
 	                      "r", "s", current_parsed_root->directory,
 	                      "sVv", ",", changes,
 			             logmsg_list_to_args_proc, (void *) NULL,
 	                      (char *)NULL
-	                    );
+	                     );
     if( !cmdline || !strlen( cmdline ) )
     {
 	if( cmdline ) free( cmdline );
@@ -816,7 +812,7 @@ logfile_write (const char *repository, const char *filter, const char *message,
     }
     (void) fprintf (pipefp, "Update of %s\n", repository);
     (void) fprintf (pipefp, "In directory %s:", hostname);
-    cp = xgetwd ();
+    cp = xgetcwd ();
     if (cp == NULL)
 	fprintf (pipefp, "<cannot get working directory: %s>\n\n",
 		 strerror (errno));
@@ -842,7 +838,7 @@ logfile_write (const char *repository, const char *filter, const char *message,
 
 
 
-/*  This routine is calld by Parse_Info.  It runs the
+/*  This routine is called by Parse_Info.  It runs the
  *  message verification script.
  */
 static int
@@ -852,7 +848,7 @@ verifymsg_proc (const char *repository, const char *script, void *closure)
 #ifdef SUPPORT_OLD_INFO_FMT_STRINGS
     char *newscript = NULL;
 #endif /* SUPPORT_OLD_INFO_FMT_STRINGS */
-    struct verifymsg_proc_data *vpd = (struct verifymsg_proc_data *) closure;
+    struct verifymsg_proc_data *vpd = closure;
     const char *srepos = Short_Repository (repository);
 
 #ifdef SUPPORT_OLD_INFO_FMT_STRINGS
@@ -892,7 +888,7 @@ verifymsg_proc (const char *repository, const char *script, void *closure)
 	if (fclose (fp) == EOF)
 	    error (1, errno, "%s", vpd->fname);
 
-	if (RereadLogAfterVerify == LOGMSG_REREAD_STAT)
+	if (config->RereadLogAfterVerify == LOGMSG_REREAD_STAT)
 	{
 	    /* Remember the status of the temp file for later */
 	    if (CVS_STAT (vpd->fname, &(vpd->pre_stbuf)) != 0)
@@ -904,13 +900,18 @@ verifymsg_proc (const char *repository, const char *script, void *closure)
 	     */
 	    sleep_past (vpd->pre_stbuf.st_mtime);
 	}
-    } /* if( vpd->fname == NULL ) */
+    } /* if (vpd->fname == NULL) */
 
     verifymsg_script = format_cmdline (
 #ifdef SUPPORT_OLD_INFO_FMT_STRINGS
-                                       0, srepos,
+                                       false, srepos,
 #endif /* SUPPORT_OLD_INFO_FMT_STRINGS */
                                        script,
+				       "c", "s", cvs_cmd_name,
+#ifdef SERVER_SUPPORT
+				       "R", "s", referrer ? referrer->original
+							  : "NONE",
+#endif /* SERVER_SUPPORT */
                                        "p", "s", srepos,
                                        "r", "s",
                                        current_parsed_root->directory,
@@ -944,7 +945,7 @@ verifymsg_proc (const char *repository, const char *script, void *closure)
      * reason and should care about errno or that the process we called
      * returned -1 and the value of errno is undefined.  In other words,
      * run_exec should probably be rewritten to have two return codes.  one
-     * which is it's own exit status and one which is the child process's.  So
+     * which is its own exit status and one which is the child process's.  So
      * there.  :P
      *
      * Once run_exec is returning two error codes, we should probably be

@@ -558,11 +558,35 @@ Response expected: yes.
 Ask the server to send back a @code{Valid-requests} response.
 The @code{Root} request need not have been previously sent.
 
+@item Command-prep @var{command} \n
+Response expected: yes.
+Notify the server of the command that we are leading up to.  Intended to allow
+the server to send a redirect for write operations.  Requires either an
+@code{ok} or @code{Redirect} respnose.
+
+@item Referrer @var{CVSROOT} \n
+Response expected: no.
+Notify a primary server of a server which referred us.  Intended to allow
+a primary (write) server to update the read-only mirror a client is using
+for reads to minimize races on any subsequent updates from the client.
+
 @item Directory @var{local-directory} \n
+@itemx Relative-directory @var{local-directory} \n
 Additional data: @var{repository} \n.  Response expected: no.
-Tell the server what directory to use.  The @var{repository} should be a
-directory name from a previous server response.  Note that
-this both gives a default for @code{Entry} and @code{Modified} and
+Tell the server what directory to use.
+
+The @var{repository} should be a directory name from a previous server
+response and may be specified either relative to the @var{pathname} provided
+with the @code{Root} request or absolute.  Relative or absolute, it must
+specify a path within @var{pathname}.
+
+Prior to @sc{cvs} version @strong{FIXME - release number 1.12.10?},
+@var{repository} had to be absolute and @code{Relative-directory} was not a
+valid request.  The @code{Relative-directory} request is synonymous with
+@code{Directory} and is provided to alert modern clients that a relative
+@var{repository} is acceptable.
+
+Note that this both gives a default for @code{Entry} and @code{Modified} and
 also for @code{ci} and the other commands; normal usage is to send 
 @code{Directory} for each directory in which there will be an
 @code{Entry} or @code{Modified}, and then a final @code{Directory}
@@ -589,10 +613,10 @@ C: Root /home/kingdon/zwork/cvsroot
 . . .
 C: Argument moddir
 C: Directory .
-C: /home/kingdon/zwork/cvsroot
+C: .
 C: co
 S: Clear-sticky moddir/
-S: /home/kingdon/zwork/cvsroot/1dir/
+S: 1dir/
 . . .
 S: ok
 @end example
@@ -607,7 +631,7 @@ request might look like:
 
 @example
 C: Directory moddir
-C: /home/kingdon/zwork/cvsroot/1dir
+C: 1dir
 . . .
 C: update
 @end example
@@ -639,15 +663,15 @@ repository.
 @example
 C: Argument dir1
 C: Directory dir1
-C: /home/foo/repos/mod1
+C: mod1
 . . .
 C: Argument dir2
 C: Directory dir2
-C: /home/foo/repos/mod2
+C: mod2
 . . .
 C: Argument dir3
 C: Directory dir3/subdir3
-C: /home/foo/repos/mod3
+C: mod3
 . . .
 C: update
 @end example
@@ -677,18 +701,18 @@ follows:
 @example
 C: Argument dir1
 C: Directory dir1
-C: /home/foo/repos/mod1
+C: mod1
 . . .
 C: Argument dir2
 C: Directory dir2
-C: /home/foo/repos/mod2
+C: mod2
 . . .
 C: Argument dir3
 C: Directory dir3
-C: /home/foo/repos/.
+C: .
 . . .
 C: Directory dir3/subdir3
-C: /home/foo/repos/mod3
+C: mod3
 . . .
 C: update
 @end example
@@ -707,10 +731,10 @@ must be sent first.  For example, the following would not work to update
 . . .
 C: Argument dir3
 C: Directory dir3/subdir3
-C: /home/foo/repos/mod3
+C: mod3
 . . .
 C: Directory dir3
-C: /home/foo/repos/.
+C: .
 . . .
 C: update
 @end example
@@ -1031,6 +1055,14 @@ Response expected: no.
 Set a user variable @var{variable} to @var{value}.
 The @code{Root} request need not have been previously sent.
 
+@item Hostname @var{hostname} \n
+Response expected: no.  Set the client hostname for an upcoming @code{edit}
+request.
+
+@item LocalDir @var{hostname} \n
+Response expected: no.  Set the local client directory name for an upcoming
+@code{edit} request.
+
 @item expand-modules \n
 Response expected: yes.  Expand the modules which are specified in the
 arguments.  Returns the data in @code{Module-expansion} responses.  Note
@@ -1073,7 +1105,7 @@ C: Root /home/kingdon/zwork/cvsroot
 . . .
 C: Argument aliasmodule
 C: Directory .
-C: /home/kingdon/zwork/cvsroot
+C: .
 C: expand-modules
 S: Module-expansion 1dir
 S: ok
@@ -1229,9 +1261,9 @@ C: Root /u/cvsroot
 . . .
 C: Argument nsdir
 C: Directory nsdir
-C: /u/cvsroot/1dir/nsdir
+C: 1dir/nsdir
 C: Directory .
-C: /u/cvsroot/1dir
+C: 1dir
 C: add
 S: M Directory /u/cvsroot/1dir/nsdir added to the repository
 S: ok
@@ -1249,7 +1281,7 @@ request.  For example:
 @example
 C: Argument nfile
 C: Directory .
-C: /u/cvsroot/1dir
+C: 1dir
 C: Modified nfile
 C: u=rw,g=r,o=r
 C: 6
@@ -1302,6 +1334,14 @@ to perform a few more checks.
 
 The client sends a subsequent @code{ci} request to actually record the
 removal in the repository.
+
+@item edit \n
+Response expected: yes.  Actually do the @code{cvs edit} command.  This uses
+any previous @code{Argument}, @code{Directory}, @code{Entry}, @code{LocalDir},
+or @code{Hostname} requests, if they have been sent.  Unless the user has
+requested that edits not be granted unless no one else is editing a file, a
+local edit followed by an attempt to send @code{Notify} requests to the
+server is preferred.
 
 @item watch-on \n
 @itemx watch-off \n
@@ -1416,15 +1456,21 @@ The name is somewhat misleading; it actually indicates a pair of
 pathnames.  First, a local directory name
 relative to the directory in which the command was given (i.e. the last
 @code{Directory} before the command).  Then a linefeed and a repository
-name.  Then
-a slash and the filename (without a @samp{,v} ending).
+name.  Then a slash and the filename (without a @samp{,v} ending).
+
+The repository name may be absolute or relative to the @var{pathname}
+sent with the @code{Root} request.  If absolute, the repository name must begin
+with the @var{pathname} sent with the @code{Root} request.  Relative or
+absolute, the repository name must specify a path underneath the @code{Root}
+@var{pathname}.
+
 For example, for a file @file{i386.mh}
 which is in the local directory @file{gas.clean/config} and for which
-the repository is @file{/rel/cvsfiles/devo/gas/config}:
+the repository name is @file{devo/gas/config}:
 
 @example
 gas.clean/config/
-/rel/cvsfiles/devo/gas/config/i386.mh
+devo/gas/config/i386.mh
 @end example
 
 If the server wants to tell the client to create a directory, then it
@@ -1462,6 +1508,15 @@ Indicate what requests the server will accept.  @var{request-list}
 is a space separated list of tokens.  If the server supports sending
 patches, it will include @samp{update-patches} in this list.  The
 @samp{update-patches} request does not actually do anything.
+
+@item Redirect @var{CVSROOT}
+Request that the client redirect its connection to @var{CVSROOT} and begin
+again.  This response is only valid in response to a @code{Command-prep}
+request.  If a client receives this response, it is expected to notify the
+write server it subsequently contacts of the CVSROOT of the server which
+redirected it using the @samp{Referrer} request.  This information makes it
+possible for primary servers to update the client's mirror first, hopefully
+minimizing race conditions on subsequent updates from the same client.
 
 @item Checked-in @var{pathname} \n
 Additional data: New Entries line, \n.  This means a file @var{pathname}
@@ -1545,6 +1600,9 @@ format.  Like @code{Rcs-diff}, this response is only used if the
 The @code{Patched} response is deprecated in favor of the
 @code{Rcs-diff} response.  However, older clients (CVS 1.9 and earlier)
 only support @code{Patched}.
+
+@item Edit-file @var{pathname} \n
+Do the client-side portion of editing a file.
 
 @item Mode @var{mode} \n
 This @var{mode} applies to the next file mentioned in
@@ -1823,8 +1881,11 @@ MT -updated
 @end example
 
 The @code{importmergecmd} tag is used when doing an import which has
-conflicts.  The client can use it to report how to merge in the newly
-imported changes.  The @var{count} is the number of conflicts.  The
+conflicts, or when doing an import with the @samp{-X} flag.
+The client can use it to report how to merge in the newly
+imported changes.  The @var{count} is the number of conflicts, or the
+string @code{No} if no conflicts occurred.  (The latter will only be
+sent for imports run with the @samp{-X} flag.)  The
 newly imported changes can be merged by running the following command:
 @smallexample
 cvs checkout -j @var{tag1} -j @var{tag2} @var{repository}
@@ -1881,7 +1942,7 @@ directory rather than a module.
 @example
 C: Argument supermunger
 C: Directory .
-C: /u/cvsroot
+C: .
 C: expand-modules
 @end example
 
@@ -1903,7 +1964,7 @@ for the working directory means that there is not already a
 C: Argument -N
 C: Argument supermunger
 C: Directory .
-C: /u/cvsroot
+C: .
 C: co
 @end example
 
@@ -1957,7 +2018,7 @@ relative to that directory.
 
 @example
 C: Directory .
-C: /u/cvsroot/supermunger
+C: supermunger
 C: Entry /mungeall.c/1.1///
 C: Modified mungeall.c
 C: u=rw,g=r,o=r

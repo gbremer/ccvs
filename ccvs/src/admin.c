@@ -19,8 +19,6 @@ static Dtype admin_dirproc (void *callerdat, const char *dir,
                             List *entries);
 static int admin_fileproc (void *callerdat, struct file_info *finfo);
 
-char *UserAdminOptions = "k";
-
 static const char *const admin_usage[] =
 {
     "Usage: %s %s [options] files...\n",
@@ -137,6 +135,75 @@ arg_add (struct admin_data *dat, int opt, char *arg)
     dat->av[dat->ac++] = newelt;
 }
 
+
+
+/*
+ * callback proc to run a script when admin finishes.
+ */
+static int
+postadmin_proc (const char *repository, const char *filter, void *closure)
+{
+    char *cmdline;
+    const char *srepos = Short_Repository (repository);
+
+    TRACE (TRACE_FUNCTION, "postadmin_proc (%s, %s)", repository, filter);
+
+    /* %c = cvs_cmd_name
+     * %R = referrer
+     * %p = shortrepos
+     * %r = repository
+     */
+    cmdline = format_cmdline (
+#ifdef SUPPORT_OLD_INFO_FMT_STRINGS
+	                      false, srepos,
+#endif /* SUPPORT_OLD_INFO_FMT_STRINGS */
+	                      filter,
+	                      "c", "s", cvs_cmd_name,
+#ifdef SERVER_SUPPORT
+	                      "R", "s", referrer ? referrer->original : "NONE",
+#endif /* SERVER_SUPPORT */
+	                      "p", "s", srepos,
+	                      "r", "s", current_parsed_root->directory,
+	                      (char *)NULL
+	                     );
+
+    if (!cmdline || !strlen (cmdline))
+    {
+	if (cmdline) free (cmdline);
+	error (0, 0, "postadmin proc resolved to the empty string!");
+	return 1;
+    }
+
+    run_setup (cmdline);
+
+    free (cmdline);
+
+    /* FIXME - read the comment in verifymsg_proc() about why we use abs()
+     * below() and shouldn't.
+     */
+    return abs (run_exec (RUN_TTY, RUN_TTY, RUN_TTY,
+			  RUN_NORMAL | RUN_SIGIGNORE));
+}
+
+
+
+/*
+ * Call any postadmin procs.
+ */
+static int
+admin_filesdoneproc (void *callerdat, int err, const char *repository,
+                     const char *update_dir, List *entries)
+{
+    TRACE (TRACE_FUNCTION, "admin_filesdoneproc (%d, %s, %s)", err, repository,
+           update_dir);
+    Parse_Info (CVSROOTADM_POSTADMIN, repository, postadmin_proc, PIOPT_ALL,
+                NULL);
+
+    return err;
+}
+
+
+
 int
 admin (int argc, char **argv)
 {
@@ -148,7 +215,7 @@ admin (int argc, char **argv)
     struct admin_data admin_data;
     int c;
     int i;
-    int only_allowed_options;
+    bool only_allowed_options;
 
     if (argc <= 1)
 	usage (admin_usage);
@@ -161,12 +228,17 @@ admin (int argc, char **argv)
        example, admin_data->branch should be not `-bfoo' but simply `foo'. */
 
     optind = 0;
-    only_allowed_options = 1;
+    only_allowed_options = true;
     while ((c = getopt (argc, argv,
 			"+ib::c:a:A:e::l::u::LUn:N:m:o:s:t::IqxV:k:")) != -1)
     {
-	if (c != 'q' && !strchr(UserAdminOptions, c))
-	    only_allowed_options = 0;
+	if (
+# ifdef CLIENT_SUPPORT
+	    !current_parsed_root->isremote &&
+# endif	/* CLIENT_SUPPORT */
+	    c != 'q' && !strchr (config->UserAdminOptions, c)
+	   )
+	    only_allowed_options = false;
 
 	switch (c)
 	{
@@ -384,8 +456,8 @@ admin (int argc, char **argv)
 	 */
         !current_parsed_root->isremote &&
 # endif	/* CLIENT_SUPPORT */
-        !only_allowed_options &&
-	(grp = getgrnam(CVS_ADMIN_GROUP)) != NULL)
+        !only_allowed_options
+	&& (grp = getgrnam (CVS_ADMIN_GROUP)) != NULL)
     {
 #ifdef HAVE_GETGROUPS
 	gid_t *grps;
@@ -395,7 +467,7 @@ admin (int argc, char **argv)
 	n = getgroups (0, NULL);
 	if (n < 0)
 	    error (1, errno, "unable to get number of auxiliary groups");
-	grps = (gid_t *) xmalloc((n + 1) * sizeof *grps);
+	grps = xmalloc ((n + 1) * sizeof *grps);
 	n = getgroups (n, grps);
 	if (n < 0)
 	    error (1, errno, "unable to get list of auxiliary groups");
@@ -514,7 +586,7 @@ admin (int argc, char **argv)
     lock_tree_promotably (argc, argv, 0, W_LOCAL, 0);
 
     err = start_recursion
-	    (admin_fileproc, NULL, admin_dirproc,
+	    (admin_fileproc, admin_filesdoneproc, admin_dirproc,
 	     NULL, &admin_data,
 	     argc, argv, 0,
 	     W_LOCAL, 0, CVS_LOCK_WRITE, NULL, 1, NULL);
@@ -537,8 +609,10 @@ admin (int argc, char **argv)
     if (admin_data.av != NULL)
 	free (admin_data.av);
 
-    return (err);
+    return err;
 }
+
+
 
 /*
  * Called to run "rcs" on a particular file.
@@ -931,5 +1005,5 @@ admin_dirproc (void *callerdat, const char *dir, const char *repos,
 {
     if (!quiet)
 	error (0, 0, "Administrating %s", update_dir);
-    return (R_PROCESS);
+    return R_PROCESS;
 }

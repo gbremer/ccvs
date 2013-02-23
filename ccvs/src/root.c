@@ -23,11 +23,12 @@ const char method_names[][16] = {
 
 #ifndef DEBUG
 
-char *
-Name_Root (char *dir, char *update_dir)
+cvsroot_t *
+Name_Root (const char *dir, const char *update_dir)
 {
     FILE *fpin;
-    char *ret, *xupdate_dir;
+    cvsroot_t *ret;
+    const char *xupdate_dir;
     char *root = NULL;
     size_t root_allocated = 0;
     char *tmp;
@@ -85,7 +86,7 @@ Name_Root (char *dir, char *update_dir)
 	goto out;
     }
     fclose (fpin);
-    cp = root + (len - 1);
+    cp = root + len - 1;
     if (*cp == '\n')
 	*cp = '\0';			/* strip the newline */
 
@@ -94,43 +95,38 @@ Name_Root (char *dir, char *update_dir)
      * absolute pathname or specify a remote server.
      */
 
-    if (
-#ifdef CLIENT_SUPPORT
-	(strchr (root, ':') == NULL) &&
-#endif
-    	! isabsolute (root))
+    ret = parse_cvsroot (root);
+    if (ret == NULL)
     {
 	error (0, 0, "in directory %s:", xupdate_dir);
 	error (0, 0,
-	       "ignoring %s because it does not contain an absolute pathname.",
+	       "ignoring %s because it does not contain a valid root.",
 	       CVSADM_ROOT);
-	ret = NULL;
 	goto out;
     }
 
+    if (
 #ifdef CLIENT_SUPPORT
-    if ((strchr (root, ':') == NULL) && !isdir (root))
-#else /* ! CLIENT_SUPPORT */
-    if (!isdir (root))
-#endif /* CLIENT_SUPPORT */
+        !ret->isremote &&
+#endif
+        !isdir (ret->directory))
     {
 	error (0, 0, "in directory %s:", xupdate_dir);
 	error (0, 0,
 	       "ignoring %s because it specifies a non-existent repository %s",
 	       CVSADM_ROOT, root);
+	free_cvsroot_t (ret);
 	ret = NULL;
 	goto out;
     }
 
-    /* allocate space to return and fill it in */
-    strip_trailing_slashes (root);
-    ret = xstrdup (root);
+
  out:
     free (cvsadm);
     free (tmp);
     if (root != NULL)
 	free (root);
-    return (ret);
+    return ret;
 }
 
 
@@ -173,67 +169,135 @@ Create_Root (const char *dir, const char *rootdir)
 #endif /* ! DEBUG */
 
 
+
+/* Translate an absolute repository string for a primary server and return it.
+ *
+ * INPUTS
+ *   root_in	The root to be translated.
+ *
+ * RETURNS
+ *   A translated string this function owns, or a pointer to the original
+ *   string passed in if no translation was necessary.
+ *
+ *   If the returned string is the translated one, it may be overwritten
+ *   by the next call to this function.
+ */
+const char *
+primary_root_translate (const char *root_in)
+{
+    char *translated;
+    static char *previous = NULL;
+    static size_t len;
+
+#ifdef PROXY_SUPPORT
+    /* This can happen, for instance, during `cvs init'.  */
+    if (!config) return root_in;
+
+    if (config->PrimaryServer
+        && !strncmp (root_in, config->PrimaryServer->directory,
+		     strlen (config->PrimaryServer->directory))
+        && (ISSLASH (root_in[strlen (config->PrimaryServer->directory)])
+            || root_in[strlen (config->PrimaryServer->directory)] == '\0')
+       )
+    {
+	translated =
+	    Xasnprintf (previous, &len,
+		        "%s%s", current_parsed_root->directory,
+	                root_in + strlen (config->PrimaryServer->directory));
+	if (previous && previous != translated)
+	    free (previous);
+	return previous = translated;
+    }
+#endif
+
+    /* There is no primary root configured or it didn't match.  */
+    return root_in;
+}
+
+
+
+/* Translate a primary root in reverse for PATHNAMEs in responses.
+ *
+ * INPUTS
+ *   root_in	The root to be translated.
+ *
+ * RETURNS
+ *   A translated string this function owns, or a pointer to the original
+ *   string passed in if no translation was necessary.
+ *
+ *   If the returned string is the translated one, it may be overwritten
+ *   by the next call to this function.
+ */
+const char *
+primary_root_inverse_translate (const char *root_in)
+{
+    char *translated;
+    static char *previous = NULL;
+    static size_t len;
+
+#ifdef PROXY_SUPPORT
+    /* This can happen, for instance, during `cvs init'.  */
+    if (!config) return root_in;
+
+    if (config->PrimaryServer
+        && !strncmp (root_in, current_parsed_root->directory,
+		     strlen (current_parsed_root->directory))
+        && (ISSLASH (root_in[strlen (current_parsed_root->directory)])
+            || root_in[strlen (current_parsed_root->directory)] == '\0')
+       )
+    {
+	translated =
+	    Xasnprintf (previous, &len,
+		        "%s%s", config->PrimaryServer->directory,
+	                root_in + strlen (current_parsed_root->directory));
+	if (previous && previous != translated)
+	    free (previous);
+	return previous = translated;
+    }
+#endif
+
+    /* There is no primary root configured or it didn't match.  */
+    return root_in;
+}
+
+
+
 /* The root_allow_* stuff maintains a list of valid CVSROOT
    directories.  Then we can check against them when a remote user
    hands us a CVSROOT directory.  */
+static List *root_allow;
 
-static int root_allow_count;
-static char **root_allow_vector;
-static int root_allow_size;
+static void
+delconfig (Node *n)
+{
+    if (n->data) free_config (n->data);
+}
+
+
 
 void
-root_allow_add (char *arg)
+root_allow_add (const char *arg)
 {
-    char *p;
+    Node *n;
 
-    if (root_allow_size <= root_allow_count)
-    {
-	if (root_allow_size == 0)
-	{
-	    root_allow_size = 1;
-	    root_allow_vector =
-		(char **) xmalloc (root_allow_size * sizeof (char *));
-	}
-	else
-	{
-	    root_allow_size *= 2;
-	    root_allow_vector =
-		(char **) xrealloc (root_allow_vector,
-				   root_allow_size * sizeof (char *));
-	}
-
-	if (root_allow_vector == NULL)
-	{
-	no_memory:
-	    /* Strictly speaking, we're not supposed to output anything
-	       now.  But we're about to exit(), give it a try.  */
-	    printf ("E Fatal server error, aborting.\n\
-error ENOMEM Virtual memory exhausted.\n");
-
-	    exit (EXIT_FAILURE);
-	}
-    }
-    p = xmalloc (strlen (arg) + 1);
-    if (p == NULL)
-	goto no_memory;
-    strcpy (p, arg);
-    root_allow_vector[root_allow_count++] = p;
+    if (!root_allow) root_allow = getlist();
+    n = getnode();
+    n->key = xstrdup (arg);
+    n->data = parse_config (arg);
+    n->delproc = delconfig;
+    addnode (root_allow, n);
 }
 
 void
 root_allow_free (void)
 {
-    if (root_allow_vector != NULL)
-	free_names (&root_allow_count, root_allow_vector);
-    root_allow_size = 0;
+    dellist (&root_allow);
 }
 
-int
-root_allow_ok (char *arg)
+bool
+root_allow_ok (const char *arg)
 {
-    int i;
-
-    if (root_allow_count == 0)
+    if (!root_allow)
     {
 	/* Probably someone upgraded from CVS before 1.9.10 to 1.9.10
 	   or later without reading the documentation about
@@ -249,10 +313,32 @@ error 0 Server configuration missing --allow-root in inetd.conf\n");
 	exit (EXIT_FAILURE);
     }
 
-    for (i = 0; i < root_allow_count; ++i)
-	if (strcmp (root_allow_vector[i], arg) == 0)
-	    return 1;
-    return 0;
+    if (findnode (root_allow, arg))
+	return true;
+    return false;
+}
+
+
+
+/* Get a config we stored in response to root_allow.
+ *
+ * RETURNS
+ *   The config associated with ARG.
+ */
+struct config *
+get_root_allow_config (const char *arg)
+{
+    Node *n;
+
+    TRACE (TRACE_FUNCTION, "get_root_allow_config (%s)", arg);
+
+    if (root_allow)
+	n = findnode (root_allow, arg);
+    else
+	n = NULL;
+
+    if (n) return n->data;
+    return parse_config (arg);
 }
 
 
@@ -266,7 +352,13 @@ char *CVSroot_cmdline;
 
 /* FIXME - Deglobalize this. */
 cvsroot_t *current_parsed_root = NULL;
-
+/* Used to save the original root being processed so that we can still find it
+ * in lists and the like after a `Redirect' response.  Also set to mirror
+ * current_parsed_root in server mode so that code which runs on both the
+ * client and server but which wants to use original data on the client can
+ * just always reference the original_parsed_root.
+ */
+const cvsroot_t *original_parsed_root;
 
 
 /* allocate and initialize a cvsroot_t
@@ -373,7 +465,10 @@ parse_cvsroot (const char *root_in)
 
     assert (root_in != NULL);
 
-    TRACE (TRACE_FUNCTION, "parse_cvsroot ( %s )", root_in);
+    /* This message is TRACE_FLOW since this function is called repeatedly by
+     * the recursion routines.
+     */
+    TRACE (TRACE_FLOW, "parse_cvsroot (%s)", root_in);
 
     /* allocate some space */
     newroot = new_cvsroot_t();
@@ -436,7 +531,7 @@ parse_cvsroot (const char *root_in)
 
 #ifdef CLIENT_SUPPORT
 	/* Parse the method options, for instance, proxy, proxyport */
-	while (p = strtok (NULL, ";"))
+	while ((p = strtok (NULL, ";")))
 	{
 	    char *q = strchr (p, '=');
 	    if (q == NULL)
@@ -795,7 +890,6 @@ normalize_cvsroot (const cvsroot_t *root)
 {
     char *cvsroot_canonical;
     char *p, *hostname;
-    size_t length;
 
     /* use a lower case hostname since we know hostnames are case insensitive */
     /* Some logic says we should be tacking our domain name on too if it isn't
@@ -811,7 +905,7 @@ normalize_cvsroot (const cvsroot_t *root)
 	p++;
     }
 
-    cvsroot_canonical = asnprintf (NULL, &length, ":pserver:%s@%s:%d%s",
+    cvsroot_canonical = Xasprintf (":pserver:%s@%s:%d%s",
                                    root->username ? root->username
                                                   : getcaller(),
                                    hostname, get_cvs_port_number (root),
@@ -821,6 +915,34 @@ normalize_cvsroot (const cvsroot_t *root)
     return cvsroot_canonical;
 }
 #endif /* AUTH_CLIENT_SUPPORT */
+
+
+
+#ifdef PROXY_SUPPORT
+/* A walklist() function to walk the root_allow list looking for a PrimaryServer
+ * configuration with a directory matching the requested directory.
+ *
+ * If found, replace it.
+ */
+static bool get_local_root_dir_done;
+static int
+get_local_root_dir (Node *p, void *root_in)
+{
+    struct config *c = p->data;
+    char **r = root_in;
+
+    if (get_local_root_dir_done)
+	return 0;
+
+    if (c->PrimaryServer && !strcmp (*r, c->PrimaryServer->directory))
+    {
+	free (*r);
+	*r = xstrdup (p->key);
+	get_local_root_dir_done = true;
+    }
+    return 0;
+}
+#endif /* PROXY_SUPPORT */
 
 
 
@@ -838,7 +960,17 @@ local_cvsroot (const char *dir)
      * called on a CVSROOT now.  cvsroot->original is saved for error messages
      * and, otherwise, we want no trailing slashes.
      */
-    Sanitize_Repository_Name( newroot->directory );
+    Sanitize_Repository_Name (newroot->directory);
+
+#ifdef PROXY_SUPPORT
+    /* Translate the directory to a local one in the case that we are
+     * configured as a secondary.  If root_allow has not been initialized,
+     * nothing happens.
+     */
+    get_local_root_dir_done = false;
+    walklist (root_allow, get_local_root_dir, &newroot->directory);
+#endif /* PROXY_SUPPORT */
+
     return newroot;
 }
 

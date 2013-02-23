@@ -91,7 +91,7 @@ socket_buffer_initialize( int socket, int input,
     return buf_initialize (input ? socket_buffer_input : NULL,
 			   input ? NULL : socket_buffer_output,
 			   input ? NULL : socket_buffer_flush,
-			   NULL,
+			   NULL, NULL,
 			   socket_buffer_shutdown,
 			   memory,
 			   sbuf);

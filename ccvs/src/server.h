@@ -150,7 +150,6 @@ void server_pause_check (void);
 
 #ifdef AUTH_SERVER_SUPPORT
 extern char *CVS_Username;
-extern int system_auth;
 #endif /* AUTH_SERVER_SUPPORT */
 
 #endif /* SERVER_SUPPORT */
@@ -193,6 +192,9 @@ struct request
 extern struct request requests[];
 
 /* Gzip library, see zlib.c.  */
-int gunzip_and_write (int, char *, unsigned char *, size_t);
+int gunzip_and_write (int, const char *, unsigned char *, size_t);
 int read_and_gzip (int, const char *, unsigned char **, size_t *, size_t *,
                    int);
+void server_edit_file (struct file_info *finfo);
+
+extern cvsroot_t *referrer;

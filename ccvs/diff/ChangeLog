@@ -1,3 +1,59 @@
+2004-11-05  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libdiff.dep: Regenerated for "../lib/libcvs.dsp" change.
+
+2004-11-04  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libdiff.dep: Regenerated for "../lib/libcvs.dsp" change.
+
+2004-11-01  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libdiff.dep: Regenerated for "../lib/libcvs.dsp" change.
+
+2004-10-26  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libdiff.dep: Regenerate for "../cvsnt.dsp" and "../lib/libcvs.dsp" change.
+
+2004-10-21  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libdiff.dep: Regenerated for "../zlib/libz.dsp" change.
+	* libdiff.mak: Regenerated for "../zlib/libz.dsp" change.
+
+2004-10-20  Mark D. Baushke  <mdb@cvshome.org>
+
+	* Makefile.in: Regenerate for new configure.in.
+
+2004-10-09  Mark D. Baushke  <mdb@cvshome.org>
+
+	* diff.c, diff3.c: Backout last change.
+	* Makefile.am: Add -I$(top_builddir)/lib to find getopt.h
+	* Makefile.in: Regenerated.
+
+2004-10-09  Mark D. Baushke  <mdb@cvshome.org>
+
+	* diff.c: Add support for systems that do not #include <stio.h>
+	* diff3.c: Ditto.
+
+2004-10-07  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libdiff.dep: Regenerate for "../lib/libcvs.dsp" changes made 2004-10-07.
+
+2004-10-05  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libdiff.dep: Regenerated for "../cvsnt.dsp" and "../lib/libcvs.dsp"
+	changes made 2004-10-05.
+	* libdiff.mak: Regenerated for "../cvsnt.dsp" and "../lib/libcvs.dsp"
+	changes made 2004-10-05.
+
+2004-09-09  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libdiff.dep: Regenerated for "../cvsnt.dsp" changes made 2004-09-08.
+	* libdiff.mak: Regenerated for "../cvsnt.dsp" changes made 2004-09-08.
+
+2004-07-13  Derek Price  <derek@ximbiot.com>
+
+	* .cvsignore: Ignore GCC profiling data.
+
 2004-05-15  Derek Price  <derek@ximbiot.com>
 
 	* libdiff.dsp: Header file list updated for GNULIB updates.

@@ -34,7 +34,7 @@
  */
 
 #include "cvs.h"
-#include "savecwd.h"
+#include "save-cwd.h"
 #ifdef SERVER_SUPPORT
 # include "md5.h"
 #endif
@@ -366,7 +366,7 @@ update (int argc, char **argv)
 #endif
 
     if (tag != NULL)
-	tag_check_valid (tag, argc, argv, local, aflag, "");
+	tag_check_valid (tag, argc, argv, local, aflag, "", false);
     if (join_rev1 != NULL)
         tag_check_valid_join (join_rev1, argc, argv, local, aflag, "");
     if (join_rev2 != NULL)
@@ -478,7 +478,7 @@ do_update (int argc, char **argv, char *xoptions, char *xtag, char *xdate,
 	/* We need to do an extra recursion, bleah.  It's to make sure
 	   that we know as much as possible about file linkage. */
 	hardlist = getlist();
-	working_dir = xgetwd();		/* save top-level working dir */
+	working_dir = xgetcwd ();		/* save top-level working dir */
 
 	/* FIXME-twp: the arguments to start_recursion make me dizzy.  This
 	   function call was copied from the update_fileproc call that
@@ -844,7 +844,7 @@ update_filesdone_proc (void *callerdat, int err, const char *repository,
     {
         /* If there is no CVS/Root file, add one */
         if (!isfile (CVSADM_ROOT))
-	    Create_Root (NULL, current_parsed_root->original);
+	    Create_Root (NULL, original_parsed_root->original);
     }
 
     return err;
@@ -1122,7 +1122,7 @@ isemptydir (const char *dir, int might_not_exist)
 		struct saved_cwd cwd;
 
 		if (save_cwd (&cwd))
-		    exit (EXIT_FAILURE);
+		    error (1, errno, "Failed to save current directory.");
 
 		if (CVS_CHDIR (dir) < 0)
 		    error (1, errno, "cannot change directory to %s", dir);
@@ -1130,8 +1130,10 @@ isemptydir (const char *dir, int might_not_exist)
 		files_removed = walklist (l, isremoved, 0);
 		Entries_Close (l);
 
-		if (restore_cwd (&cwd, NULL))
-		    exit (EXIT_FAILURE);
+		if (restore_cwd (&cwd))
+		    error (1, errno,
+		           "Failed to restore current directory, `%s'.",
+		           cwd.name);
 		free_cwd (&cwd);
 
 		if (files_removed != 0)
@@ -1265,7 +1267,7 @@ Checking out ", 0);
 		cvs_outerr (finfo->fullname, 0);
 		cvs_outerr ("\n\
 RCS:  ", 0);
-		cvs_outerr (vers_ts->srcfile->path, 0);
+		cvs_outerr (vers_ts->srcfile->print_path, 0);
 		cvs_outerr ("\n\
 VERS: ", 0);
 		cvs_outerr (vers_ts->vn_rcs, 0);
@@ -1314,7 +1316,9 @@ VERS: ", 0);
 		   for us to stat.  */
 		if( CVS_STAT( vers_ts->srcfile->path, &sb ) < 0 )
 		{
+#if defined (SERVER_SUPPORT) || defined (CLIENT_SUPPORT)
 		    buf_free (revbuf);
+#endif /* defined (SERVER_SUPPORT) || defined (CLIENT_SUPPORT) */
 		    error (1, errno, "cannot stat %s",
 			   vers_ts->srcfile->path);
 		}
@@ -1481,8 +1485,10 @@ VERS: ", 0);
 	free (backup);
     }
 
+#if defined (SERVER_SUPPORT) || defined (CLIENT_SUPPORT)
     if (revbuf != NULL)
 	buf_free (revbuf);
+#endif /* defined (SERVER_SUPPORT) || defined (CLIENT_SUPPORT) */
     return retval;
 }
 
@@ -1517,7 +1523,7 @@ struct patch_file_data
     /* Whether to compute the MD5 checksum.  */
     int compute_checksum;
     /* Data structure for computing the MD5 checksum.  */
-    struct cvs_MD5Context context;
+    struct md5_ctx context;
     /* Set if the file has a final newline.  */
     int final_nl;
 };
@@ -1656,7 +1662,7 @@ patch_file (struct file_info *finfo, Vers_TS *vers_ts, int *docheckout, struct s
 	data.fp = e;
 	data.final_nl = 0;
 	data.compute_checksum = 1;
-	cvs_MD5Init (&data.context);
+	md5_init_ctx (&data.context);
 
 	retcode = RCS_checkout (vers_ts->srcfile, (char *) NULL,
 				vers_ts->vn_rcs, vers_ts->tag,
@@ -1669,7 +1675,7 @@ patch_file (struct file_info *finfo, Vers_TS *vers_ts, int *docheckout, struct s
 	if (retcode != 0 || ! data.final_nl)
 	    fail = 1;
 	else
-	    cvs_MD5Final (checksum, &data.context);
+	    md5_finish_ctx (&data.context, checksum);
     }	  
 
     retcode = 0;
@@ -1841,7 +1847,7 @@ patch_file_write (void *callerdat, const char *buffer, size_t len)
     data->final_nl = (buffer[len - 1] == '\n');
 
     if (data->compute_checksum)
-	cvs_MD5Update (&data->context, (unsigned char *) buffer, len);
+	md5_process_bytes (buffer, len, &data->context);
 }
 
 #endif /* SERVER_SUPPORT */
@@ -2689,8 +2695,10 @@ special_file_mismatch (struct file_info *finfo, char *rev1, char *rev2)
 
     if (rev1 == NULL)
     {
-	if (islink (finfo->file))
-	    rev1_symlink = xreadlink (finfo->file);
+	ssize_t rsize;
+
+	if ((rsize = islink (finfo->file)) > 0)
+	    rev1_symlink = Xreadlink (finfo->file, rsize);
 	else
 	{
 # ifdef HAVE_STRUCT_STAT_ST_RDEV
@@ -2767,8 +2775,10 @@ special_file_mismatch (struct file_info *finfo, char *rev1, char *rev2)
     /* Obtain file information for REV2. */
     if (rev2 == NULL)
     {
-	if (islink (finfo->file))
-	    rev2_symlink = xreadlink (finfo->file);
+	ssize_t rsize;
+
+	if ((rsize = islink (finfo->file)) > 0)
+	    rev2_symlink = Xreadlink (finfo->file, rsize);
 	else
 	{
 # ifdef HAVE_STRUCT_STAT_ST_RDEV

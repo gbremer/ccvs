@@ -234,8 +234,10 @@ left of \fBcvs_command\fR) are:
 .IP "" 0
 \fB--allow-root=\fIrootdir\fB\fR
 .IP "" 2
-Specify legal \fBcvsroot\fR directory.  See
-see node `Password authentication server\(aq in the CVS manual.
+May be invoked multiple times to specify one legal \fBcvsroot\fR directory with
+each invocation.  Also causes CVS to preparse the configuration file for each
+specified root, which can be useful when configuring write proxies,  See
+see node `Password authentication server\(aq in the CVS manual & see node `Write proxies\(aq in the CVS manual.
 .SP
 .IX "Authentication, stream"
 .IX "Stream authentication"
@@ -465,60 +467,8 @@ further updates in the same directory will use the same date
 (The \fBhistory\fR command uses this option in a
 slightly different way; see node `history options\(aq in the CVS manual).
 .SP
-.IX "Timezone, in input"
-.IX "Zone, time, in input"
-A wide variety of date formats are supported by
-\fBcvs\fR.  The most standard ones are ISO8601 (from the
-International Standards Organization) and the Internet
-e-mail standard (specified in RFC822 as amended by
-RFC1123).
-.SP
-ISO8601 dates have many variants but a few examples
-are:
-.SP
-.PD 0
-.SP
-.IP "" 4
-1972-09-24
-.IP "" 4
-1972-09-24 20:05
-
-.PD
-.IP "" 2
-.SP
-There are a lot more ISO8601 date formats, and \fBcvs\fR
-accepts many of them, but you probably don\(aqt want to
-hear the \fIwhole\fR long story :-).
-.SP
-In addition to the dates allowed in Internet e-mail
-itself, \fBcvs\fR also allows some of the fields to be
-omitted.  For example:
-.SP
-.PD 0
-.SP
-.IP "" 4
-24 Sep 1972 20:05
-.IP "" 4
-24 Sep
-
-.PD
-.IP "" 2
-.SP
-The date is interpreted as being in the
-local timezone, unless a specific timezone is
-specified.
-.SP
-These two date formats are preferred.  However,
-\fBcvs\fR currently accepts a wide variety of other date
-formats.  They are intentionally not documented here in
-any detail, and future versions of \fBcvs\fR might not
-accept all of them.
-.SP
-One such format is
-\fB\fImonth\fB/\fIday\fB/\fIyear\fB\fR.  This may
-confuse people who are accustomed to having the month
-and day in the other order; \fB1/4/96\fR is January 4,
-not April 1.
+For a complete description of the date formats accepted by \fBcvs\fR,
+see node `Date input formats\(aq in the CVS manual.
 .SP
 Remember to quote the argument to the \fB-D\fR
 flag so that your shell doesn\(aqt interpret spaces as
@@ -671,8 +621,8 @@ does not contain the specified tag.
 \fBNote: this is not the same as the overall \fBcvs -r\fB option,
 which you can specify to the left of a \fBcvs\fB command!\fR
 .SP
-\fB-r\fR is available with the \fBcheckout\fR, \fBcommit\fR,
-\fBdiff\fR, \fBhistory\fR, \fBexport\fR, \fBrdiff\fR,
+\fB-r\fR is available with the \fBannotate\fR, \fBcheckout\fR,
+\fBcommit\fR, \fBdiff\fR, \fBhistory\fR, \fBexport\fR, \fBrdiff\fR, 
 \fBrtag\fR, and \fBupdate\fR commands.
 .SP
 .IP "" 0
@@ -1488,6 +1438,17 @@ cannot commit to a specific revision on a branch.
 \fBcommit\fR also supports these options:
 .SP
 .IP "" 0
+\fB-c\fR
+.IP "" 2
+Refuse to commit files unless the user has registered a valid edit on the
+file via \fBcvs edit\fR.  This is most useful when \fBcommit -c\fR
+and \fBedit -c\fR have been placed in all \fB.cvsrc\fR files.
+A commit can be forced anyways by either regestering an edit retroactively
+via \fBcvs edit\fR (no changes to the file will be lost) or using the
+\fB-f\fR option to commit.  Support for \fBcommit -c\fR requires both
+client and a server versions 1.12.10 or greater.
+.SP
+.IP "" 0
 \fB-F \fIfile\fB\fR
 .IP "" 2
 Read the log message from \fIfile\fR, instead
@@ -1500,7 +1461,8 @@ Note that this is not the standard behavior of
 the \fB-f\fR option as defined in see node `Common options\(aq in the CVS manual.
 .SP
 Force \fBcvs\fR to commit a new revision even if you haven\(aqt
-made any changes to the file.  If the current revision
+made any changes to the file.  As of \fBcvs\fR version 1.12.10,
+it also causes the \fB-c\fR option to be ignored.  If the current revision
 of \fIfile\fR is 1.7, then the following two commands
 are equivalent:
 .SP
@@ -2831,8 +2793,10 @@ At least three arguments are required.
 \fIrepository\fR is needed to identify the collection
 of source.  \fIvendortag\fR is a tag for the entire
 branch (e.g., for 1.1.1).  You must also specify at
-least one \fIreleasetag\fR to identify the files at
-the leaves created each time you execute \fBimport\fR.
+least one \fIreleasetag\fR to uniquely identify the files at
+the leaves created each time you execute \fBimport\fR.  The
+\fIreleasetag\fR should be new, not previously existing in the
+repository file, and uniquely identify the imported release,
 .SP
 Note that \fBimport\fR does \fInot\fR change the
 directory in which you invoke it.  In particular, it
@@ -2889,6 +2853,23 @@ import.  You can use this option repeatedly.
 \fIspec\fR can be a file name pattern of the same type
 that you can specify in the \fB.cvswrappers\fR
 file. see node `Wrappers\(aq in the CVS manual.
+.SP
+.IP "" 0
+\fB-X\fR
+.IP "" 2
+Modify the algorithm used by \fBcvs\fR when importing new files
+so that new files do not immediately appear on the main trunk.
+.SP
+Specifically, this flag causes \fBcvs\fR to mark new files as
+if they were deleted on the main trunk, by taking the following
+steps for each file in addition to those normally taken on import:
+creating a new revision on the main trunk indicating that
+the new file is \fBdead\fR, resetting the new file\(aqs default branch,
+and placing the file in the Attic (see node `Attic\(aq in the CVS manual) directory.
+.SP
+Use of this option can be forced on a repository-wide basis
+by setting the \fBImportNewFilesToVendorBranchOnly\fR option in
+CVSROOT/config (see node `config\(aq in the CVS manual).
 .SP
 .SH "import output"
 .SP

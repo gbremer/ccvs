@@ -40,9 +40,15 @@
 #endif /* __attribute__ */
 
 /* begin GNULIB headers */
+#include "dirname.h"
 #include "exit.h"
-#include "vasnprintf.h"
+#include "getdate.h"
+#include "minmax.h"
+#include "regex.h"
+#include "strcase.h"
 #include "xalloc.h"
+#include "xgetcwd.h"
+#include "xreadlink.h"
 #include "xsize.h"
 /* end GNULIB headers */
 
@@ -78,8 +84,6 @@ char *strerror (int);
 #include <ndbm.h>
 #endif /* MY_NDBM */
 
-#include "regex.h"
-#include "getopt.h"
 #include "wait.h"
 
 #include "rcs.h"
@@ -149,23 +153,28 @@ char *strerror (int);
  * entire source repository beginning at $CVSROOT.
  */
 #define	CVSROOTADM		"CVSROOT"
-#define	CVSROOTADM_MODULES	"modules"
-#define	CVSROOTADM_LOGINFO	"loginfo"
-#define	CVSROOTADM_RCSINFO	"rcsinfo"
-#define CVSROOTADM_COMMITINFO	"commitinfo"
-#define CVSROOTADM_TAGINFO      "taginfo"
-#define CVSROOTADM_VERIFYMSG    "verifymsg"
-#define	CVSROOTADM_HISTORY	"history"
-#define CVSROOTADM_VALTAGS	"val-tags"
-#define	CVSROOTADM_IGNORE	"cvsignore"
 #define	CVSROOTADM_CHECKOUTLIST "checkoutlist"
-#define CVSROOTADM_WRAPPER	"cvswrappers"
-#define CVSROOTADM_NOTIFY	"notify"
-#define CVSROOTADM_USERS	"users"
-#define CVSROOTADM_READERS	"readers"
-#define CVSROOTADM_WRITERS	"writers"
-#define CVSROOTADM_PASSWD	"passwd"
+#define CVSROOTADM_COMMITINFO	"commitinfo"
 #define CVSROOTADM_CONFIG	"config"
+#define	CVSROOTADM_HISTORY	"history"
+#define	CVSROOTADM_IGNORE	"cvsignore"
+#define	CVSROOTADM_LOGINFO	"loginfo"
+#define	CVSROOTADM_MODULES	"modules"
+#define CVSROOTADM_NOTIFY	"notify"
+#define CVSROOTADM_PASSWD	"passwd"
+#define CVSROOTADM_POSTADMIN	"postadmin"
+#define CVSROOTADM_POSTPROXY	"postproxy"
+#define CVSROOTADM_POSTTAG	"posttag"
+#define CVSROOTADM_POSTWATCH	"postwatch"
+#define CVSROOTADM_PREPROXY	"preproxy"
+#define	CVSROOTADM_RCSINFO	"rcsinfo"
+#define CVSROOTADM_READERS	"readers"
+#define CVSROOTADM_TAGINFO      "taginfo"
+#define CVSROOTADM_USERS	"users"
+#define CVSROOTADM_VALTAGS	"val-tags"
+#define CVSROOTADM_VERIFYMSG    "verifymsg"
+#define CVSROOTADM_WRAPPER	"cvswrappers"
+#define CVSROOTADM_WRITERS	"writers"
 
 #define CVSNULLREPOS		"Emptydir"	/* an empty directory */
 
@@ -216,13 +225,9 @@ char *strerror (int);
 #define	CVSBRANCH	"1.1.1"		/* RCS branch used for vendor srcs */
 
 #ifdef USE_VMS_FILENAMES
-#define BAKPREFIX       "_$"
-#define DEVNULL         "NLA0:"
+# define BAKPREFIX	"_$"
 #else /* USE_VMS_FILENAMES */
-#define	BAKPREFIX	".#"		/* when rcsmerge'ing */
-#ifndef DEVNULL
-#define	DEVNULL		"/dev/null"
-#endif
+# define BAKPREFIX	".#"		/* when rcsmerge'ing */
 #endif /* USE_VMS_FILENAMES */
 
 /*
@@ -247,7 +252,10 @@ char *strerror (int);
 #define	EDITOR3_ENV	"EDITOR"	/* which editor to use */
 
 #define	CVSROOT_ENV	"CVSROOT"	/* source directory root */
-#define	CVSROOT_DFLT	NULL		/* No dflt; must set for checkout */
+/* Define CVSROOT_DFLT to a fallback value for CVSROOT.
+ *
+#undef	CVSROOT_DFL
+ */
 
 #define	IGNORE_ENV	"CVSIGNORE"	/* More files to ignore */
 #define WRAPPER_ENV     "CVSWRAPPERS"   /* name of the wrapper file */
@@ -360,10 +368,10 @@ extern mode_t cvsumask;
    from the CVSROOT environment variable or from a CVS/Root file.  */
 extern char *CVSroot_cmdline;
 
-/* These variables keep track of all of the CVSROOT directories that
-   have been seen by the client and the current one of those selected.  */
+/* This variable keeps track of all of the CVSROOT directories that
+ * have been seen by the client.
+ */
 extern List *root_directories;
-extern cvsroot_t *current_parsed_root;
 
 char *emptydir_name (void);
 int safe_location (char *);
@@ -373,16 +381,17 @@ extern int noexec;		/* Don't modify disk anywhere */
 extern int readonlyfs;		/* fail on all write locks; succeed all read locks */
 extern int logoff;		/* Don't write history entry */
 
-extern int top_level_admin;
-#ifdef SUPPORT_OLD_INFO_FMT_STRINGS
-extern int UseNewInfoFmtStrings;
-#endif /* SUPPORT_OLD_INFO_FMT_STRINGS */
 
 
 #define LOGMSG_REREAD_NEVER 0	/* do_verify - never  reread message */
 #define LOGMSG_REREAD_ALWAYS 1	/* do_verify - always reread message */
 #define LOGMSG_REREAD_STAT 2	/* do_verify - reread message if changed */
-extern int RereadLogAfterVerify;
+
+/* This header needs the LOGMSG_* defns above.  */
+#include "parseinfo.h"
+
+/* This structure holds the global configuration data.  */
+extern struct config *config;
 
 #ifdef CLIENT_SUPPORT
 extern List *dirs_sent_to_server; /* used to decide which "Argument
@@ -403,6 +412,7 @@ int RCS_merge (RCSNode *, const char *, const char *, const char *,
 #define RCS_FLAGS_QUIET 4
 #define RCS_FLAGS_MODTIME 8
 #define RCS_FLAGS_KEEPFILE 16
+#define RCS_FLAGS_USETIME 32
 
 int RCS_exec_rcsdiff (RCSNode *rcsfile,
                       const char *opts, const char *options,
@@ -416,6 +426,17 @@ int diff_exec (const char *file1, const char *file2,
 
 
 #include "error.h"
+
+/* If non-zero, error will use the CVS protocol to report error
+ * messages.  This will only be set in the CVS server parent process;
+ * most other code is run via do_cvs_command, which forks off a child
+ * process and packages up its stderr in the protocol.
+ *
+ * This needs to be here rather than in error.h in order to use an unforked
+ * error.h from GNULIB.
+ */
+extern int error_use_protocol;
+
 
 DBM *open_module (void);
 FILE *open_file (const char *, const char *);
@@ -438,17 +459,6 @@ char *Name_Repository (const char *dir, const char *update_dir);
 const char *Short_Repository (const char *repository);
 void Sanitize_Repository_Name (char *repository);
 
-char *Name_Root (char *dir, char *update_dir);
-void free_cvsroot_t (cvsroot_t *root_in);
-cvsroot_t *parse_cvsroot (const char *root)
-	__attribute__ ((__malloc__));
-cvsroot_t *local_cvsroot (const char *dir)
-	__attribute__ ((__malloc__));
-void Create_Root (const char *dir, const char *rootdir);
-void root_allow_add (char *);
-void root_allow_free (void);
-int root_allow_ok (char *);
-
 char *previous_rev (RCSNode *rcs, const char *rev);
 char *gca (const char *rev1, const char *rev2);
 void check_numeric (const char *, int, char **);
@@ -457,14 +467,18 @@ char *entries_time (time_t unixtime);
 time_t unix_time_stamp (const char *file);
 char *time_stamp (const char *file);
 
-void *xmalloc (size_t bytes)
-	__attribute__((__malloc__));
-void *xrealloc (void *ptr, size_t bytes)
-	__attribute__ ((__malloc__));
 void expand_string (char **, size_t *, size_t);
 void xrealloc_and_strcat (char **, size_t *, const char *);
-char *xstrdup (const char *str)
+/* Many, many CVS calls to xstrdup depend on it to return NULL when its
+ * argument is NULL.
+ */
+#define xstrdup Xstrdup
+char *Xstrdup (const char *str)
 	__attribute__ ((__malloc__));
+char *Xasprintf (const char *format, ...)
+	__attribute__ ((__malloc__, __format__ (__printf__, 1, 2)));
+char *Xasnprintf (char *resultbuf, size_t *lengthp, const char *format, ...)
+        __attribute__ ((__malloc__, __format__ (__printf__, 3, 4)));
 int strip_trailing_newlines (char *str);
 int pathname_levels (const char *path);
 
@@ -472,21 +486,18 @@ typedef	int (*CALLPROC)	(const char *repository, const char *value,
                          void *closure);
 int Parse_Info (const char *infofile, const char *repository,
                 CALLPROC callproc, int opt, void *closure);
-int parse_config (char *);
 
-typedef	RETSIGTYPE (*SIGCLEANUPPROC)	();
+typedef	RETSIGTYPE (*SIGCLEANUPPROC)	(int);
 int SIG_register (int sig, SIGCLEANUPPROC sigcleanup);
-int isdir (const char *file);
-int isfile (const char *file);
-int islink (const char *file);
-int isdevice (const char *file);
-int isreadable (const char *file);
-int iswritable (const char *file);
-int isaccessible (const char *file, const int mode);
-int isabsolute (const char *filename);
-#ifdef HAVE_READLINK
-char *xreadlink (const char *link);
-#endif /* HAVE_READLINK */
+bool isdir (const char *file);
+bool isfile (const char *file);
+ssize_t islink (const char *file);
+bool isdevice (const char *file);
+bool isreadable (const char *file);
+bool iswritable (const char *file);
+bool isaccessible (const char *file, const int mode);
+bool isabsolute (const char *filename);
+char *Xreadlink (const char *link, size_t size);
 char *xresolvepath (const char *path);
 const char *last_component (const char *path);
 char *get_homedir (void);
@@ -538,19 +549,12 @@ int update (int argc, char *argv[]);
  */
 void write_letter (struct file_info *finfo, int letter);
 int xcmp (const char *file1, const char *file2);
-int yesno (void);
 void *valloc (size_t bytes);
-
-/* Need this until we back out the get_date () proto again and use a current
- * version of getdate.y from GNULIB.
- */
-#include "xtime.h"
-time_t get_date (char *date, struct timeb *now);
 
 int Create_Admin (const char *dir, const char *update_dir,
                   const char *repository, const char *tag, const char *date,
                   int nonbranch, int warn, int dotemplate);
-int expand_at_signs (const char *, off_t, FILE *);
+int expand_at_signs (const char *, size_t, FILE *);
 
 /* Locking subsystem (implemented in lock.c).  */
 
@@ -565,12 +569,6 @@ void lock_tree_promotably (int argc, char **argv, int local, int which,
 
 /* See lock.c for description.  */
 void lock_dir_for_write (const char *);
-
-/* LockDir setting from CVSROOT/config.  */
-extern char *lock_dir;
-
-/* AllowedAdminOptions setting from CVSROOT/config.  */
-extern char *UserAdminOptions;
 
 void Scratch_Entry (List * list, const char *fname);
 void ParseTag (char **tagp, char **datep, int *nonbranchp);
@@ -612,19 +610,13 @@ void rename_file (const char *from, const char *to);
 void expand_wild (int argc, char **argv, 
                   int *pargc, char ***pargv);
 
-#ifdef SERVER_SUPPORT
-int cvs_casecmp (const char *, const char *);
-#endif
-
 /* exithandle.c */
 void signals_register (RETSIGTYPE (*handler)(int));
 void cleanup_register (void (*handler) (void));
 
-void strip_trailing_slashes (char *path);
 void update_delproc (Node * p);
 void usage (const char *const *cpp);
 void xchmod (const char *fname, int writable);
-char *xgetwd (void);
 List *Find_Names (char *repository, int which, int aflag,
 		  List ** optentries);
 void Register (List * list, const char *fname, const char *vn, const char *ts,
@@ -722,7 +714,7 @@ struct format_cmdline_walklist_closure
 char *cmdlinequote (char quotes, char *s);
 char *cmdlineescape (char quotes, char *s);
 #ifdef SUPPORT_OLD_INFO_FMT_STRINGS
-char *format_cmdline (int oldway, const char *srepos, const char *format, ...);
+char *format_cmdline (bool oldway, const char *srepos, const char *format, ...);
 #else /* SUPPORT_OLD_INFO_FMT_STRINGS */
 char *format_cmdline (const char *format, ...);
 #endif /* SUPPORT_OLD_INFO_FMT_STRINGS */
@@ -930,7 +922,7 @@ int cvsstatus (int argc, char **argv);
 int cvstag (int argc, char **argv);
 int version (int argc, char **argv);
 
-unsigned long int lookup_command_attribute (char *);
+unsigned long int lookup_command_attribute (const char *);
 
 #if defined(AUTH_CLIENT_SUPPORT) || defined(AUTH_SERVER_SUPPORT)
 char *scramble (char *str);
@@ -947,7 +939,7 @@ char *normalize_cvsroot (const cvsroot_t *root)
 	__attribute__ ((__malloc__));
 #endif /* AUTH_CLIENT_SUPPORT */
 
-void tag_check_valid (char *, int, char **, int, int, char *);
+void tag_check_valid (char *, int, char **, int, int, char *, bool);
 void tag_check_valid_join (char *, int, char **, int, int,
                            char *);
 

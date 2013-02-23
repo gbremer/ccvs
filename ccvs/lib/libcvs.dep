@@ -1,9 +1,5 @@
 # Microsoft Developer Studio Generated Dependency File, included by libcvs.mak
 
-.\argmatch.c : \
-	"..\windows-NT\config.h"\
-	
-
 .\asnprintf.c : \
 	"..\windows-NT\config.h"\
 	".\vasnprintf.h"\
@@ -11,7 +7,15 @@
 
 .\basename.c : \
 	"..\windows-NT\config.h"\
+	"..\windows-NT\stdbool.h"\
 	".\dirname.h"\
+	
+
+.\dirname.c : \
+	"..\windows-NT\config.h"\
+	"..\windows-NT\stdbool.h"\
+	".\dirname.h"\
+	".\xalloc.h"\
 	
 
 .\exitfail.c : \
@@ -25,8 +29,10 @@
 	"..\windows-NT\ndir.h"\
 	"..\windows-NT\pwd.h"\
 	"..\windows-NT\stdbool.h"\
+	"..\windows-NT\stdint.h"\
 	"..\windows-NT\unistd.h"\
 	".\fnmatch.h"\
+	".\getopt.h"\
 	".\gettext.h"\
 	".\system.h"\
 	".\timespec.h"\
@@ -35,6 +41,7 @@
 
 .\fnmatch.c : \
 	"..\windows-NT\config.h"\
+	"..\windows-NT\stdbool.h"\
 	".\alloca.h"\
 	".\fnmatch.h"\
 	".\fnmatch_loop.c"\
@@ -50,7 +57,12 @@
 
 .\getdate.c : \
 	"..\windows-NT\config.h"\
-	".\xtime.h"\
+	"..\windows-NT\stdbool.h"\
+	".\alloca.h"\
+	".\getdate.h"\
+	".\setenv.h"\
+	".\timespec.h"\
+	".\xalloc.h"\
 	
 
 .\getline.c : \
@@ -61,19 +73,21 @@
 
 .\getndelim2.c : \
 	"..\windows-NT\config.h"\
+	"..\windows-NT\stdint.h"\
 	".\getndelim2.h"\
-	".\unlocked-io.h"\
 	
 
 .\getopt.c : \
 	"..\windows-NT\config.h"\
 	".\getopt.h"\
+	".\getopt_int.h"\
 	".\gettext.h"\
 	
 
 .\getopt1.c : \
 	"..\windows-NT\config.h"\
 	".\getopt.h"\
+	".\getopt_int.h"\
 	
 
 .\gettime.c : \
@@ -83,6 +97,7 @@
 
 .\md5.c : \
 	"..\windows-NT\config.h"\
+	"..\windows-NT\stdint.h"\
 	".\md5.h"\
 	
 
@@ -93,9 +108,14 @@
 
 ".\printf-parse.c" : \
 	"..\windows-NT\config.h"\
+	"..\windows-NT\stdint.h"\
 	".\printf-args.h"\
 	".\printf-parse.h"\
 	".\xsize.h"\
+	
+
+.\readlink.c : \
+	"..\windows-NT\config.h"\
 	
 
 .\realloc.c : \
@@ -106,14 +126,25 @@
 	"..\windows-NT\config.h"\
 	".\gettext.h"\
 	".\regex.h"\
-	".\unlocked-io.h"\
 	
 
-.\savecwd.c : \
+.\rpmatch.c : \
+	"..\windows-NT\config.h"\
+	
+
+".\save-cwd.c" : \
+	"..\windows-NT\config.h"\
+	"..\windows-NT\stdbool.h"\
+	"..\windows-NT\unistd.h"\
+	".\save-cwd.h"\
+	".\xgetcwd.h"\
+	
+
+.\setenv.c : \
 	"..\windows-NT\config.h"\
 	"..\windows-NT\unistd.h"\
-	".\error.h"\
-	".\savecwd.h"\
+	".\alloca.h"\
+	".\allocsa.h"\
 	
 
 .\sighandle.c : \
@@ -121,17 +152,39 @@
 	"..\windows-NT\ndir.h"\
 	"..\windows-NT\pwd.h"\
 	"..\windows-NT\stdbool.h"\
+	"..\windows-NT\stdint.h"\
 	"..\windows-NT\unistd.h"\
 	".\fnmatch.h"\
+	".\getopt.h"\
 	".\gettext.h"\
 	".\system.h"\
 	".\timespec.h"\
 	".\unlocked-io.h"\
 	
 
+.\strcasecmp.c : \
+	"..\windows-NT\config.h"\
+	
+
+.\strftime.c : \
+	"..\windows-NT\config.h"\
+	".\time_r.h"\
+	
+
 .\stripslash.c : \
 	"..\windows-NT\config.h"\
+	"..\windows-NT\stdbool.h"\
 	".\dirname.h"\
+	
+
+.\time_r.c : \
+	"..\windows-NT\config.h"\
+	".\time_r.h"\
+	
+
+.\unsetenv.c : \
+	"..\windows-NT\config.h"\
+	"..\windows-NT\unistd.h"\
 	
 
 .\valloc.c : \
@@ -139,8 +192,10 @@
 	"..\windows-NT\ndir.h"\
 	"..\windows-NT\pwd.h"\
 	"..\windows-NT\stdbool.h"\
+	"..\windows-NT\stdint.h"\
 	"..\windows-NT\unistd.h"\
 	".\fnmatch.h"\
+	".\getopt.h"\
 	".\getpagesize.h"\
 	".\gettext.h"\
 	".\system.h"\
@@ -150,6 +205,7 @@
 
 .\vasnprintf.c : \
 	"..\windows-NT\config.h"\
+	"..\windows-NT\stdint.h"\
 	".\alloca.h"\
 	".\printf-args.h"\
 	".\printf-parse.h"\
@@ -157,21 +213,13 @@
 	".\xsize.h"\
 	
 
-.\xgetwd.c : \
+.\vasprintf.c : \
 	"..\windows-NT\config.h"\
-	"..\windows-NT\ndir.h"\
-	"..\windows-NT\pwd.h"\
-	"..\windows-NT\stdbool.h"\
-	"..\windows-NT\unistd.h"\
-	".\fnmatch.h"\
-	".\gettext.h"\
-	".\pathmax.h"\
-	".\system.h"\
-	".\timespec.h"\
-	".\unlocked-io.h"\
+	".\vasnprintf.h"\
+	".\vasprintf.h"\
 	
 
-.\xmalloc.c : \
+".\xalloc-die.c" : \
 	"..\windows-NT\config.h"\
 	".\error.h"\
 	".\exitfail.h"\
@@ -179,14 +227,36 @@
 	".\xalloc.h"\
 	
 
-.\xstrdup.c : \
+.\xgetcwd.c : \
+	"..\windows-NT\config.h"\
+	"..\windows-NT\unistd.h"\
+	".\xalloc.h"\
+	".\xgetcwd.h"\
+	
+
+.\xmalloc.c : \
 	"..\windows-NT\config.h"\
 	".\xalloc.h"\
 	
 
+.\xreadlink.c : \
+	"..\windows-NT\config.h"\
+	"..\windows-NT\unistd.h"\
+	".\xalloc.h"\
+	".\xreadlink.h"\
+	
+
 .\yesno.c : \
 	"..\windows-NT\config.h"\
+	"..\windows-NT\stdbool.h"\
+	".\yesno.h"\
 	
+
+!IF  "$(CFG)" == "libcvs - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "libcvs - Win32 Debug"
+
+!ENDIF 
 
 !IF  "$(CFG)" == "libcvs - Win32 Release"
 

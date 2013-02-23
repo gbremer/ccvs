@@ -18,6 +18,8 @@
    file system semantics.  */
 
 #include "cvs.h"
+#include "save-cwd.h"
+#include "xsize.h"
 
 static int deep_remove_dir (const char *path);
 
@@ -30,6 +32,7 @@ copy_file (const char *from, const char *to)
     struct stat sb;
     struct utimbuf t;
     int fdin, fdout;
+    ssize_t rsize;
 
     TRACE ( 1, "copy(%s,%s)", from, to );
 
@@ -38,9 +41,9 @@ copy_file (const char *from, const char *to)
 
     /* If the file to be copied is a link or a device, then just create
        the new link or device appropriately. */
-    if (islink (from))
+    if ((rsize = islink (from)) > 0)
     {
-	char *source = xreadlink (from);
+	char *source = Xreadlink (from, rsize);
 	symlink (source, to);
 	free (source);
 	return;
@@ -88,11 +91,6 @@ copy_file (const char *from, const char *to)
 		    error (1, errno, "cannot write file %s for copying", to);
 		}
 	    }
-
-#ifdef HAVE_FSYNC
-	    if (fsync (fdout)) 
-		error (1, errno, "cannot fsync file %s after copying", to);
-#endif
 	}
 
 	if (close (fdin) < 0) 
@@ -108,95 +106,109 @@ copy_file (const char *from, const char *to)
     (void) utime (to, &t);
 }
 
+
+
 /* FIXME-krp: these functions would benefit from caching the char * &
    stat buf.  */
 
 /*
- * Returns non-zero if the argument file is a directory, or is a symbolic
+ * Returns true if the argument file is a directory, or is a symbolic
  * link which points to a directory.
  */
-int
+bool
 isdir (const char *file)
 {
     struct stat sb;
 
-    if( CVS_STAT( file, &sb ) < 0 )
-	return (0);
-    return (S_ISDIR (sb.st_mode));
+    if (CVS_STAT (file, &sb) < 0)
+	return false;
+    return S_ISDIR (sb.st_mode);
 }
 
+
+
 /*
- * Returns non-zero if the argument file is a symbolic link.
+ * Returns 0 if the argument file is not a symbolic link.
+ * Returns size of the link if it is a symbolic link.
  */
-int
+ssize_t
 islink (const char *file)
 {
+    ssize_t retsize = 0;
 #ifdef S_ISLNK
     struct stat sb;
 
-    if (CVS_LSTAT (file, &sb) < 0)
-	return (0);
-    return (S_ISLNK (sb.st_mode));
-#else
-    return (0);
+    if ((CVS_LSTAT (file, &sb) >= 0) && S_ISLNK (sb.st_mode))
+	retsize = sb.st_size;
 #endif
+    return retsize;
 }
 
+
+
 /*
- * Returns non-zero if the argument file is a block or
+ * Returns true if the argument file is a block or
  * character special device.
  */
-int
+bool
 isdevice (const char *file)
 {
     struct stat sb;
 
     if (CVS_LSTAT (file, &sb) < 0)
-	return (0);
+	return false;
 #ifdef S_ISBLK
     if (S_ISBLK (sb.st_mode))
-	return 1;
+	return true;
 #endif
 #ifdef S_ISCHR
     if (S_ISCHR (sb.st_mode))
-	return 1;
+	return true;
 #endif
-    return 0;
+    return false;
 }
 
+
+
 /*
- * Returns non-zero if the argument file exists.
+ * Returns true if the argument file exists.
  */
-int
+bool
 isfile (const char *file)
 {
-    return isaccessible(file, F_OK);
+    return isaccessible (file, F_OK);
 }
+
+
 
 /*
  * Returns non-zero if the argument file is readable.
  */
-int
+bool
 isreadable (const char *file)
 {
-    return isaccessible(file, R_OK);
+    return isaccessible (file, R_OK);
 }
+
+
 
 /*
  * Returns non-zero if the argument file is writable.
  */
-int
+bool
 iswritable (const char *file)
 {
-    return isaccessible(file, W_OK);
+    return isaccessible (file, W_OK);
 }
 
+
+
 /*
- * Returns non-zero if the argument file is accessable according to
+ * Returns true if the argument file is accessable according to
  * mode.  If compiled with SETXID_SUPPORT also works if cvs has setxid
  * bits set.
  */
-int
+bool
 isaccessible (const char *file, const int mode)
 {
 #ifdef SETXID_SUPPORT
@@ -206,19 +218,19 @@ isaccessible (const char *file, const int mode)
     int omask = 0;
     int uid, mask;
     
-    if( CVS_STAT( file, &sb ) == -1 )
-	return 0;
+    if (CVS_STAT (file, &sb)== -1)
+	return false;
     if (mode == F_OK)
-	return 1;
+	return true;
 
     uid = geteuid();
     if (uid == 0)		/* superuser */
     {
 	if (!(mode & X_OK) || (sb.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)))
-	    return 1;
+	    return true;
 
 	errno = EACCES;
-	return 0;
+	return false;
     }
 	
     if (mode & R_OK)
@@ -242,13 +254,15 @@ isaccessible (const char *file, const int mode)
 
     mask = sb.st_uid == uid ? umask : sb.st_gid == getegid() ? gmask : omask;
     if ((sb.st_mode & mask) == mask)
-	return 1;
+	return true;
     errno = EACCES;
-    return 0;
-#else
-    return access(file, mode) == 0;
-#endif
+    return false;
+#else /* !SETXID_SUPPORT */
+    return access (file, mode) == 0;
+#endif /* SETXID_SUPPORT */
 }
+
+
 
 /*
  * Open a file and die if it fails
@@ -335,8 +349,10 @@ xchmod (const char *fname, int writable)
     struct stat sb;
     mode_t mode, oumask;
 
-    if (preserve_perms)
+#ifdef PRESERVE_PERMISSIONS_SUPPORT
+    if (config->preserve_perms)
 	return;
+#endif /* PRESERVE_PERMISSIONS_SUPPORT */
 
     if( CVS_STAT( fname, &sb ) < 0 )
     {
@@ -585,8 +601,8 @@ xcmp (const char *file1, const char *file2)
     if (S_ISLNK (sb1.st_mode) && S_ISLNK (sb2.st_mode))
     {
 	int result;
-	buf1 = xreadlink (file1);
-	buf2 = xreadlink (file2);
+	buf1 = Xreadlink (file1, sb1.st_size);
+	buf2 = Xreadlink (file2, sb2.st_size);
 	result = (strcmp (buf1, buf2) == 0);
 	free (buf1);
 	free (buf2);
@@ -758,54 +774,8 @@ FILE *cvs_temp_file (char **filename)
 
 
 
-#ifdef HAVE_READLINK
 /* char *
- * xreadlink ( const char *link )
- *
- * Like the X/OPEN and 4.4BSD readlink() function, but allocates and returns
- * its own buf.
- *
- * INPUTS
- *  link	The original path.
- *
- * RETURNS
- *  The resolution of the final symbolic link in the path.
- *
- * ERRORS
- *  This function exits with a fatal error if it fails to read the link for
- *  any reason.
- */
-char *
-xreadlink (const char *link)
-{
-    char *file = NULL;
-    int buflen = 128;
-    int link_name_len;
-
-    /* Get the name of the file to which `from' is linked.
-       FIXME: what portability issues arise here?  Are readlink &
-       ENAMETOOLONG defined on all systems? -twp */
-    do
-    {
-	file = xrealloc (file, buflen);
-	link_name_len = readlink (link, file, buflen - 1);
-	buflen *= 2;
-    }
-    while (link_name_len < 0 && errno == ENAMETOOLONG);
-
-    if (link_name_len < 0)
-	error (1, errno, "cannot readlink %s", link);
-
-    file[link_name_len] = '\0';
-
-    return file;
-}
-#endif /* HAVE_READLINK */
-
-
-
-/* char *
- * xresolvepath ( const char *path )
+ * xresolvepath (const char *path)
  *
  * Like xreadlink(), but resolve all links in a path.
  *
@@ -823,22 +793,22 @@ char *
 xresolvepath (const char *path)
 {
     char *hardpath;
-    char *owd;
+    struct saved_cwd owd;
 
-    assert ( isdir ( path ) );
+    assert (isdir (path));
 
     /* FIXME - If HAVE_READLINK is defined, we should probably walk the path
      * bit by bit calling xreadlink().
      */
 
-    owd = xgetwd();
-    if ( CVS_CHDIR ( path ) < 0)
-	error ( 1, errno, "cannot chdir to %s", path );
-    if ( ( hardpath = xgetwd() ) == NULL )
+    if (save_cwd (&owd))
+	error (1, 0, "failed to save current working directory");
+    if (CVS_CHDIR (path ) < 0)
+	error (1, errno, "cannot chdir to %s", path);
+    if ((hardpath = xgetcwd ()) == NULL)
 	error (1, errno, "cannot getwd in %s", path);
-    if ( CVS_CHDIR ( owd ) < 0)
-	error ( 1, errno, "cannot chdir to %s", owd );
-    free (owd);
+    if (restore_cwd (&owd) < 0)
+	error (1, 0, "failed to restore working directory");
     return hardpath;
 }
 
@@ -941,31 +911,3 @@ expand_wild (int argc, char **argv, int *pargc, char ***pargv)
     for (i = 0; i < argc; ++i)
 	(*pargv)[i] = xstrdup (argv[i]);
 }
-
-
-
-#ifdef SERVER_SUPPORT
-/* Case-insensitive string compare.  I know that some systems
-   have such a routine, but I'm not sure I see any reasons for
-   dealing with the hair of figuring out whether they do (I haven't
-   looked into whether this is a performance bottleneck; I would guess
-   not).  */
-int
-cvs_casecmp (const char *str1, const char *str2)
-{
-    const char *p;
-    const char *q;
-    int pqdiff;
-
-    p = str1;
-    q = str2;
-    while ((pqdiff = tolower (*p) - tolower (*q)) == 0)
-    {
-	if (*p == '\0')
-	    return 0;
-	++p;
-	++q;
-    }
-    return pqdiff;
-}
-#endif /* SERVER_SUPPORT */

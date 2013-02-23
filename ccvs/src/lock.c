@@ -126,9 +126,6 @@ static struct lock global_writelock;
    with locklist, sort of.  */
 static List *lock_tree_list;
 
-/* LockDir from CVSROOT/config.  */
-char *lock_dir;
-
 
 
 /* Return a newly malloc'd string containing the name of the lock for the
@@ -150,7 +147,7 @@ lock_name (const char *repository, const char *name)
     TRACE (TRACE_FLOW, "lock_name (%s, %s)",
 	   repository  ? repository : "(null)", name ? name : "(null)");
 
-    if (lock_dir == NULL)
+    if (!config->lock_dir)
     {
 	/* This is the easy case.  Because the lock files go directly
 	   in the repository, no need to create directories or anything.  */
@@ -177,11 +174,11 @@ lock_name (const char *repository, const char *name)
 	else
 	    assert (short_repos[-1] == '/');
 
-	retval = xmalloc (strlen (lock_dir)
+	retval = xmalloc (strlen (config->lock_dir)
 			  + strlen (short_repos)
 			  + strlen (name)
 			  + 10);
-	strcpy (retval, lock_dir);
+	strcpy (retval, config->lock_dir);
 	q = retval + strlen (retval);
 	*q++ = '/';
 
@@ -220,8 +217,8 @@ lock_name (const char *repository, const char *name)
 	   because the locks will generally be removed by the process
 	   which created them.  */
 
-	if (CVS_STAT (lock_dir, &sb) < 0)
-	    error (1, errno, "cannot stat %s", lock_dir);
+	if (CVS_STAT (config->lock_dir, &sb) < 0)
+	    error (1, errno, "cannot stat %s", config->lock_dir);
 	new_mode = sb.st_mode;
 	save_umask = umask (0000);
 	saved_umask = 1;
@@ -286,7 +283,7 @@ lock_name (const char *repository, const char *name)
 static void
 remove_lock_files (struct lock *lock, int free_repository)
 {
-    TRACE (TRACE_FLOW, "remove_lock_files(%s)", lock->repository);
+    TRACE (TRACE_FLOW, "remove_lock_files (%s)", lock->repository);
 
     /* If lock->file is set, the lock *might* have been created, but since
      * Reader_Lock & lock_dir_for_write don't use SIG_beginCrSect the way that
@@ -389,36 +386,24 @@ Simple_Lock_Cleanup (void)
 void
 Lock_Cleanup (void)
 {
-    static short int never_run_again = 0;
-
     TRACE (TRACE_FUNCTION, "Lock_Cleanup()");
 
-    /* Since main_cleanup() always calls exit() (via error (1, ...)), we avoid
-     * allowing this function to be called twice as an optimization.
-     *
-     * If we are already in a signal critical section, assume we were called
-     * via the signal handler and set a flag which will prevent future calls.
-     * The only time that we should get into one of these functions otherwise
-     * while still in a critical section is if error(1,...) is called from a
-     * critical section, in which case we are exiting and interrupts are
-     * already being ignored.
-     *
-     * For Lock_Cleanup(), this is not a run_once variable since Lock_Cleanup()
-     * can be called to clean up the current lock set multiple times by the
-     * same run of a CVS command.
-     *
-     * For server_cleanup() and rcs_cleanup(), this is not a run_once variable
-     * since a call to the cleanup function from atexit() could be interrupted
-     * by the interrupt handler.
+    /* FIXME: Do not perform buffered I/O from an interrupt handler like
+     * this (via error).  However, I'm leaving the error-calling code there
+     * in the hope that on the rare occasion the error call is actually made
+     * (e.g., a fluky I/O error or permissions problem prevents the deletion
+     * of a just-created file) reentrancy won't be an issue.
      */
-    if (never_run_again) return;
-    if (SIG_inCrSect()) never_run_again = 1;
 
     remove_locks ();
 
     /* Avoid being interrupted during calls which set globals to NULL.  This
      * avoids having interrupt handlers attempt to use these global variables
      * in inconsistent states.
+     *
+     * This isn't always necessary, because sometimes we are called via exit()
+     * or the interrupt handler, in which case signals will already be blocked,
+     * but sometimes we might be called from elsewhere.
      */
     SIG_beginCrSect();
     dellist (&lock_tree_list);
@@ -1265,7 +1250,7 @@ lock_dir_for_write (const char *repository)
 		Node *p = findnode (locklist, repository);
 		if (p)
 		{
-		    remove_lock_files ((struct lock *)p->data, 1);
+		    remove_lock_files (p->data, 1);
 		    delnode (p);
 		}
 	    }

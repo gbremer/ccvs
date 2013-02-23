@@ -10,6 +10,8 @@
 
 #include "cvs.h"
 #include "getline.h"
+#include "vasprintf.h"
+#include "vasnprintf.h"
 
 /* Get wint_t.  */
 #ifdef HAVE_WINT_T
@@ -38,13 +40,40 @@ expand_string (char **strptr, size_t *n, size_t newsize)
 
 
 
+/* char *
+ * Xreadlink (const char *link, size_t size)
+ *
+ * INPUTS
+ *  link	The original path.
+ *  size	A guess as to the size needed for the path. It need
+ *              not be right.
+ * RETURNS
+ *  The resolution of the final symbolic link in the path.
+ *
+ * ERRORS
+ *  This function exits with a fatal error if it fails to read the
+ *  link for any reason.
+ */
+char *
+Xreadlink (const char *link, size_t size)
+{
+    char *file = xreadlink (link, size);
+
+    if (file == NULL)
+	error (1, errno, "cannot readlink %s", link);
+
+    return file;
+}
+
+
+
 /* *STR is a pointer to a malloc'd string or NULL.  *LENP is its allocated
  * length.  If *STR is NULL then *LENP must be 0 and visa-versa.
  * Add SRC to the end of *STR, reallocating *STR if necessary.  */
 void
 xrealloc_and_strcat (char **str, size_t *lenp, const char *src)
 {
-    short newstr = !*lenp;
+    bool newstr = !*lenp;
     expand_string (str, lenp, (newstr ? 0 : strlen (*str)) + strlen (src) + 1);
     if (newstr)
 	strcpy (*str, src);
@@ -209,7 +238,6 @@ char *
 increment_revnum (const char *rev)
 {
     char *newrev, *p;
-    int lastfield;
     size_t len = strlen (rev);
 
     newrev = xmalloc (len + 2);
@@ -712,10 +740,12 @@ get_file (const char *name, const char *fullname, const char *mode, char **buf, 
 void
 resolve_symlink (char **filename)
 {
+    ssize_t rsize;
+
     if (filename == NULL || *filename == NULL)
 	return;
 
-    while (islink (*filename))
+    while ((rsize = islink (*filename)) > 0)
     {
 #ifdef HAVE_READLINK
 	/* The clean thing to do is probably to have each filesubr.c
@@ -723,7 +753,7 @@ resolve_symlink (char **filename)
 	   platform, in which case islink would presumably return 0).
 	   But that would require editing each filesubr.c and so the
 	   expedient hack seems to be looking at HAVE_READLINK.  */
-	char *newname = xreadlink (*filename);
+	char *newname = Xreadlink (*filename, rsize);
 	
 	if (isabsolute (newname))
 	{
@@ -1037,7 +1067,7 @@ cmdlineescape (char quotes, char *s)
  */
 char *
 #ifdef SUPPORT_OLD_INFO_FMT_STRINGS
-format_cmdline (int oldway, const char *srepos, const char *format, ...)
+format_cmdline (bool oldway, const char *srepos, const char *format, ...)
 #else /* SUPPORT_OLD_INFO_FMT_STRINGS */
 format_cmdline (const char *format, ...)
 #endif /* SUPPORT_OLD_INFO_FMT_STRINGS */
@@ -1193,7 +1223,6 @@ format_cmdline (const char *format, ...)
 	strcpy (buf+1, conversion);
 	switch (*s)
 	{
-	    size_t dummy;
 	    case 'c':
 		/* chars (an integer conversion) */
 		if (!char_conversion)
@@ -1234,14 +1263,14 @@ format_cmdline (const char *format, ...)
 		    case sizeof(char):
 		    {
 		    	char arg_char = (char) va_arg (args, int);
-			b->data = asnprintf(NULL, &dummy, buf, arg_char);
+			b->data = Xasprintf (buf, arg_char);
 			break;
 		    }
 #ifdef UNIQUE_INT_TYPE_WINT_T		/* implies HAVE_WINT_T */
 		    case sizeof(wint_t):
 		    {
 		    	wint_t arg_wint_t = va_arg (args, wint_t);
-			b->data = asnprintf(NULL, &dummy, buf, arg_wint_t);
+			b->data = Xasprintf (buf, arg_wint_t);
 			break;
 		    }
 #endif /* UNIQUE_INT_TYPE_WINT_T */
@@ -1249,7 +1278,7 @@ format_cmdline (const char *format, ...)
 		    case sizeof(short):
 		    {
 		    	short arg_short = (short) va_arg (args, int);
-			b->data = asnprintf(NULL, &dummy, buf, arg_short);
+			b->data = Xasprintf (buf, arg_short);
 			break;
 		    }
 #endif /* UNIQUE_INT_TYPE_SHORT */
@@ -1257,7 +1286,7 @@ format_cmdline (const char *format, ...)
 		    case sizeof(int):
 		    {
 		    	int arg_int = va_arg (args, int);
-			b->data = asnprintf(NULL, &dummy, buf, arg_int);
+			b->data = Xasprintf(buf, arg_int);
 			break;
 		    }
 #endif /* UNIQUE_INT_TYPE_INT */
@@ -1265,7 +1294,7 @@ format_cmdline (const char *format, ...)
 		    case sizeof(long):
 		    {
 		    	long arg_long = va_arg (args, long);
-			b->data = asnprintf(NULL, &dummy, buf, arg_long);
+			b->data = Xasprintf (buf, arg_long);
 			break;
 		    }
 #endif /* UNIQUE_INT_TYPE_LONG */
@@ -1273,7 +1302,7 @@ format_cmdline (const char *format, ...)
 		    case sizeof(long long):
 		    {
 		    	long long arg_long_long = va_arg (args, long long);
-			b->data = asnprintf(NULL, &dummy, buf, arg_long_long);
+			b->data = Xasprintf (buf, arg_long_long);
 			break;
 		    }
 #endif /* UNIQUE_INT_TYPE_LONG_LONG */
@@ -1281,7 +1310,7 @@ format_cmdline (const char *format, ...)
 		    case sizeof(intmax_t):
 		    {
 		    	intmax_t arg_intmax_t = va_arg (args, intmax_t);
-			b->data = asnprintf(NULL, &dummy, buf, arg_intmax_t);
+			b->data = Xasprintf (buf, arg_intmax_t);
 			break;
 		    }
 #endif /* UNIQUE_INT_TYPE_INTMAX_T */
@@ -1289,7 +1318,7 @@ format_cmdline (const char *format, ...)
 		    case sizeof(size_t):
 		    {
 		    	size_t arg_size_t = va_arg (args, size_t);
-			b->data = asnprintf(NULL, &dummy, buf, arg_size_t);
+			b->data = Xasprintf (buf, arg_size_t);
 			break;
 		    }
 #endif /* UNIQUE_INT_TYPE_SIZE_T */
@@ -1297,7 +1326,7 @@ format_cmdline (const char *format, ...)
 		    case sizeof(ptrdiff_t):
 		    {
 		    	ptrdiff_t arg_ptrdiff_t = va_arg (args, ptrdiff_t);
-			b->data = asnprintf(NULL, &dummy, buf, arg_ptrdiff_t);
+			b->data = Xasprintf (buf, arg_ptrdiff_t);
 			break;
 		    }
 #endif /* UNIQUE_INT_TYPE_PTRDIFF_T */
@@ -1333,14 +1362,14 @@ format_cmdline (const char *format, ...)
 		    case sizeof(double):
 		    {
 		    	double arg_double = va_arg (args, double);
-			b->data = asnprintf(NULL, &dummy, buf, arg_double);
+			b->data = Xasprintf (buf, arg_double);
 			break;
 		    }
 #ifdef UNIQUE_FLOAT_TYPE_LONG_DOUBLE	/* implies HAVE_LONG_DOUBLE */
 		    case sizeof(long double):
 		    {
 		    	long double arg_long_double = va_arg (args, long double);
-			b->data = asnprintf(NULL, &dummy, buf, arg_long_double);
+			b->data = Xasprintf (buf, arg_long_double);
 			break;
 		    }
 #endif /* UNIQUE_FLOAT_TYPE_LONG_DOUBLE */
@@ -1363,8 +1392,7 @@ format_cmdline (const char *format, ...)
 		    case 2:
 		    {
 		    	wchar_t *arg_wchar_t_string = va_arg (args, wchar_t *);
-			b->data = asnprintf (NULL, &dummy, buf,
-			                     arg_wchar_t_string);
+			b->data = Xasprintf (buf, arg_wchar_t_string);
 			break;
 		    }
 #endif /* HAVE_WCHAR_T */
@@ -1802,9 +1830,9 @@ format_cmdline (const char *format, ...)
 
 
 
-/* Return non-zero iff FILENAME is absolute.
+/* Return true iff FILENAME is absolute.
    Trivial under Unix, but more complicated under other systems.  */
-int
+bool
 isabsolute (filename)
     const char *filename;
 {
@@ -1816,23 +1844,71 @@ isabsolute (filename)
 /*
  * void cvs_trace(int level, const char *fmt, ...)
  *
- * Print tracing information to stderr on request.  I haven't decided to
- * actually use levels yet, but I did implement them as CVSNT did.
+ * Print tracing information to stderr on request.  Levels are implemented
+ * as with CVSNT.
  */
-void cvs_trace ( int level, const char *fmt, ... )
+void cvs_trace (int level, const char *fmt, ...)
 {
-    if(trace >= level)
+    if (trace >= level)
     {
 	va_list va;
 
-	va_start( va, fmt );
+	va_start (va, fmt);
 #ifdef SERVER_SUPPORT
-	fprintf(stderr,"%c -> ",server_active?'S':' ');
+	fprintf (stderr,"%c -> ",server_active?'S':' ');
 #else /* ! SERVER_SUPPORT */
-	fprintf(stderr,"  -> ");
+	fprintf (stderr,"  -> ");
 #endif
-	vfprintf(stderr, fmt, va);
-	fprintf(stderr,"\n");
-	va_end(va);
+	vfprintf (stderr, fmt, va);
+	fprintf (stderr,"\n");
+	va_end (va);
     }
+}
+
+
+
+/* Like xstrdup (), but can handle a NULL argument.
+ */
+char *
+Xstrdup (const char *string)
+{
+  if (string == NULL) return NULL;
+  return xmemdup (string, strlen (string) + 1);
+}
+
+
+
+/* Like xasprintf(), but consider all errors fatal (may never return NULL).
+ */
+char *
+Xasprintf (const char *format, ...)
+{
+    va_list args;
+    char *result;
+
+    va_start (args, format);
+    if (vasprintf (&result, format, args) < 0)
+	error (1, errno, "Failed to write to string.");
+    va_end (args);
+
+    return result;
+}
+
+
+
+/* Like xasmprintf(), but consider all errors fatal (may never return NULL).
+ */
+char *
+Xasnprintf (char *resultbuf, size_t *lengthp, const char *format, ...)
+{
+    va_list args;
+    char *result;
+
+    va_start (args, format);
+    result = vasnprintf (resultbuf, lengthp, format, args);
+    if (result == NULL)
+	error (1, errno, "Failed to write to string.");
+    va_end (args);
+
+    return result;
 }

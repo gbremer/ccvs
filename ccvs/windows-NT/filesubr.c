@@ -23,6 +23,8 @@
 
 #include "cvs.h"
 
+#include "JmgStat.h"
+
 static int deep_remove_dir( const char *path );
 
 /* Copies "from" to "to".  Note that the functionality here is similar
@@ -360,15 +362,6 @@ xchmod (fname, writable)
 	error (0, errno, "cannot change mode of file %s", fname);
 }
 
-
-/* Read the value of a symbolic link.
-   Under Windows NT, this function always returns EINVAL.  */
-int
-readlink (char *path, char *buf, int buf_size)
-{
-    errno = EINVAL;
-    return -1;
-}
 
 /* Rename for NT which works for read only files.  Apparently if we are
    accessing FROM and TO via a Novell network, this is an issue.  */
@@ -767,16 +760,18 @@ xresolvepath ( path )
      * bit by bit calling xreadlink().
      */
 
-    owd = xgetwd();
+    owd = xgetcwd ();
     if ( CVS_CHDIR ( path ) < 0)
 	error ( 1, errno, "cannot chdir to %s", path );
-    if ( ( hardpath = xgetwd() ) == NULL )
+    if ((hardpath = xgetcwd ()) == NULL)
 	error (1, errno, "cannot readlink %s", hardpath);
     if ( CVS_CHDIR ( owd ) < 0)
 	error ( 1, errno, "cannot chdir to %s", owd );
     free (owd);
     return hardpath;
 }
+
+
 
 /* Return a pointer into PATH's last component.  */
 const char *
@@ -1005,9 +1000,6 @@ expand_wild (argc, argv, pargc, pargv)
 
 static void check_statbuf (const char *file, struct stat *sb)
 {
-    struct tm *newtime;
-    time_t long_time;
-
     /* Win32 processes file times in a 64 bit format
        (see Win32 functions SetFileTime and GetFileTime).
        If the file time on a file doesn't fit into the
@@ -1028,22 +1020,8 @@ static void check_statbuf (const char *file, struct stat *sb)
     if (sb->st_atime == (time_t) -1)
 	error (1, 0, "invalid access time for %s", file);
 
-    time( &long_time );			/* Get time as long integer. */
-    newtime = localtime( &long_time );	/* Convert to local time. */
-
-    /* we know for a fact that the stat function under Windoze NT 4.0 and,
-     * by all reports, many other Windoze systems, will return file times
-     * 3600 seconds too big when daylight savings time is in effect.  This is
-     * a bug since it is defined as returning the time in UTC.
-     *
-     * So correct for it for now.
-     */
-    if (newtime->tm_isdst == 1)
-    {
-	sb->st_ctime -= 3600;
-	sb->st_mtime -= 3600;
-	sb->st_atime -= 3600;
-    }
+    if (!GetUTCFileModTime (file, &sb->st_mtime))
+	error (1, 0, "Failed to retrieve modification time for %s", file);
 }
 
 /* see CVS_STAT */
@@ -1071,31 +1049,3 @@ wnt_lstat (const char *file, struct stat *sb)
     check_statbuf (file, sb);
     return retval;
 }
-
-#ifdef SERVER_SUPPORT
-/* Case-insensitive string compare.  I know that some systems
-   have such a routine, but I'm not sure I see any reasons for
-   dealing with the hair of figuring out whether they do (I haven't
-   looked into whether this is a performance bottleneck; I would guess
-   not).  */
-int
-cvs_casecmp (str1, str2)
-    char *str1;
-    char *str2;
-{
-    char *p;
-    char *q;
-    int pqdiff;
-
-    p = str1;
-    q = str2;
-    while ((pqdiff = tolower (*p) - tolower (*q)) == 0)
-    {
-	if (*p == '\0')
-	    return 0;
-	++p;
-	++q;
-    }
-    return pqdiff;
-}
-#endif /* SERVER_SUPPORT */
