@@ -1,3 +1,57 @@
+2004-12-13  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note Windows build fixes.
+
+2004-12-09  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note `Redirect' CVSROOT method option and doc improvements.
+
+2004-12-09  Mark D. Baushke  <mdb@cvshome.org>
+
+	* README: Remove Dr. Pascal Molli's CVS URL from the
+	documentation.
+	* FAQ: Ditto.
+	
+2004-12-03  Mark D. Baushke  <mdb@cvshome.org>
+
+	* NEWS: Document new CVSROOT options and case insensitivity.
+
+2004-11-30  Mark D. Baushke  <mdb@cvshome.org>
+
+	* HACKING (Coding standards): Add the primary URL for the GNU
+	coding standards.
+
+2004-11-30  Conrad T. Pino  <Conrad@Pino.com>
+
+	* cvsnt.dsp: Add "src/subr.h" to project.
+	* cvsnt.dep: Regenerated for "cvsnt.dsp" change.
+	* cvsnt.mak: Regenerated for "cvsnt.dsp" change.
+
+2004-11-21  Mark D. Baushke  <mdb@cvshome.org>
+
+	* cvsnt.dep: Add "xgethostname.h" to project.
+	* cvsnt.dsp: Add "xgethostname.h" to project.
+	
+2004-11-20  Derek Price  <derek@ximbiot.com>
+
+	* BUGS: Remove note about BSDI test failure.
+
+2004-11-19  Derek Price  <derek@ximbiot.com>
+
+	* gnulib-update (MODULES): Add xgethostname.
+
+2004-11-17  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note "red file" fix source inclusion.
+
+2004-11-17  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note Windows distribution fix.
+
+2004-11-17  Derek Price  <derek@ximbiot.com>
+
+	* NEWS: Note most recent GNULIB update.
+
 2004-11-15  Derek Price  <derek@ximbiot.com>
 
 	* BUGS: Note current CVS test failures on BSD/OS & Cray.
@@ -6,7 +60,7 @@
 
 	* BUGS: Note current CVS server turds on AIX.
 
-2004-11-11  Mark D. Baushke  <mdb@juniper.net>
+2004-11-11  Mark D. Baushke  <mdb@cvshome.org>
 
 	* config.h.in, configure: Regenerated.
 

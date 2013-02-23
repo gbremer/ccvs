@@ -1213,20 +1213,33 @@ pass ()
   passed=`expr $passed + 1`
 }
 
-remoteonly ()
+# Like skip(), but don't fail when $skipfail is set.
+skip_always ()
 {
-  echo "SKIP: $1 (only tested in remote mode)" >>$LOGFILE
+  echo "SKIP: $1${2+ ($2)}" >>$LOGFILE
   skipped=`expr $skipped + 1`
 }
 
 skip ()
 {
   if $skipfail; then
+    # exits
     fail "$1${2+ ($2)}"
-  else
-    echo "SKIP: $1${2+ ($2)}" >>$LOGFILE
   fi
-  skipped=`expr $skipped + 1`
+
+  skip_always ${1+"$@"}
+}
+
+# Convenience function for skipping tests run only in remote mode.
+remoteonly ()
+{
+  skip_always $1 "only tested in remote mode"
+}
+
+# Convenience function for skipping tests not run in proxy mode.
+notproxy ()
+{
+  skip_always $1 "not tested in proxy mode"
 }
 
 warn ()
@@ -1560,8 +1573,8 @@ RCSINIT=; export RCSINIT
 if test x"$*" = x; then
 	# Basic/miscellaneous functionality
 	tests="version basica basicb basicc basic1 deep basic2 ls"
-	tests="$tests parseroot parseroot2 files spacefiles commit-readonly"
-	tests="${tests} commit-add-missing"
+	tests="$tests parseroot parseroot2 parseroot3 files spacefiles"
+	tests="${tests} commit-readonly commit-add-missing"
 	tests="${tests} status"
 	# Branching, tagging, removing, adding, multiple directories
 	tests="${tests} rdiff rdiff-short"
@@ -1580,7 +1593,7 @@ if test x"$*" = x; then
 	tests="${tests} keywordexpand"
 	# Checking out various places (modules, checkout -d, &c)
 	tests="${tests} modules modules2 modules3 modules4 modules5 modules6"
-	tests="${tests} mkmodules co-d"
+	tests="${tests} modules7 mkmodules co-d"
 	tests="${tests} cvsadm emptydir abspath abspath2 toplevel toplevel2"
         tests="${tests} rstar-toplevel trailingslashes checkout_repository"
 	# Log messages, error messages.
@@ -1618,6 +1631,7 @@ if test x"$*" = x; then
 	tests="${tests} rmroot reposmv pserver server server2 client"
 	tests="${tests} dottedroot fork commit-d template"
 	tests="${tests} writeproxy writeproxy-noredirect writeproxy-ssh"
+	tests="${tests} writeproxy-ssh-noredirect"
 else
 	tests="$*"
 fi
@@ -2550,7 +2564,7 @@ if $proxy; then
     require_rsync
     if test $? -eq 77; then
 	echo "Unable to test in proxy mode: $skipreason" >&2
-	echo "SKIP: all - missing or broken rsync command." >>$LOGFILE
+	skip all "missing or broken rsync command."
 	exit 0
     fi
 
@@ -3222,8 +3236,14 @@ ${SPROG} \[admin aborted\]: attempt to delete all revisions"
 	  # of the moon (weirdness with optind), and who knows what else.
 	  # I've been seeing "illegal"...
 	  # And I switched it to "invalid". -DRP
+	  # POSIX 1003.2 specifies the format should be 'illegal option'
+	  # many other folks are still using the older 'invalid option'
+	  # lib/getopt.c will use POSIX when __posixly_correct
+	  # otherwise the other, so accept both of them. -- mdb
 	  dotest_fail basicb-21 "${testcvs} -q admin -H" \
 "admin: invalid option -- H
+${CPROG} \[admin aborted\]: specify ${CPROG} -H admin for usage information" \
+"admin: illegal option -- H
 ${CPROG} \[admin aborted\]: specify ${CPROG} -H admin for usage information"
 	  cd ..
 	  rmdir 1
@@ -4229,6 +4249,33 @@ Are you sure you want to release (and delete) directory .first-dir.: "
 "${SPROG} rtag: Tagging first-dir
 ${SPROG} rtag: Tagging first-dir/dir1
 ${SPROG} rtag: Tagging first-dir/dir1/dir2"
+
+		dotest basic2-21b "${testcvs} co -p -r rtagged-by-head first-dir/file6" \
+"===================================================================
+Checking out first-dir/file6
+RCS:  $CVSROOT_DIRNAME/first-dir/file6,v
+VERS: 1\.2
+\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*
+file6
+file6"
+		# see what happens when val-tags is removed
+		modify_repo mv $CVSROOT_DIRNAME/CVSROOT/val-tags \
+				$CVSROOT_DIRNAME/CVSROOT/val-tags.save
+		# The output for this used to be something like:
+		# "${SPROG} checkout: cannot open CVS/Entries for reading: No such file or directory
+		# ${SPROG} \[checkout aborted\]: no such tag \`rtagged-by-head'"
+
+		dotest basic2-21c \
+"${testcvs} co -p -r rtagged-by-head first-dir/file6" \
+"===================================================================
+Checking out first-dir/file6
+RCS:  $CVSROOT_DIRNAME/first-dir/file6,v
+VERS: 1\.2
+\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*
+file6
+file6"
+		modify_repo mv $CVSROOT_DIRNAME/CVSROOT/val-tags.save \
+				$CVSROOT_DIRNAME/CVSROOT/val-tags
 
 		# tag by tag
 		dotest basic2-22 "${testcvs} rtag -r rtagged-by-head rtagged-by-tag first-dir" \
@@ -12078,6 +12125,34 @@ U CVSROOT/verifymsg'
 \$MyBSD: keywordexpand/file1,v 1\.2 [0-9/]* [0-9:]* ${username} Exp \$
 a change"
 
+	  cd ../CVSROOT
+	  mv config config.old
+	  sed -e 's/LocalKeyword=MyBSD/LocalKeyword=My_BSD/' < config.old > config
+	  dotest keywordexpand-9 "${testcvs} -Q ci -minvalidlocalkeyword config"
+	  dotest keywordexpand-10 "${testcvs} -Q update config" \
+"${SPROG} [a-z]*: LocalKeyword ignored: Bad character \`_' in key \`My_BSD'" \
+"${SPROG} [a-z]*: LocalKeyword ignored: Bad character \`_' in key \`My_BSD'
+${SPROG} [a-z]*: LocalKeyword ignored: Bad character \`_' in key \`My_BSD'"
+	  cp config.old config
+	  dotest keywordexpand-11 "${testcvs} -Q ci -mfixit config" \
+"${SPROG} [a-z]*: LocalKeyword ignored: Bad character \`_' in key \`My_BSD'" \
+"${SPROG} [a-z]*: LocalKeyword ignored: Bad character \`_' in key \`My_BSD'
+${SPROG} [a-z]*: LocalKeyword ignored: Bad character \`_' in key \`My_BSD'" \
+	  dotest keywordexpand-12 "${testcvs} -Q update config"
+	  sed -e 's/LocalKeyword=MyBSD=CVSHeader/LocalKeyword=MyBSD=Name/' \
+	    < config.old > config
+	  dotest keywordexpand-13 "${testcvs} -Q ci -minvalidlocalkeyword2 config"
+	  dotest keywordexpand-14 "${testcvs} -Q update config" \
+"${SPROG} [a-z]*: LocalKeyword ignored: Unknown LocalId mode: \`Name'" \
+"${SPROG} [a-z]*: LocalKeyword ignored: Unknown LocalId mode: \`Name'
+${SPROG} [a-z]*: LocalKeyword ignored: Unknown LocalId mode: \`Name'"
+	  cp config.old config
+	  dotest keywordexpand-15 "${testcvs} -Q ci -mfixit2 config" \
+"${SPROG} [a-z]*: LocalKeyword ignored: Unknown LocalId mode: \`Name'" \
+"${SPROG} [a-z]*: LocalKeyword ignored: Unknown LocalId mode: \`Name'
+${SPROG} [a-z]*: LocalKeyword ignored: Unknown LocalId mode: \`Name'"
+	  dotest keywordexpand-16 "${testcvs} -Q update config"
+
 	  dokeep
 	  # Done. Clean up.
 	  cd ../..
@@ -13434,6 +13509,49 @@ ${CPROG} \[checkout aborted\]: cannot expand modules"
 	  restore_adm
 	  cd ..
 	  rm -r modules6
+	  ;;
+
+
+
+	modules7)
+	  #
+	  # Test tag problems vs an empty CVSROOT/val-tags file
+	  #
+	  # See the header comment for the `modules' test for an index of
+	  # the complete suite of modules tests.
+	  #
+	  mkdir modules7
+	  cd modules7
+	  dotest modules7-1 "$testcvs -Q co -d top ."
+	  cd top
+	  mkdir zero one
+	  dotest modules7-2 "$testcvs -Q add zero one"
+	  cd one
+	  echo 'file1 contents' > file1
+	  dotest modules7-2 "$testcvs -Q add file1"
+	  dotest modules7-3 "$testcvs -Q ci -mnew file1"
+	  dotest modules7-4 "$testcvs -Q tag mytag file1"
+	  cd ../CVSROOT
+	  echo 'all -a zero one' > modules
+	  dotest modules7-5 "$testcvs -Q ci -mall-module"
+	  cd ../..
+	  mkdir myexport
+	  cd myexport
+
+	  # This failed prior to CVS version 1.12.10.
+	  dotest modules7-7 "$testcvs export -rmytag all" \
+"$SPROG export: Updating zero
+$SPROG export: Updating one
+U one/file1"
+	  dotest modules7-8 'cat one/file1' 'file1 contents'
+
+	  dokeep
+
+	  # cleanup
+	  restore_adm
+	  cd ../..
+	  rm -fr modules7
+	  rm -rf $CVSROOT_DIRNAME/zero $CVSROOT_DIRNAME/one
 	  ;;
 
 
@@ -18729,7 +18847,7 @@ EOF
 	  else
 	    chmod +x ${TESTDIR}/vscript*
 	  fi
-	  echo "^first-dir/yet-another\\(/\\|\$\\) ${TESTDIR}/vscript2 %l" >>verifymsg
+	  echo "^first-dir/yet-another\\(/\\|\$\\) ${TESTDIR}/vscript2 %l" >verifymsg
 	  echo "^first-dir\\(/\\|\$\\) ${TESTDIR}/vscript %l" >>verifymsg
 	  echo "^missing-script\$ ${TESTDIR}/bogus %l" >>verifymsg
 	  echo "^missing-var\$ ${TESTDIR}/vscript %l \${=Bogus}" >>verifymsg
@@ -18810,7 +18928,7 @@ ${SPROG} \[import aborted\]: Message verification failed" \
 "${SPROG} \[import aborted\]: Message verification failed"
 
 	  dotest_fail info-v8 "${testcvs} import -m bogus missing-var x y" \
-"${SPROG} import: verifymsg:33: no such user variable \${=Bogus}
+"${SPROG} import: verifymsg:4: no such user variable \${=Bogus}
 ${SPROG} \[import aborted\]: Message verification failed"
 
 	  rm file2
@@ -22405,7 +22523,7 @@ new revision: 1\.6; previous revision: 1\.5"
           # skip this test.
 
 	  if $proxy; then
-            skip sshstdio "ssh testing is skipped in proxy test mode."
+            notproxy sshstdio
 	    continue
 	  fi
 
@@ -22511,6 +22629,79 @@ EOF
 	  cd ../..
 	  CVSROOT=$save_CVSROOT
 	  rm -r parseroot2
+	  ;;
+
+
+
+	parseroot3)
+	  # Test some :ext: roots for consistancy.
+	  if $remote; then :; else
+	    remoteonly parseroot3
+	    continue
+	  fi
+
+	  require_rsh "$CVS_RSH"
+	  if test $? -eq 77; then
+	    skip parseroot3 "$skipreason"
+	    continue
+	  fi
+
+	  # Test checking out and subsequently updating with some different
+	  # CVSROOTs.
+
+	  # A standard case, hostname:dirname.
+	  mkdir parseroot3; cd parseroot3
+	  save_CVSROOT=$CVSROOT
+	  save_CVS_RSH=$CVS_RSH
+	  save_CVS_SERVER=$CVS_SERVER
+	  unset CVS_RSH
+	  unset CVS_SERVER
+	  CVSROOT=":ext;CVS_RSH=$save_CVS_RSH;CVS_SERVER=$save_CVS_SERVER:$host:$CVSROOT_DIRNAME"
+	  dotest parseroot3-1 "$testcvs -Q co CVSROOT"
+	  cd CVSROOT
+	  dotest parseroot3-2 "$testcvs -Q up"
+	  cd ..
+
+	  # Initial checkout.
+	  rm -r CVSROOT
+	  CVSROOT=":ext;cvs_RSH=$save_CVS_RSH;CVS_Server=$save_CVS_SERVER:$host$CVSROOT_DIRNAME"
+	  dotest parseroot3-3 "$testcvs -Q co CVSROOT"
+	  cd CVSROOT
+	  dotest parseroot3-4 "$testcvs -Q up"
+	  cd ..
+
+	  # Checkout bogus values for Redirect
+	  rm -r CVSROOT
+	  CVSROOT=":ext;Redirect=bogus;CVS_RSH=$save_CVS_RSH;CVS_SERVER=$save_CVS_SERVER:$host$CVSROOT_DIRNAME"
+	  dotest parseroot3-5 "$testcvs -Q co CVSROOT" \
+"$SPROG checkout: CVSROOT: unrecognized value \`bogus' for \`Redirect'"
+	  cd CVSROOT
+	  # FIXCVS: parse_cvsroot is called more often that is
+	  # desirable.	  
+	  dotest parseroot3-6 "$testcvs -Q up" \
+"$SPROG update: CVSROOT: unrecognized value \`bogus' for \`Redirect'"
+	  cd ..
+
+	  # Checkout good values for Redirect
+	  rm -r CVSROOT
+	  CVSROOT=":EXT;Redirect=no;CVS_RSH=$save_CVS_RSH;CVS_SERVER=$save_CVS_SERVER:$host$CVSROOT_DIRNAME"
+	  dotest parseroot3-7 "$testcvs -Q co CVSROOT"
+	  cd CVSROOT
+	  dotest parseroot3-8 "$testcvs -Q up"
+	  cd ..
+
+	  dotest parseroot3-9 "$testcvs -Q co -ldtop ."
+	  dotest parseroot3-10 "test -d top"
+	  dotest parseroot3-11 "test -d top/CVS"
+	  dotest parseroot3-10 "cat top/CVS/Root" "$CVSROOT"
+
+	  dokeep
+	  cd ..
+	  CVSROOT=$save_CVSROOT
+	  CVS_RSH=$save_CVS_RSH
+	  CVS_SERVER=$save_CVS_SERVER
+	  export CVS_RSH CVS_SERVER
+	  rm -r parseroot3
 	  ;;
 
 
@@ -29182,16 +29373,30 @@ No conflicts created by this import"
 
 	  # There were some duplicated warnings and such; only test
 	  # for the part of the error message which makes sense.
+	  #
+	  # FIXCVS then FIXME
+	  # Now the duplicated error messages only occur on some platforms,
+	  # including, apparently, NetBSD 1.6.1, RedHat Linux 7.3, whatever
+	  # kernel that is using, and Solaris 9.  These platforms somehow
+	  # decide to call Name_Root() up to four times, via do_recursion, but
+	  # I'm not sure of the rest of the details.  Other platforms,
+	  # including Fedora Core 1 (Linux 2.4.22-1.2199.nptl), RH Linux 9
+	  # (Linux 2.4.20-37.9.legacy), and probably AIX 3.4, Solaris 8, 
+	  # BSD/OS 4.2, & IRIX 6.5 only call Name_Root() once as a result of
+	  # this test.
+	  #
 	  # Bug: "skipping directory " without filename.
 	  if $remote; then
 	    dotest_fail reposmv-2r "${testcvs} update" \
 "Cannot access ${TESTDIR}/root1/CVSROOT
 No such file or directory"
 	  else
-	    dotest reposmv-2 "${testcvs} update" "${DOTSTAR}
-${CPROG} update: ignoring CVS/Root because it specifies a non-existent repository ${TESTDIR}/root1
-${CPROG} update: cannot open directory ${CVSROOT_DIRNAME}/dir1: No such file or directory
-${CPROG} update: skipping directory "
+	    dotest reposmv-2 "$testcvs update" \
+"$DOTSTAR$CPROG update: in directory \.:
+$CPROG update: ignoring CVS/Root because it specifies a non-existent repository $TESTDIR/root1
+$CPROG update: Updating \.
+$DOTSTAR$CPROG update: cannot open directory $CVSROOT_DIRNAME/dir1: No such file or directory
+$CPROG update: skipping directory "
 	  fi
 
 	  # CVS/Root overrides $CVSROOT
@@ -29203,14 +29408,13 @@ ${CPROG} update: skipping directory "
 No such file or directory"
 	    CVSROOT=${CVSROOT_save}; export CVSROOT
 	  else
-	    CVSROOT_save=${CVSROOT}
-	    CVSROOT=${TESTDIR}/root-moved; export CVSROOT
-	    dotest reposmv-3 "${testcvs} update" \
-"${DOTSTAR}
-${CPROG} update: ignoring CVS/Root because it specifies a non-existent repository ${TESTDIR}/root1
-${CPROG} update: Updating \.
-${DOTSTAR}"
-	    CVSROOT=${CVSROOT_save}; export CVSROOT
+	    CVSROOT_save=$CVSROOT
+	    CVSROOT=$TESTDIR/root-moved; export CVSROOT
+	    dotest reposmv-3 "$testcvs update" \
+"$DOTSTAR$CPROG update: in directory \.:
+$CPROG update: ignoring CVS/Root because it specifies a non-existent repository $TESTDIR/root1
+$CPROG update: Updating \.$DOTSTAR"
+	    CVSROOT=$CVSROOT_save; export CVSROOT
 	  fi
 
 	  if $remote; then
@@ -30006,7 +30210,7 @@ EOF
 	    # writing through a proxy server.  There is no writeproxy-client
 	    # test currently.  The writeproxy & writeproxy-noredirect tests
 	    # test the writeproxy server.
-	    remoteonly client
+	    notproxy client
 	    continue
 	  fi
 
@@ -30713,6 +30917,7 @@ ${SPROG} update: Updating first/subdir"
 	  dotest writeproxy-init-2 "$testcvs -Qd$PRIMARY_CVSROOT co CVSROOT"
 	  cd CVSROOT
 	  cat >>loginfo <<EOF
+ALL (cat >/dev/null; echo %R) >$TESTDIR/referrer
 ALL $RSYNC -gopr --delete $PRIMARY_CVSROOT_DIRNAME/ $SECONDARY_CVSROOT_DIRNAME
 EOF
 	  cat >>config <<EOF
@@ -30817,8 +31022,21 @@ PrimaryServer=$PRIMARY_CVSROOT"
 	  dotest writeproxy-6a "grep file1 CVS/Entries >/dev/null"
 	  dotest writeproxy-7 "$testcvs -Q ci -mfirst-file file1"
 
+	  # Verify that the server got the correct referrer.
+	  #
+	  # This happens even when using a :fork:ed server because CVS is
+	  # hardcoded to support only :ext: servers.
+	  #
+	  # This test meaningfully detects that a referrer was passed in fork
+	  # mode because the only time the referrer string can be altered from
+	  # its original state is when the server sends a Referrer response.
+	  # If the client were not parsing and resending the referrer, this
+	  # string would still match $SECONDARY_CVSROOT_DIRNAME.
+	  dotest writeproxy-7a "cat $TESTDIR/referrer" \
+":ext:$username@$hostname$SECONDARY_CVSROOT_DIRNAME"
+
 	  # Make sure the sync took place
-	  dotest writeproxy-7a "$testcvs -Q up"
+	  dotest writeproxy-7b "$testcvs -Q up"
 
 	  # Checkout from primary
 	  cd ../../../primary
@@ -30861,7 +31079,7 @@ $SPROG \[update aborted\]: could not find desired version 1\.4 in $PRIMARY_CVSRO
 
 	  dokeep
 	  cd ../../..
-	  rm -r writeproxy
+	  rm -r writeproxy $TESTDIR/referrer
 	  rm -rf $PRIMARY_CVSROOT_DIRNAME $SECONDARY_CVSROOT_DIRNAME
 	  PRIMARY_CVSROOT_DIRNAME=$PRIMARY_CVSROOT_DIRNAME_save
 	  PRIMARY_CVSROOT=$PRIMARY_CVSROOT_save
@@ -31168,9 +31386,9 @@ EOF
 
 	  # Set new roots.
 	  PRIMARY_CVSROOT_DIRNAME=$TESTDIR/primary_cvsroot
-	  PRIMARY_CVSROOT=`newroot $PRIMARY_CVSROOT_DIRNAME`
+	  PRIMARY_CVSROOT=:ext:$host$PRIMARY_CVSROOT_DIRNAME
 	  SECONDARY_CVSROOT_DIRNAME=$TESTDIR/writeproxy_cvsroot
-	  SECONDARY_CVSROOT=`newroot $SECONDARY_CVSROOT_DIRNAME`
+	  SECONDARY_CVSROOT=":ext;Redirect=yes:$host$SECONDARY_CVSROOT_DIRNAME"
 
 	  # Initialize the primary repository
 	  dotest writeproxy-ssh-init-1 "$testcvs -d$PRIMARY_CVSROOT init"
@@ -31202,7 +31420,12 @@ EOF
 
 	  # Checkin to secondary
 	  cd ../..
-	  dotest writeproxy-ssh-1 "$testcvs -Qd$SECONDARY_CVSROOT co -ldtop ."
+	  save_CVSROOT=$CVSROOT
+	  CVSROOT=$SECONDARY_CVSROOT
+	  export CVSROOT
+	  dotest writeproxy-ssh-1 "$testcvs -Q co -ldtop ."
+	  CVSROOT=$save_CVSROOT
+	  export CVSROOT
 	  cd top
 	  mkdir firstdir
 
@@ -31211,13 +31434,13 @@ EOF
 	  mv $TESTDIR/save-root $PRIMARY_CVSROOT_DIRNAME
 
 	  dotest writeproxy-ssh-2 "$testcvs -Q add firstdir" \
-"Referrer=$SECONDARY_CVSROOT"
+"Referrer=:ext:$username@$hostname$SECONDARY_CVSROOT_DIRNAME"
 
 	  cd firstdir
 	  echo now you see me >file1
 	  dotest writeproxy-ssh-3 "$testcvs -Q add file1"
 	  dotest writeproxy-ssh-4 "$testcvs -Q ci -mfirst-file file1" \
-"Referrer=$SECONDARY_CVSROOT"
+"Referrer=:ext:$username@$hostname$SECONDARY_CVSROOT_DIRNAME"
 
 	  dokeep
 	  cd ../../..
@@ -31227,6 +31450,139 @@ EOF
 	  PRIMARY_CVSROOT=$PRIMARY_CVSROOT_save
 	  SECONDARY_CVSROOT_DIRNAME=$SECONDARY_CVSROOT_DIRNAME_save
 	  SECONDARY_CVSROOT=$SECONDARY_CVSROOT_save
+	  ;;
+
+
+
+	writeproxy-ssh-noredirect)
+	  # Various tests for a read-only CVS mirror set up as a write-proxy
+	  # for a central server accessed via the :ext: method.
+	  #
+	  # Mostly these tests are intended to set up for the final test which
+	  # verifies that the server registers the referrer.
+	  if $remote; then :; else
+	    remoteonly writeproxy-ssh-noredirect
+	    continue
+	  fi
+
+	  require_rsh "$CVS_RSH"
+	  if test $? -eq 77; then
+	    skip writeproxy-ssh-noredirect "$skipreason"
+	    continue
+	  fi
+
+	  require_rsync
+	  if test $? -eq 77; then
+	    skip writeproxy-ssh-noredirect "$skipreason"
+	    continue
+	  fi
+
+	  # Save old roots.
+	  PRIMARY_CVSROOT_DIRNAME_save=$PRIMARY_CVSROOT_DIRNAME
+	  PRIMARY_CVSROOT_save=$PRIMARY_CVSROOT
+	  SECONDARY_CVSROOT_DIRNAME_save=$SECONDARY_CVSROOT_DIRNAME
+	  SECONDARY_CVSROOT_save=$SECONDARY_CVSROOT
+
+	  # Set new roots.
+	  PRIMARY_CVSROOT_DIRNAME=$TESTDIR/primary_cvsroot
+	  PRIMARY_CVSROOT=:ext:$host$PRIMARY_CVSROOT_DIRNAME
+	  SECONDARY_CVSROOT_DIRNAME=$TESTDIR/writeproxy_cvsroot
+	  SECONDARY_CVSROOT=":ext;Redirect=no:$host$PRIMARY_CVSROOT_DIRNAME"
+
+	  # Initialize the primary repository
+	  dotest writeproxy-ssh-noredirect-init-1 \
+"$testcvs -d$PRIMARY_CVSROOT init"
+	  mkdir writeproxy-ssh-noredirect; cd writeproxy-ssh-noredirect
+	  mkdir primary; cd primary
+	  dotest writeproxy-ssh-noredirect-init-2 \
+"$testcvs -Qd$PRIMARY_CVSROOT co CVSROOT"
+	  cd CVSROOT
+	  cat >>loginfo <<EOF
+ALL $RSYNC -gopr --delete $PRIMARY_CVSROOT_DIRNAME/ $SECONDARY_CVSROOT_DIRNAME
+EOF
+	  cat >>loginfo <<EOF
+ALL echo Referrer=%R; cat >/dev/null
+EOF
+	  cat >>config <<EOF
+PrimaryServer=$PRIMARY_CVSROOT
+EOF
+	  dotest writeproxy-ssh-noredirect-init-3 \
+"$testcvs -Q ci -mconfigure-writeproxy-ssh-noredirect" \
+"Referrer=NONE"
+
+	  # And now the secondary.
+	  $RSYNC -gopr $PRIMARY_CVSROOT_DIRNAME/ $SECONDARY_CVSROOT_DIRNAME
+
+	  # Wrap the CVS server to allow --primary-root to be set by the
+	  # secondary.
+	  cat <<EOF >$TESTDIR/writeproxy-secondary-wrapper
+#! $TESTSHELL
+CVS_SERVER=$TESTDIR/writeproxy-primary-wrapper
+export CVS_SERVER
+
+# No need to check the PID of the last client since we are testing with
+# Redirect disabled.
+proot_arg="--allow-root=$SECONDARY_CVSROOT_DIRNAME"
+exec $CVS_SERVER \$proot_arg "\$@"
+EOF
+	  cat <<EOF >$TESTDIR/writeproxy-primary-wrapper
+#! $TESTSHELL
+CVS_SERVER_LOG=/tmp/cvsprimarylog; export CVS_SERVER_LOG
+exec $CVS_SERVER \$proot_arg "\$@"
+EOF
+
+	  CVS_SERVER_save=$CVS_SERVER
+	  CVS_SERVER_secondary=$TESTDIR/writeproxy-secondary-wrapper
+	  CVS_SERVER=$CVS_SERVER_secondary
+
+	  chmod a+x $TESTDIR/writeproxy-secondary-wrapper \
+	            $TESTDIR/writeproxy-primary-wrapper
+
+	  # Checkout from secondary
+	  #
+	  # For now, move the primary root out of the way to satisfy
+	  # ourselves that the data is coming from the secondary.
+	  mv $PRIMARY_CVSROOT_DIRNAME $TESTDIR/save-root
+
+	  # Checkin to secondary
+	  cd ../..
+	  #CVSROOT_save=$CVSROOT
+	  #CVSROOT=$SECONDARY_CVSROOT
+	  #CVS_SERVER_LOG=/tmp/cvsserverlog
+	  #CVS_CLIENT_LOG=/tmp/cvsclientlog
+	  #export CVS_SERVER_LOG CVS_CLIENT_LOG
+	  dotest writeproxy-ssh-noredirect-1 \
+"$testcvs -qd '$SECONDARY_CVSROOT' co -ldtop ."
+	  #CVSROOT=$CVSROOT_save
+
+	  cd top
+	  mkdir firstdir
+
+	  # Have to move the primary root back before we can perform write
+	  # operations.
+	  mv $TESTDIR/save-root $PRIMARY_CVSROOT_DIRNAME
+
+	  dotest writeproxy-ssh-noredirect-2 "$testcvs -Q add firstdir" \
+"Referrer=NONE"
+
+	  cd firstdir
+	  echo now you see me >file1
+	  dotest writeproxy-ssh-noredirect-3 "$testcvs -Q add file1"
+	  dotest writeproxy-ssh-noredirect-4 \
+"$testcvs -Q ci -mfirst-file file1" \
+"Referrer=NONE"
+
+	  dokeep
+	  cd ../../..
+	  rm -r writeproxy-ssh-noredirect
+	  rm -rf $PRIMARY_CVSROOT_DIRNAME $SECONDARY_CVSROOT_DIRNAME
+	  PRIMARY_CVSROOT_DIRNAME=$PRIMARY_CVSROOT_DIRNAME_save
+	  PRIMARY_CVSROOT=$PRIMARY_CVSROOT_save
+	  SECONDARY_CVSROOT_DIRNAME=$SECONDARY_CVSROOT_DIRNAME_save
+	  SECONDARY_CVSROOT=$SECONDARY_CVSROOT_save
+	  rm $TESTDIR/writeproxy-secondary-wrapper \
+	     $TESTDIR/writeproxy-primary-wrapper
+	  CVS_SERVER=$CVS_SERVER_save
 	  ;;
 
 
@@ -34260,6 +34616,10 @@ You have \[0\] altered files in this repository\."
 	fail "test slagged \$servercvs"
     fi
 
+    # Reset val-tags to a pristine state.
+    if test -s $CVSROOT_DIRNAME/CVSROOT/val-tags; then
+       modify_repo ":" > $CVSROOT_DIRNAME/CVSROOT/val-tags
+    fi
     verify_tmp_empty "post $what"
 
 done # The big loop

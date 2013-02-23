@@ -171,7 +171,7 @@ Index
 * Conflict markers:                      Conflicts example.
 * Conflict resolution:                   Conflicts example.
 * Conflicts (merge example):             Conflicts example.
-* connection method options:             Remote repositories.
+* connection method options:             The connection method.
 * Contributors (CVS program):            What is CVS?.
 * Contributors (manual):                 Credits.
 * Copying a repository:                  Moving a repository.
@@ -210,9 +210,11 @@ Index
 * CVS_PASSFILE, environment variable:    Password authentication client.
 * CVS_PID, environment variable:         Environment variables.
 * CVS_PROXY_PORT <1>:                    Environment variables.
-* CVS_PROXY_PORT:                        Remote repositories.
+* CVS_PROXY_PORT:                        The connection method.
 * CVS_RCMD_PORT, environment variable:   Environment variables.
+* CVS_RSH method option:                 The connection method.
 * CVS_RSH, environment variable:         Environment variables.
+* CVS_SERVER method option:              The connection method.
 * CVS_SERVER, and :fork::                Connecting via fork.
 * CVS_SERVER, environment variable:      Connecting via rsh.
 * CVS_SERVER_SLEEP, environment variable: Environment variables.
@@ -351,6 +353,7 @@ Index
 * HOME, environment variable:            Environment variables.
 * HOMEDRIVE, environment variable:       Environment variables.
 * HOMEPATH, environment variable:        Environment variables.
+* HTTP proxies, connecting via:          The connection method.
 * Id keyword:                            Keyword list.
 * Ident (shell command):                 Using keywords.
 * Identifying a branch:                  Accessing branches.
@@ -389,6 +392,7 @@ Index
 * Keyword substitution:                  Keyword substitution.
 * Keyword substitution, and merging:     Merging and keywords.
 * Keyword substitution, changing modes:  Substitution modes.
+* KeywordExpand, in CVSROOT/config:      config.
 * Kflag:                                 Substitution modes.
 * kinit:                                 Kerberos authenticated.
 * Known bugs in this manual or CVS:      BUGS.
@@ -401,6 +405,7 @@ Index
 * Link, symbolic, importing:             import output.
 * List, mailing list:                    What is CVS?.
 * Local keyword:                         Keyword list.
+* LocalKeyword, in CVSROOT/config:       config.
 * Locally Added:                         File status.
 * Locally Modified:                      File status.
 * Locally Removed:                       File status.
@@ -484,7 +489,7 @@ Index
 * Number, revision-:                     Revision numbers.
 * numbers, written-out:                  General date syntax.
 * Option defaults:                       ~/.cvsrc.
-* options, connection method:            Remote repositories.
+* options, connection method:            The connection method.
 * Options, global:                       Global options.
 * Options, in modules file:              Module options.
 * ordinal numbers:                       General date syntax.
@@ -519,9 +524,12 @@ Index
 * Primary server:                        Write proxies.
 * PrimaryServer, in CVSROOT/config <1>:  config.
 * PrimaryServer, in CVSROOT/config:      Write proxies.
-* proxies, web, using:                   Remote repositories.
+* proxies, HTTP, connecting via:         The connection method.
+* proxies, web, connecting via:          The connection method.
+* proxy, method option:                  The connection method.
 * proxy, write <1>:                      config.
 * proxy, write:                          Write proxies.
+* proxyport, method option:              The connection method.
 * pserver (client/server connection method), port specification <1>: Password authentication server.
 * pserver (client/server connection method), port specification: Remote repositories.
 * pserver (subcommand):                  Password authentication server.
@@ -546,6 +554,7 @@ Index
 * Read-only repository mode:             Global options.
 * readers (admin file):                  Read-only access.
 * Recursive (directory descending):      Recursive behavior.
+* Redirect, method option:               The connection method.
 * Reference manual (files):              Administrative files.
 * Reference manual for variables:        Environment variables.
 * Reference, commands:                   Invoking CVS.
@@ -744,7 +753,7 @@ Index
 * Watches:                               Watches.
 * wdiff (import example):                First import.
 * Web pages, maintaining with CVS:       Keeping a checked out copy.
-* web proxies, using:                    Remote repositories.
+* web proxies, connecting via:           The connection method.
 * What (shell command):                  Using keywords.
 * What branches are good for:            Branches motivation.
 * What is CVS not?:                      What is CVS not?.

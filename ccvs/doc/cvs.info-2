@@ -413,35 +413,10 @@ the password in each created directory.  `cvs login' first instead
    The details of exactly what needs to be set up depend on how you are
 connecting to the server.
 
-   If METHOD is not specified, and the repository name does not start
-with a `/', then the default is `ext' or `server', depending on your
-platform; both are described in *Note Connecting via rsh::.
-
-   The `gserver' and `pserver' connection methods all accept optional
-method options, specified as part of the METHOD string, like so:
-
-     :METHOD[;OPTION=ARG...]:
-
-   Currently, the only two valid connection options are `proxy', which
-takes a hostname as an argument, and `proxyport', which takes a port
-number as an argument.  These options can be used to connect via an HTTP
-tunnel style web proxy.  For example, to connect pserver via a web proxy
-at www.myproxy.net and port 8000, you would use a method of:
-
-     :pserver;proxy=www.myproxy.net;proxyport=8000:
-
-   *NOTE: The rest of the connection string is required to connect to
-the server as noted in the upcoming sections on password authentication,
-gserver and kserver.  The example above would only modify the METHOD
-portion of the repository name.*
-
-   PROXY must be supplied to connect to a CVS server via a proxy
-server, but PROXYPORT will default to port 8080 if not supplied.
-PROXYPORT may also be set via the CVS_PROXY_PORT environment variable.
-
 * Menu:
 
 * Server requirements::         Memory and other resources for servers
+* The connection method::       Connection methods and method options
 * Connecting via rsh::          Using the `rsh' program to connect
 * Password authenticated::      Direct connections using passwords
 * GSSAPI authenticated::        Direct connections using GSSAPI
@@ -450,7 +425,7 @@ PROXYPORT may also be set via the CVS_PROXY_PORT environment variable.
 * Write proxies::               Distributing load across several CVS servers
 
 
-File: cvs.info,  Node: Server requirements,  Next: Connecting via rsh,  Up: Remote repositories
+File: cvs.info,  Node: Server requirements,  Next: The connection method,  Up: Remote repositories
 
 Server requirements
 -------------------
@@ -500,7 +475,120 @@ have little trouble.
 repository::.
 
 
-File: cvs.info,  Node: Connecting via rsh,  Next: Password authenticated,  Prev: Server requirements,  Up: Remote repositories
+File: cvs.info,  Node: The connection method,  Next: Connecting via rsh,  Prev: Server requirements,  Up: Remote repositories
+
+The connection method
+---------------------
+
+   In its simplest form, the METHOD portion of the repository string
+(*note Remote repositories::) may be one of `ext', `fork', `gserver',
+`kserver', `local', `pserver', and, on some platforms, `server'.
+
+   If METHOD is not specified, and the repository name starts with a
+`/', then the default is `local'.  If METHOD is not specified, and the
+repository name does not start with a `/', then the default is `ext' or
+`server', depending on your platform; both the `ext' and `server'
+methods are described in *Note Connecting via rsh::.
+
+   The `ext', `fork', `gserver', and `pserver' connection methods all
+accept optional method options, specified as part of the METHOD string,
+like so:
+
+     :METHOD[;OPTION=ARG...]:OTHER_CONNECTION_DATA
+
+   CVS is not sensitive to the case of METHOD or OPTION, though it may
+sometimes be sensitive to the case of ARG.  The possible method options
+are as follows:
+
+`proxy=HOSTNAME'
+`proxyport=PORT'
+     These two method options can be used to connect via an HTTP tunnel
+     style web proxy.  HOSTNAME should be the name of the HTTP proxy
+     server to connect through and PORT is the port number on the HTTP
+     proxy server to connect via.  PORT defaults to 8080.
+
+     *NOTE: An HTTP proxy server is not the same as a CVS write proxy
+     server - please see *Note Write proxies:: for more on CVS write
+     proxies.*
+
+     For example, to connect pserver via a web proxy listening on port
+     8000 of www.myproxy.net, you would use a method of:
+
+          :pserver;proxy=www.myproxy.net;proxyport=8000:PSERVER_CONNECTION_STRING
+
+     *NOTE: In the above example, PSERVER_CONNECTION_STRING is still
+     required to connect and authenticate to the CVS server, as noted
+     in the upcoming sections on password authentication, `gserver', and
+     `kserver'.  The example above only demonstrates a modification to
+     the METHOD portion of the repository name.*
+
+     These options first appeared in CVS version 1.12.7 and are valid as
+     modifcations to the `gserver' and `pserver' connection methods.
+
+`CVS_RSH=PATH'
+     This method option can be used with the `ext' method to specify
+     the path the CVS client will use to find the remote shell used to
+     contact the CVS server and takes precedence over any path
+     specified in the `$CVS_RSH' environment variable (*note Connecting
+     via rsh::).  For example, to connect to a CVS server via the local
+     `/path/to/ssh/command' command, you could choose to specify the
+     following PATH via the `CVS_RSH' method option:
+
+          :ext;CVS_RSH=/path/to/ssh/command:EXT_CONNECTION_STRING
+
+     This method option first appeared in CVS version 1.12.11 and is
+     valid only as a modifcation to the `ext' connection method.
+
+`CVS_SERVER=PATH'
+     This method option can be used with the `ext' and `fork' methods to
+     specify the path CVS will use to find the CVS executable on the
+     CVS server and takes precedence over any path specified in the
+     `$CVS_SERVER' environment variable (*note Connecting via rsh::).
+     For example, to select the remote `/path/to/cvs/command'
+     executable as your CVS server application on the CVS server
+     machine, you could choose to specify the following PATH via the
+     `CVS_SERVER' method option:
+
+          :ext;CVS_SERVER=/path/to/cvs/command:EXT_CONNECTION_STRING
+
+     or, to select an executable named `cvs-1.12.11', assuming it is in
+     your `$PATH' on the CVS server:
+
+          :ext;CVS_SERVER=cvs-1.12.11:EXT_CONNECTION_STRING
+
+     This method option first appeared in CVS version 1.12.11 and is
+     valid as a modifcation to both the `ext' and `fork' connection
+     methods.
+
+`Redirect=BOOLEAN-STATE'
+     The `Redirect' method option determines whether the CVS client will
+     allow a CVS server to redirect it to a different CVS server,
+     usually for write requests, as in a write proxy setup.
+
+     A BOOLEAN-STATE of any value acceptable for boolean
+     `CVSROOT/config' file options is acceptable here (*note config::).
+     For example, `on', `off', `true', and `false' are all valid
+     values for BOOLEAN-STATE.  BOOLEAN-STATE for the `Redirect' method
+     option defaults to `on'.
+
+     This option will have no effect when talking to any non-secondary
+     CVS server.  For more on write proxies and secondary servers,
+     please see *Note Write proxies::.
+
+     This method option first appeared in CVS version 1.12.11 and is
+     valid only as a modifcation to the `ext' connection method.
+
+   As a further example, to combine both the `CVS_RSH' and `CVS_SERVER'
+options, a method specification like the following would work:
+
+     :ext;CVS_RSH=/path/to/ssh/command;CVS_SERVER=/path/to/cvs/command:
+
+   This means that you would not need to have the `CVS_SERVER' or
+`CVS_RSH' environment variables set correctly.  See *Note Connecting
+via rsh::, for more details on these environment variables.
+
+
+File: cvs.info,  Node: Connecting via rsh,  Next: Password authenticated,  Prev: The connection method,  Up: Remote repositories
 
 Connecting with rsh
 -------------------
@@ -527,7 +615,10 @@ example includes the directory containing a program named `cvs' which
 is the server.  You need to set the path in `.bashrc', `.cshrc', etc.,
 not `.login' or `.profile'.  Alternately, you can set the environment
 variable `CVS_SERVER' on the client machine to the filename of the
-server you want to use, for example `/usr/local/bin/cvs-1.6'.
+server you want to use, for example `/usr/local/bin/cvs-1.6'.  For the
+`ext' and `fork' methods, you may also specify CVS_SERVER as an otpion
+in the CVSROOT so that you may use different servers for differnt
+roots. See *Note Remote repositories:: for more details.
 
    There is no need to edit `inetd.conf' or start a CVS server daemon.
 
@@ -547,6 +638,11 @@ it may change in the future.  If you set `CVS_RSH' to `SSH' or some
 other rsh replacement, the instructions in the rest of this section
 concerning `.rhosts' and so on are likely to be inapplicable; consult
 the documentation for your rsh replacement.
+
+   You may choose to specify the CVS_RSH option in the CVSROOT to allow
+you to use different ones for different roots. For example, allowing
+some roots to use CVS_RSH=REMSH and some to use CVS_RSH=SSH for the
+`ext' method. See also the *Note Remote repositories:: for more details.
 
    Continuing our example, supposing you want to access the module
 `foo' in the repository `/usr/local/cvsroot/', on machine
@@ -960,67 +1056,4 @@ set this up as required by your GSSAPI mechanism.
    To connect using GSSAPI, use the `:gserver:' method.  For example,
 
      cvs -d :gserver:faun.example.org:/usr/local/cvsroot checkout foo
-
-
-File: cvs.info,  Node: Kerberos authenticated,  Next: Connecting via fork,  Prev: GSSAPI authenticated,  Up: Remote repositories
-
-Direct connection with Kerberos
--------------------------------
-
-   The easiest way to use Kerberos is to use the Kerberos `rsh', as
-described in *Note Connecting via rsh::.  The main disadvantage of
-using rsh is that all the data needs to pass through additional
-programs, so it may be slower.  So if you have Kerberos installed you
-can connect via a direct TCP connection, authenticating with Kerberos.
-
-   This section concerns the Kerberos network security system, version
-4.  Kerberos version 5 is supported via the GSSAPI generic network
-security interface, as described in the previous section.
-
-   To do this, CVS needs to be compiled with Kerberos support; when
-configuring CVS it tries to detect whether Kerberos is present or you
-can use the `--with-krb4' flag to configure.
-
-   The data transmitted is _not_ encrypted by default.  Encryption
-support must be compiled into both the client and server; use the
-`--enable-encryption' configure option to turn it on.  You must then
-use the `-x' global option to request encryption.
-
-   The CVS client will attempt to connect to port 1999 by default.
-
-   When you want to use CVS, get a ticket in the usual way (generally
-`kinit'); it must be a ticket which allows you to log into the server
-machine.  Then you are ready to go:
-
-     cvs -d :kserver:faun.example.org:/usr/local/cvsroot checkout foo
-
-   Previous versions of CVS would fall back to a connection via rsh;
-this version will not do so.
-
-
-File: cvs.info,  Node: Connecting via fork,  Next: Write proxies,  Prev: Kerberos authenticated,  Up: Remote repositories
-
-Connecting with fork
---------------------
-
-   This access method allows you to connect to a repository on your
-local disk via the remote protocol.  In other words it does pretty much
-the same thing as `:local:', but various quirks, bugs and the like are
-those of the remote CVS rather than the local CVS.
-
-   For day-to-day operations you might prefer either `:local:' or
-`:fork:', depending on your preferences.  Of course `:fork:' comes in
-particularly handy in testing or debugging `cvs' and the remote
-protocol.  Specifically, we avoid all of the network-related
-setup/configuration, timeouts, and authentication inherent in the other
-remote access methods but still create a connection which uses the
-remote protocol.
-
-   To connect using the `fork' method, use `:fork:' and the pathname to
-your local repository.  For example:
-
-     cvs -d :fork:/usr/local/cvsroot checkout foo
-
-   As with `:ext:', the server is called `cvs' by default, or the value
-of the `CVS_SERVER' environment variable.
 

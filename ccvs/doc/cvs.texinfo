@@ -262,7 +262,6 @@ on downloading @sc{cvs} and other @sc{cvs} topics, see:
 
 @example
 @url{http://www.cvshome.org/}
-@url{http://www.loria.fr/~molli/cvs-index.html}
 @end example
 
 @cindex Mailing list
@@ -2072,43 +2071,6 @@ password in each created directory.  @code{cvs login} first instead
 The details of exactly what needs to be set up depend
 on how you are connecting to the server.
 
-If @var{method} is not specified, and the repository
-name does not start with a @samp{/}, then the default is @code{ext}
-or @code{server}, depending on your platform; both are
-described in @ref{Connecting via rsh}.
-
-@cindex connection method options
-@cindex options, connection method
-@cindex proxies, web, using
-@cindex web proxies, using
-The @code{gserver} and @code{pserver} connection
-methods all accept optional method options, specified as part of the
-@var{method} string, like so:
-
-@example
-:@var{method}[;@var{option}=@var{arg}...]:
-@end example
-
-Currently, the only two valid connection options are @code{proxy}, which
-takes a hostname as an argument, and @code{proxyport}, which takes a port
-number as an argument.  These options can be used to connect via an HTTP
-tunnel style web proxy.  For example, to connect pserver via a web proxy
-at www.myproxy.net and port 8000, you would use a method of:
-
-@example
-:pserver;proxy=www.myproxy.net;proxyport=8000:
-@end example
-
-@strong{NOTE: The rest of the connection string is required to connect to
-the server as noted in the upcoming sections on password authentication,
-gserver and kserver.  The example above would only modify the @var{method}
-portion of the repository name.}
-
-@cindex CVS_PROXY_PORT
-@var{proxy} must be supplied to connect to a CVS server via a
-proxy server, but @var{proxyport} will default to port 8080 if not supplied.
-@var{PROXYPORT} may also be set via the @var{CVS_PROXY_PORT} environment
-variable.
 @c Should we try to explain which platforms are which?
 @c Platforms like unix and VMS, which only allow
 @c privileged programs to bind to sockets <1024 lose on
@@ -2118,17 +2080,9 @@ variable.
 @c Platforms like OS/2 and NT probably could plausibly
 @c default either way (modulo -b troubles).
 
-@c FIXME: We need to have a better way of explaining
-@c what method to use.  This presentation totally
-@c obscures the fact that :ext: and CVS_RSH is the way to
-@c use SSH, for example.  Plus it incorrectly implies
-@c that you need an @code{rsh} binary on the client to use
-@c :server:.
-@c Also note that rsh not pserver is the right choice if you want
-@c users to be able to create their own repositories
-@c (because of the --allow-root related issues).
 @menu
 * Server requirements::         Memory and other resources for servers
+* The connection method::       Connection methods and method options
 * Connecting via rsh::          Using the @code{rsh} program to connect
 * Password authenticated::      Direct connections using passwords
 * GSSAPI authenticated::        Direct connections using GSSAPI
@@ -2226,6 +2180,143 @@ trouble.
 For information on disk space requirements, see
 @ref{Creating a repository}.
 
+@node The connection method
+@subsection The connection method
+
+In its simplest form, the @var{method} portion of the repository string
+(@pxref{Remote repositories}) may be one of @samp{ext}, @samp{fork},
+@samp{gserver}, @samp{kserver}, @samp{local}, @samp{pserver}, and, on some
+platforms, @samp{server}.
+
+If @var{method} is not specified, and the repository
+name starts with a @samp{/}, then the default is @code{local}.
+If @var{method} is not specified, and the repository
+name does not start with a @samp{/}, then the default is @code{ext}
+or @code{server}, depending on your platform; both the @samp{ext}
+and @samp{server} methods are described in @ref{Connecting via rsh}.
+
+@cindex connection method options
+@cindex options, connection method
+The @code{ext}, @code{fork}, @code{gserver}, and @code{pserver} connection
+methods all accept optional method options, specified as part of the
+@var{method} string, like so:
+
+@example
+:@var{method}[;@var{option}=@var{arg}...]:@var{other_connection_data}
+@end example
+
+@sc{cvs} is not sensitive to the case of @var{method} or @var{option}, though
+it may sometimes be sensitive to the case of @var{arg}.  The possible method
+options are as follows:
+
+@table @code
+@cindex CVS_PROXY_PORT
+@cindex proxy, method option
+@cindex proxyport, method option
+@cindex proxies, web, connecting via
+@cindex web proxies, connecting via
+@cindex proxies, HTTP, connecting via
+@cindex HTTP proxies, connecting via
+@item proxy=@var{hostname}
+@itemx proxyport=@var{port}
+These two method options can be used to connect via an HTTP tunnel style web
+proxy.  @var{hostname} should be the name of the HTTP proxy server to connect
+through and @var{port} is the port number on the HTTP proxy server to connect
+via.  @var{port} defaults to 8080.
+
+@strong{NOTE: An HTTP proxy server is not the same as a @sc{cvs} write proxy
+server - please see @ref{Write proxies} for more on @sc{cvs} write proxies.}
+
+For example, to connect pserver via a web proxy listening on port 8000 of
+www.myproxy.net, you would use a method of:
+
+@example
+:pserver;proxy=www.myproxy.net;proxyport=8000:@var{pserver_connection_string}
+@end example
+
+@strong{NOTE: In the above example, @var{pserver_connection_string} is still
+required to connect and authenticate to the CVS server, as noted in the
+upcoming sections on password authentication, @code{gserver}, and
+@code{kserver}.  The example above only demonstrates a modification to the
+@var{method} portion of the repository name.}
+
+These options first appeared in @sc{cvs} version 1.12.7 and are valid as
+modifcations to the @code{gserver} and @code{pserver} connection methods.
+
+@cindex CVS_RSH method option
+@item CVS_RSH=@var{path}
+This method option can be used with the @code{ext} method to specify the path
+the @sc{cvs} client will use to find the remote shell used to contact the
+@sc{cvs} server and takes precedence over any path specified in the
+@code{$CVS_RSH} environment variable (@pxref{Connecting via rsh}).  For
+example, to connect to a @sc{cvs} server via the local
+@file{/path/to/ssh/command} command, you could choose to specify the following
+@var{path} via the @code{CVS_RSH} method option:
+
+@example
+:ext;CVS_RSH=/path/to/ssh/command:@var{ext_connection_string}
+@end example
+
+This method option first appeared in @sc{cvs} version 1.12.11 and is valid only
+as a modifcation to the @code{ext} connection method.
+
+@cindex CVS_SERVER method option
+@item CVS_SERVER=@var{path}
+This method option can be used with the @code{ext} and @code{fork} methods to
+specify the path @sc{cvs} will use to find the @sc{cvs} executable on the
+@sc{cvs} server and takes precedence over any path specified in the
+@code{$CVS_SERVER} environment variable (@pxref{Connecting via rsh}).  For
+example, to select the remote @file{/path/to/cvs/command} executable as your
+@sc{cvs} server application on the @sc{cvs} server machine, you could choose to
+specify the following @var{path} via the @code{CVS_SERVER} method option:
+
+@example
+:ext;CVS_SERVER=/path/to/cvs/command:@var{ext_connection_string}
+@end example
+
+@noindent
+or, to select an executable named @samp{cvs-1.12.11}, assuming it is in your
+@code{$PATH} on the @sc{cvs} server:
+
+@example
+:ext;CVS_SERVER=cvs-1.12.11:@var{ext_connection_string}
+@end example
+
+This method option first appeared in @sc{cvs} version 1.12.11 and is valid
+as a modifcation to both the @code{ext} and @code{fork} connection methods.
+
+@cindex Redirect, method option
+@item Redirect=@var{boolean-state}
+The @code{Redirect} method option determines whether the @sc{cvs} client will
+allow a @sc{cvs} server to redirect it to a different @sc{cvs} server, usually
+for write requests, as in a write proxy setup.
+
+A @var{boolean-state} of any value acceptable for boolean @file{CVSROOT/config}
+file options is acceptable here (@pxref{config}).  For example, @samp{on},
+@samp{off}, @samp{true}, and @samp{false} are all valid values for
+@var{boolean-state}.  @var{boolean-state} for the @code{Redirect} method option
+defaults to @samp{on}.
+
+This option will have no effect when talking to any non-secondary @sc{cvs}
+server.  For more on write proxies and secondary servers, please see
+@ref{Write proxies}.
+
+This method option first appeared in @sc{cvs} version 1.12.11 and is valid only
+as a modifcation to the @code{ext} connection method.
+@end table
+
+As a further example, to combine both the @code{CVS_RSH} and @code{CVS_SERVER}
+options, a method specification like the following would work:
+
+@example
+:ext;CVS_RSH=/path/to/ssh/command;CVS_SERVER=/path/to/cvs/command:
+@end example
+
+This means that you would not need to have
+the @code{CVS_SERVER} or @code{CVS_RSH} environment
+variables set correctly.  See @ref{Connecting via rsh}, for more details on
+these environment variables.
+
 @node Connecting via rsh
 @subsection Connecting with rsh
 
@@ -2265,10 +2356,11 @@ or @file{.profile}.  Alternately, you can set the
 environment variable @code{CVS_SERVER} on the client
 machine to the filename of the server you want to use,
 for example @file{/usr/local/bin/cvs-1.6}.
-@c FIXME: there should be a way to specify the
-@c program in CVSROOT, not CVS_SERVER, so that one can use
-@c different ones for different roots.  e.g. ":server;cvs=cvs-1.6:"
-@c instead of ":server:".
+For the @code{ext} and @code{fork} methods, you may
+also specify @var{CVS_SERVER} as an otpion in the
+@var{CVSROOT} so that you may use different servers for
+differnt roots. See @ref{Remote repositories} for more
+details.
 
 There is no need to edit @file{inetd.conf} or start a
 @sc{cvs} server daemon.
@@ -2300,10 +2392,13 @@ replacement, the instructions in the rest of this
 section concerning @file{.rhosts} and so on are likely
 to be inapplicable; consult the documentation for your rsh
 replacement.
-@c FIXME: there should be a way to specify the
-@c program in CVSROOT, not CVS_RSH, so that one can use
-@c different ones for different roots.  e.g. ":ext;rsh=remsh:"
-@c instead of ":ext:".
+
+You may choose to specify the @var{CVS_RSH} option in
+the @var{CVSROOT} to allow you to use different ones
+for different roots. For example, allowing some roots
+to use @var{CVS_RSH=remsh} and some to use
+@var{CVS_RSH=ssh} for the @code{ext} method. See also
+the @ref{Remote repositories} for more details.
 @c See also the comment in src/client.c for rationale
 @c concerning "rsh" being the default and never
 @c "remsh".
@@ -3007,7 +3102,11 @@ primary is periodically broken.  Only write operations will require the network
 link to the primary.
 
 To configure write proxies, the primary must be specified with the
-@samp{PrimaryServer} option in @file{CVSROOT/config} (@pxref{config}).
+@samp{PrimaryServer} option in @file{CVSROOT/config} (@pxref{config}).  For the
+transparent proxy mode to work, all secondary servers must also be running the
+same version of the @sc{cvs} server, or at least one that provides the same
+list of supported requests to the client as the primary server.  This is not
+necessary for redirection.
 
 Once a primary server is configured, secondary servers may be configured by:
 
@@ -3776,7 +3875,7 @@ like this:
                         1.2
                 1.1     1.3                       _
         1.1     1.2     1.4     1.1              /
-        1.2*----1.3*----1.5*----1.2*----1.1     (--- <--- Look here
+        1.2*----1.3*----1.5*----1.2*----1.1*    (--- <--- Look here
         1.3             1.6     1.3              \_
         1.4                     1.4
                                 1.5
@@ -7040,7 +7139,7 @@ This is a list of the keywords:
 The login name of the user who checked in the revision.
 
 @cindex CVSHeader keyword
-@item $@splitrcskeyword{CVSHeader}
+@item $@splitrcskeyword{CVSHeader}$
 A standard header (similar to $@splitrcskeyword{Header}$, but with
 the CVS root stripped off). It contains the relative
 pathname of the @sc{rcs} file to the CVS root, the
@@ -7052,7 +7151,7 @@ Note that this keyword has only been recently
 introduced to @sc{cvs} and may cause problems with
 existing installations if $@splitrcskeyword{CVSHeader}$ is already
 in the files for a different purpose. This keyword may
-be excluded using the @code{KeywordExpansion=eCVSHeader}
+be excluded using the @code{KeywordExpand=eCVSHeader}
 in the @file{CVSROOT/config} file. 
 See @ref{Configuring keyword expansion} for more details.
 
@@ -7152,7 +7251,8 @@ assigned with @code{cvs admin -s}---see @ref{admin options}.
 @item Local keyword
 The @code{LocalKeyword} option in the @file{CVSROOT/config} file
 may be used to specify a local keyword which is to be
-used as an alias for one of the other keywords. For
+used as an alias for one of the keywords: $@splitrcskeyword{Id}$,
+$@splitrcskeyword{Header}$, or $@splitrcskeyword{CVSHeader}$. For
 example, if the @file{CVSROOT/config} file contains
 a line with @code{LocalKeyword=MYBSD=CVSHeader}, then a
 file with the local keyword $@splitrcskeyword{MYBSD}$ will be
@@ -7192,7 +7292,7 @@ bug to the third-party and reducing the number of
 conflicts that arise during an import of a new version.
 
 All keyword expansion except the local keyword may be
-disabled using the @code{KeywordExpansion} option in
+disabled using the @code{KeywordExpand} option in
 the @file{CVSROOT/config} file---see 
 @ref{Configuring keyword expansion} for more details.
 
@@ -7401,14 +7501,14 @@ these cases, it is typically desirable to disable the
 expansion of all keywords except the configured local
 keyword.
 
-The @code{KeywordExpansion} option in the
+The @code{KeywordExpand} option in the
 @file{CVSROOT/config} file is intended to allow for the
 either the explicit exclusion of a keyword or list of
 keywords, or for the explicit inclusion of a keyword or
 a list of keywords. This list may include the
 @code{LocalKeyword} that has been configured.
 
-The @code{KeywordExpansion} option is followed by
+The @code{KeywordExpand} option is followed by
 @code{=} and the next character may either be @code{i}
 to start an inclusion list or @code{e} to start an
 exclusion list. If the following lines were added to
@@ -13005,7 +13105,7 @@ The name of the repository (the path portion of @code{$CVSROOT}).
 @item R
 On a server, the name of the referrer, if any.  The referrer is the CVSROOT the
 client reports it used to contact a server which then referred it to this
-server.  Should usually be set on a primary server with a writeproxy setup.
+server.  Should usually be set on a primary server with a write proxy setup.
 @end table
 
 Other format strings are file specific.  See the docs on the
@@ -14208,6 +14308,20 @@ pserver users must exist in @file{CVSROOT/passwd}.
 The default is @samp{yes}.  For more on pserver, see
 @ref{Password authenticated}.
 
+@cindex LocalKeyword, in CVSROOT/config
+@item LocalKeyword=@var{value}
+Specify a local alias for a standard keyword.
+For example, @samp{LocalKeyword=MYCVS=CVSHeader}.
+For more on local keywords, see @ref{Keyword substitution}.
+
+@cindex KeywordExpand, in CVSROOT/config
+@item KeywordExpand=@var{value}
+Specify @samp{i} followed by a list of keywords to be expanded
+(for example, @samp{KeywordExpand=iMYCVS,Name,Date}),
+or @samp{e} followed by a list of keywords not to be expanded
+(for example, @samp{KeywordExpand=eCVSHeader}).
+For more on keyword expansion, see @ref{Configuring keyword expansion}.
+
 @ignore
 @cindex PreservePermissions, in CVSROOT/config
 @item PreservePermissions=@var{value}
@@ -14967,22 +15081,29 @@ set to a non-empty value and re-create the RCS file.
 
 @item cvs [checkout aborted]: no such tag @var{tag}
 This message means that @sc{cvs} isn't familiar with
-the tag @var{tag}.  Usually this means that you have
-mistyped a tag name; however there are (relatively
-obscure) cases in which @sc{cvs} will require you to
+the tag @var{tag}.  Usually the root cause is that you have
+mistyped a tag name.  Ocassionally this can also occur because the
+users creating tags do not have permissions to write to the
+@file{CVSROOT/val-tags} file (@pxref{File permissions}, for more).
+
+Prior to @sc{cvs} version 1.12.10, there were a few relatively
+obscure cases where a given tag could be created in an archive
+file in the repository but @sc{cvs} would require the user to
 @c Search sanity.sh for "no such tag" to see some of
 @c the relatively obscure cases.
-try a few other @sc{cvs} commands involving that tag,
-before you find one which will cause @sc{cvs} to update
+try a few other @sc{cvs} commands involving that tag
+until one was found whch caused @sc{cvs} to update
 @cindex CVSROOT/val-tags file, forcing tags into
 @cindex val-tags file, forcing tags into
-the @file{val-tags} file; see discussion of val-tags in
-@ref{File permissions}.  You only need to worry about
-this once for a given tag; when a tag is listed in
-@file{val-tags}, it stays there.  Note that using
-@samp{-f} to not require tag matches does not override
-this check; see @ref{Common options}.
+the @file{val-tags} file, at which point the originally failing command
+would begin to work.  This same method can be used to repair a @file{val-tags}
+file that becomes out of date due to the permissions problem mentioned above.
+This updating is only required once per tag - once a tag is listed in
+@file{val-tags}, it stays there.
 
+Note that using @samp{tag -f} to not require tag matches did not and
+does not override this check (@pxref{Common options}). 
+ 
 @item *PANIC* administration files missing
 This typically means that there is a directory named
 @sc{cvs} but it does not contain the administrative files
@@ -15111,6 +15232,20 @@ such as:
 vi $*
 exit 0
 @end example
+
+@item cvs [server aborted]: Secondary out of sync with primary!
+
+This usually means that the version of @sc{cvs} running on a secondary server
+and a primary server (@pxref{Write proxies}) are not the same.  This will not
+occur if the client support redirection.
+
+It is not the version number that is significant here, but the list of
+supported requests that the servers provide to the client.  Thus, if the
+secondary was compiled with GSSAPI support and the primary was not, then the
+list of supported requests provided by the two servers will be different and
+the secondary will not work as a transparent proxy to the primary.  Conversely,
+one server could be version 1.12.10 and the other version 1.12.11 if they both
+provided the same list of valid requests to the client.
 
 @c "warning: foo was lost" and "no longer pertinent" (both normal).
 @c Would be nice to write these up--they are
@@ -15384,7 +15519,6 @@ good places to start are:
 
 @example
 @url{http://www.cvshome.org}
-@url{http://www.loria.fr/~molli/cvs-index.html}
 @end example
 
 If you are so inspired, increasing the information

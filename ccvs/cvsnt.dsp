@@ -572,6 +572,10 @@ SOURCE=.\lib\strftime.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\subr.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\lib\system.h
 # End Source File
 # Begin Source File
@@ -613,6 +617,10 @@ SOURCE=.\lib\xalloc.h
 # Begin Source File
 
 SOURCE=.\lib\xgetcwd.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\lib\xgethostname.h
 # End Source File
 # Begin Source File
 

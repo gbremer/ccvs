@@ -373,12 +373,15 @@ many flavors of items:
 
 We describe each of these item types in turn, below.
 
-   A few numbers may be written out in words in most contexts.  This is
-most useful for specifying day of the week items or relative items (see
-below).  Here is the list: `first' for 1, `next' for 2, `third' for 3,
-`fourth' for 4, `fifth' for 5, `sixth' for 6, `seventh' for 7, `eighth'
-for 8, `ninth' for 9, `tenth' for 10, `eleventh' for 11 and `twelfth'
-for 12.  Also, `last' means exactly -1.
+   A few ordinal numbers may be written out in words in some contexts.
+This is most useful for specifying day of the week items or relative
+items (see below).  Among the most commonly used ordinal numbers, the
+word `last' stands for -1, `this' stands for 0, and `first' and `next'
+both stand for 1.  Because the word `second' stands for the unit of
+time there is no way to write the ordinal number 2, but for convenience
+`third' stands for 3, `fourth' for 4, `fifth' for 5, `sixth' for 6,
+`seventh' for 7, `eighth' for 8, `ninth' for 9, `tenth' for 10,
+`eleventh' for 11 and `twelfth' for 12.
 
    When a month is written this way, it is still considered to be
 written numerically, instead of being "spelled in full"; this changes

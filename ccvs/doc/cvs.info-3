@@ -10,6 +10,69 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
+File: cvs.info,  Node: Kerberos authenticated,  Next: Connecting via fork,  Prev: GSSAPI authenticated,  Up: Remote repositories
+
+Direct connection with Kerberos
+-------------------------------
+
+   The easiest way to use Kerberos is to use the Kerberos `rsh', as
+described in *Note Connecting via rsh::.  The main disadvantage of
+using rsh is that all the data needs to pass through additional
+programs, so it may be slower.  So if you have Kerberos installed you
+can connect via a direct TCP connection, authenticating with Kerberos.
+
+   This section concerns the Kerberos network security system, version
+4.  Kerberos version 5 is supported via the GSSAPI generic network
+security interface, as described in the previous section.
+
+   To do this, CVS needs to be compiled with Kerberos support; when
+configuring CVS it tries to detect whether Kerberos is present or you
+can use the `--with-krb4' flag to configure.
+
+   The data transmitted is _not_ encrypted by default.  Encryption
+support must be compiled into both the client and server; use the
+`--enable-encryption' configure option to turn it on.  You must then
+use the `-x' global option to request encryption.
+
+   The CVS client will attempt to connect to port 1999 by default.
+
+   When you want to use CVS, get a ticket in the usual way (generally
+`kinit'); it must be a ticket which allows you to log into the server
+machine.  Then you are ready to go:
+
+     cvs -d :kserver:faun.example.org:/usr/local/cvsroot checkout foo
+
+   Previous versions of CVS would fall back to a connection via rsh;
+this version will not do so.
+
+
+File: cvs.info,  Node: Connecting via fork,  Next: Write proxies,  Prev: Kerberos authenticated,  Up: Remote repositories
+
+Connecting with fork
+--------------------
+
+   This access method allows you to connect to a repository on your
+local disk via the remote protocol.  In other words it does pretty much
+the same thing as `:local:', but various quirks, bugs and the like are
+those of the remote CVS rather than the local CVS.
+
+   For day-to-day operations you might prefer either `:local:' or
+`:fork:', depending on your preferences.  Of course `:fork:' comes in
+particularly handy in testing or debugging `cvs' and the remote
+protocol.  Specifically, we avoid all of the network-related
+setup/configuration, timeouts, and authentication inherent in the other
+remote access methods but still create a connection which uses the
+remote protocol.
+
+   To connect using the `fork' method, use `:fork:' and the pathname to
+your local repository.  For example:
+
+     cvs -d :fork:/usr/local/cvsroot checkout foo
+
+   As with `:ext:', the server is called `cvs' by default, or the value
+of the `CVS_SERVER' environment variable.
+
+
 File: cvs.info,  Node: Write proxies,  Prev: Connecting via fork,  Up: Remote repositories
 
 Distributing load across several CVS servers
@@ -50,7 +113,11 @@ where the link to the primary is periodically broken.  Only write
 operations will require the network link to the primary.
 
    To configure write proxies, the primary must be specified with the
-`PrimaryServer' option in `CVSROOT/config' (*note config::).
+`PrimaryServer' option in `CVSROOT/config' (*note config::).  For the
+transparent proxy mode to work, all secondary servers must also be
+running the same version of the CVS server, or at least one that
+provides the same list of supported requests to the client as the
+primary server.  This is not necessary for redirection.
 
    Once a primary server is configured, secondary servers may be
 configured by:
@@ -600,7 +667,7 @@ of revisions that is "flat" along the tagged revisions, like this:
                              1.2
                      1.1     1.3                       _
              1.1     1.2     1.4     1.1              /
-             1.2*----1.3*----1.5*----1.2*----1.1     (--- <--- Look here
+             1.2*----1.3*----1.5*----1.2*----1.1*    (--- <--- Look here
              1.3             1.6     1.3              \_
              1.4                     1.4
                                      1.5
@@ -1098,61 +1165,4 @@ do this:
    It only works if at least one revision is already committed on the
 branch.  Be very careful so that you do not assign the tag to the wrong
 number.  (There is no way to see how the tag was assigned yesterday).
-
-
-File: cvs.info,  Node: Merging a branch,  Next: Merging more than once,  Prev: Magic branch numbers,  Up: Branching and merging
-
-Merging an entire branch
-========================
-
-   You can merge changes made on a branch into your working copy by
-giving the `-j BRANCHNAME' flag to the `update' subcommand.  With one
-`-j BRANCHNAME' option it merges the changes made between the greatest
-common ancestor (GCA) of the branch and the destination revision (in
-the simple case below the GCA is the point where the branch forked) and
-the newest revision on that branch into your working copy.
-
-   The `-j' stands for "join".
-
-   Consider this revision tree:
-
-     +-----+    +-----+    +-----+    +-----+
-     ! 1.1 !----! 1.2 !----! 1.3 !----! 1.4 !      <- The main trunk
-     +-----+    +-----+    +-----+    +-----+
-                     !
-                     !
-                     !   +---------+    +---------+
-     Branch R1fix -> +---! 1.2.2.1 !----! 1.2.2.2 !
-                         +---------+    +---------+
-
-The branch 1.2.2 has been given the tag (symbolic name) `R1fix'.  The
-following example assumes that the module `mod' contains only one file,
-`m.c'.
-
-     $ cvs checkout mod               # Retrieve the latest revision, 1.4
-     
-     $ cvs update -j R1fix m.c        # Merge all changes made on the branch,
-                                      # i.e. the changes between revision 1.2
-                                      # and 1.2.2.2, into your working copy
-                                      # of the file.
-     
-     $ cvs commit -m "Included R1fix" # Create revision 1.5.
-
-   A conflict can result from a merge operation.  If that happens, you
-should resolve it before committing the new revision.  *Note Conflicts
-example::.
-
-   If your source files contain keywords (*note Keyword substitution::),
-you might be getting more conflicts than strictly necessary.  See *Note
-Merging and keywords::, for information on how to avoid this.
-
-   The `checkout' command also supports the `-j BRANCHNAME' flag.  The
-same effect as above could be achieved with this:
-
-     $ cvs checkout -j R1fix mod
-     $ cvs commit -m "Included R1fix"
-
-   It should be noted that `update -j TAGNAME' will also work but may
-not produce the desired result.  *Note Merging adds and removals::, for
-more.
 

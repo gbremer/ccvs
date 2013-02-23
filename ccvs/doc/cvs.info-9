@@ -105,7 +105,7 @@ R
      On a server, the name of the referrer, if any.  The referrer is
      the CVSROOT the client reports it used to contact a server which
      then referred it to this server.  Should usually be set on a
-     primary server with a writeproxy setup.
+     primary server with a write proxy setup.
 
    Other format strings are file specific.  See the docs on the
 particular script hooks for more information (*note script hooks::).
@@ -1007,6 +1007,18 @@ very strict.  Extraneous spaces or tabs are not permitted.
      `no', then all pserver users must exist in `CVSROOT/passwd'.  The
      default is `yes'.  For more on pserver, see *Note Password
      authenticated::.
+
+`LocalKeyword=VALUE'
+     Specify a local alias for a standard keyword.  For example,
+     `LocalKeyword=MYCVS=CVSHeader'.  For more on local keywords, see
+     *Note Keyword substitution::.
+
+`KeywordExpand=VALUE'
+     Specify `i' followed by a list of keywords to be expanded (for
+     example, `KeywordExpand=iMYCVS,Name,Date'), or `e' followed by a
+     list of keywords not to be expanded (for example,
+     `KeywordExpand=eCVSHeader').  For more on keyword expansion, see
+     *Note Configuring keyword expansion::.
 
 `TopLevelAdmin=VALUE'
      Modify the `checkout' command to create a `CVS' directory at the

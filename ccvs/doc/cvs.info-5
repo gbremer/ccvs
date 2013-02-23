@@ -10,6 +10,40 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
+File: cvs.info,  Node: Setting a watch,  Next: Getting Notified,  Up: Watches
+
+Telling CVS to watch certain files
+----------------------------------
+
+   To enable the watch features, you first specify that certain files
+are to be watched.
+
+ - Command: cvs watch on [`-lR'] [FILES]...
+     Specify that developers should run `cvs edit' before editing
+     FILES.  CVS will create working copies of FILES read-only, to
+     remind developers to run the `cvs edit' command before working on
+     them.
+
+     If FILES includes the name of a directory, CVS arranges to watch
+     all files added to the corresponding repository directory, and
+     sets a default for files added in the future; this allows the user
+     to set notification policies on a per-directory basis.  The
+     contents of the directory are processed recursively, unless the
+     `-l' option is given.  The `-R' option can be used to force
+     recursion if the `-l' option is set in `~/.cvsrc' (*note
+     ~/.cvsrc::).
+
+     If FILES is omitted, it defaults to the current directory.
+
+
+ - Command: cvs watch off [`-lR'] [FILES]...
+     Do not create FILES read-only on checkout; thus, developers will
+     not be reminded to use `cvs edit' and `cvs unedit'.
+
+     The FILES and options are processed as for `cvs watch on'.
+
+
+
 File: cvs.info,  Node: Getting Notified,  Next: Editing files,  Prev: Setting a watch,  Up: Watches
 
 Telling CVS to notify you
@@ -351,7 +385,7 @@ Keyword List
 `$Author$'
      The login name of the user who checked in the revision.
 
-`$CVSHeader'
+`$CVSHeader$'
      A standard header (similar to $Header$, but with the CVS root
      stripped off). It contains the relative pathname of the RCS file
      to the CVS root, the revision number, the date (UTC), the author,
@@ -361,7 +395,7 @@ Keyword List
      Note that this keyword has only been recently introduced to CVS
      and may cause problems with existing installations if $CVSHeader$
      is already in the files for a different purpose. This keyword may
-     be excluded using the `KeywordExpansion=eCVSHeader' in the
+     be excluded using the `KeywordExpand=eCVSHeader' in the
      `CVSROOT/config' file.  See *Note Configuring keyword expansion::
      for more details.
 
@@ -440,11 +474,12 @@ Keyword List
 `Local keyword'
      The `LocalKeyword' option in the `CVSROOT/config' file may be used
      to specify a local keyword which is to be used as an alias for one
-     of the other keywords. For example, if the `CVSROOT/config' file
-     contains a line with `LocalKeyword=MYBSD=CVSHeader', then a file
-     with the local keyword $MYBSD$ will be expanded as if it were a
-     $CVSHeader$ keyword. If the src/frob.c file contained this
-     keyword, it might look something like this:
+     of the keywords: $Id$, $Header$, or $CVSHeader$. For example, if
+     the `CVSROOT/config' file contains a line with
+     `LocalKeyword=MYBSD=CVSHeader', then a file with the local keyword
+     $MYBSD$ will be expanded as if it were a $CVSHeader$ keyword. If
+     the src/frob.c file contained this keyword, it might look
+     something like this:
 
             /*
              * $MYBSD: src/frob.c,v 1.1 2003/05/04 09:27:45 john Exp $
@@ -470,8 +505,8 @@ Keyword List
      an import of a new version.
 
      All keyword expansion except the local keyword may be disabled
-     using the `KeywordExpansion' option in the `CVSROOT/config'
-     file--see *Note Configuring keyword expansion:: for more details.
+     using the `KeywordExpand' option in the `CVSROOT/config' file--see
+     *Note Configuring keyword expansion:: for more details.
 
 
 
@@ -623,15 +658,15 @@ local keyword or a standard keyword). In these cases, it is typically
 desirable to disable the expansion of all keywords except the
 configured local keyword.
 
-   The `KeywordExpansion' option in the `CVSROOT/config' file is
-intended to allow for the either the explicit exclusion of a keyword or
-list of keywords, or for the explicit inclusion of a keyword or a list
-of keywords. This list may include the `LocalKeyword' that has been
+   The `KeywordExpand' option in the `CVSROOT/config' file is intended
+to allow for the either the explicit exclusion of a keyword or list of
+keywords, or for the explicit inclusion of a keyword or a list of
+keywords. This list may include the `LocalKeyword' that has been
 configured.
 
-   The `KeywordExpansion' option is followed by `=' and the next
-character may either be `i' to start an inclusion list or `e' to start
-an exclusion list. If the following lines were added to the
+   The `KeywordExpand' option is followed by `=' and the next character
+may either be `i' to start an inclusion list or `e' to start an
+exclusion list. If the following lines were added to the
 `CVSROOT/config' file:
 
              # Add a "MyBSD" keyword and restrict keyword

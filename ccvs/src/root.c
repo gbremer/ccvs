@@ -36,6 +36,10 @@ Name_Root (const char *dir, const char *update_dir)
     char *cp;
     int len;
 
+    TRACE (TRACE_FLOW, "Name_Root (%s, %s)",
+	   dir ? dir : "(null)",
+	   update_dir ? update_dir : "(null)");
+
     if (update_dir && *update_dir)
 	xupdate_dir = update_dir;
     else
@@ -115,7 +119,6 @@ Name_Root (const char *dir, const char *update_dir)
 	error (0, 0,
 	       "ignoring %s because it specifies a non-existent repository %s",
 	       CVSADM_ROOT, root);
-	free_cvsroot_t (ret);
 	ret = NULL;
 	goto out;
     }
@@ -386,11 +389,14 @@ new_cvsroot_t (void)
     newroot->username = NULL;
     newroot->password = NULL;
     newroot->hostname = NULL;
+    newroot->cvs_rsh = NULL;
+    newroot->cvs_server = NULL;
     newroot->port = 0;
     newroot->directory = NULL;
     newroot->proxy_hostname = NULL;
     newroot->proxy_port = 0;
     newroot->isremote = 0;
+    newroot->redirect = true;	/* Advertise Redirect support */
 #endif /* CLIENT_SUPPORT */
 
     return newroot;
@@ -417,6 +423,10 @@ free_cvsroot_t (cvsroot_t *root)
     }
     if (root->hostname != NULL)
 	free (root->hostname);
+    if (root->cvs_rsh != NULL)
+	free (root->cvs_rsh);
+    if (root->cvs_server != NULL)
+	free (root->cvs_server);
     if (root->proxy_hostname != NULL)
 	free (root->proxy_hostname);
 #endif /* CLIENT_SUPPORT */
@@ -439,11 +449,15 @@ free_cvsroot_t (cvsroot_t *root)
  *
  * RETURNS
  *	A pointer to a newly allocated cvsroot_t structure upon success and
- *	NULL upon failure.  The caller is responsible for disposing of
- *	new structures with a call to free_cvsroot_t().
+ *	NULL upon failure.  The caller should never dispose of this structure,
+ *	as it is stored in a cache, but the caller may rely on it not to
+ *	change.
  *
  * NOTES
  * 	This would have been a lot easier to write in Perl.
+ *
+ *	Would it make sense to reimplement the root and config file parsing
+ *	gunk in Lex/Yacc?
  *
  * SEE ALSO
  * 	free_cvsroot_t()
@@ -462,6 +476,8 @@ parse_cvsroot (const char *root_in)
 #ifdef CLIENT_SUPPORT
     int check_hostname, no_port, no_password, no_proxy;
 #endif /* CLIENT_SUPPORT */
+    static List *cache = NULL;
+    Node *node;
 
     assert (root_in != NULL);
 
@@ -469,6 +485,9 @@ parse_cvsroot (const char *root_in)
      * the recursion routines.
      */
     TRACE (TRACE_FLOW, "parse_cvsroot (%s)", root_in);
+
+    if ((node = findnode (cache, root_in)))
+	return node->data;
 
     /* allocate some space */
     newroot = new_cvsroot_t();
@@ -509,19 +528,19 @@ parse_cvsroot (const char *root_in)
 
 	/* Now we have an access method -- see if it's valid. */
 
-	if (strcmp (method, "local") == 0)
+	if (!strcasecmp (method, "local"))
 	    newroot->method = local_method;
-	else if (strcmp (method, "pserver") == 0)
+	else if (!strcasecmp (method, "pserver"))
 	    newroot->method = pserver_method;
-	else if (strcmp (method, "kserver") == 0)
+	else if (!strcasecmp (method, "kserver"))
 	    newroot->method = kserver_method;
-	else if (strcmp (method, "gserver") == 0)
+	else if (!strcasecmp (method, "gserver"))
 	    newroot->method = gserver_method;
-	else if (strcmp (method, "server") == 0)
+	else if (!strcasecmp (method, "server"))
 	    newroot->method = server_method;
-	else if (strcmp (method, "ext") == 0)
+	else if (!strcasecmp (method, "ext"))
 	    newroot->method = ext_method;
-	else if (strcmp (method, "fork") == 0)
+	else if (!strcasecmp (method, "fork"))
 	    newroot->method = fork_method;
 	else
 	{
@@ -542,11 +561,12 @@ parse_cvsroot (const char *root_in)
 	    }
 
 	    *q++ = '\0';
-	    if (strcmp (p, "proxy") == 0)
+	    TRACE (TRACE_DATA, "CVSROOT option=`%s' value=`%s'", p, q);
+	    if (!strcasecmp (p, "proxy"))
 	    {
 		newroot->proxy_hostname = xstrdup (q);
 	    }
-	    else if (strcmp (p, "proxyport") == 0)
+	    else if (!strcasecmp (p, "proxyport"))
 	    {
 		char *r = q;
 		if (*r == '-') r++;
@@ -565,6 +585,21 @@ parse_cvsroot (const char *root_in)
 "CVSROOT may only specify a positive, non-zero, integer proxy port (not `%s').",
 			   q);
 	    }
+	    else if (!strcasecmp (p, "CVS_RSH"))
+	    {
+		/* override CVS_RSH environment variable */
+		if (newroot->method == ext_method)
+		    newroot->cvs_rsh = xstrdup (q);
+	    }
+	    else if (!strcasecmp (p, "CVS_SERVER"))
+	    {
+		/* override CVS_SERVER environment variable */
+		if (newroot->method == ext_method
+		    || newroot->method == fork_method)
+		    newroot->cvs_server = xstrdup (q);
+	    }
+	    else if (!strcasecmp (p, "Redirect"))
+		readBool ("CVSROOT", "Redirect", q, &newroot->redirect);
 	    else
 	    {
 	        error (0, 0, "Unknown option (`%s') in CVSROOT.", p);
@@ -864,6 +899,12 @@ parse_cvsroot (const char *root_in)
     
     /* Hooray!  We finally parsed it! */
     free (cvsroot_save);
+
+    if (!cache) cache = getlist();
+    node = getnode();
+    node->key = xstrdup (newroot->original);
+    node->data = newroot;
+    addnode (cache, node);
     return newroot;
 
 error_exit:
@@ -884,6 +925,9 @@ error_exit:
  * FIXME - we could cache the canonicalized version of a root inside the
  * cvsroot_t, but we'd have to un'const the input here and stop expecting the
  * caller to be responsible for our return value
+ *
+ * ASSUMPTIONS
+ *   ROOT->method == pserver_method
  */
 char *
 normalize_cvsroot (const cvsroot_t *root)

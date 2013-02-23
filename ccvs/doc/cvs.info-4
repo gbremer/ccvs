@@ -10,6 +10,63 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
+File: cvs.info,  Node: Merging a branch,  Next: Merging more than once,  Prev: Magic branch numbers,  Up: Branching and merging
+
+Merging an entire branch
+========================
+
+   You can merge changes made on a branch into your working copy by
+giving the `-j BRANCHNAME' flag to the `update' subcommand.  With one
+`-j BRANCHNAME' option it merges the changes made between the greatest
+common ancestor (GCA) of the branch and the destination revision (in
+the simple case below the GCA is the point where the branch forked) and
+the newest revision on that branch into your working copy.
+
+   The `-j' stands for "join".
+
+   Consider this revision tree:
+
+     +-----+    +-----+    +-----+    +-----+
+     ! 1.1 !----! 1.2 !----! 1.3 !----! 1.4 !      <- The main trunk
+     +-----+    +-----+    +-----+    +-----+
+                     !
+                     !
+                     !   +---------+    +---------+
+     Branch R1fix -> +---! 1.2.2.1 !----! 1.2.2.2 !
+                         +---------+    +---------+
+
+The branch 1.2.2 has been given the tag (symbolic name) `R1fix'.  The
+following example assumes that the module `mod' contains only one file,
+`m.c'.
+
+     $ cvs checkout mod               # Retrieve the latest revision, 1.4
+     
+     $ cvs update -j R1fix m.c        # Merge all changes made on the branch,
+                                      # i.e. the changes between revision 1.2
+                                      # and 1.2.2.2, into your working copy
+                                      # of the file.
+     
+     $ cvs commit -m "Included R1fix" # Create revision 1.5.
+
+   A conflict can result from a merge operation.  If that happens, you
+should resolve it before committing the new revision.  *Note Conflicts
+example::.
+
+   If your source files contain keywords (*note Keyword substitution::),
+you might be getting more conflicts than strictly necessary.  See *Note
+Merging and keywords::, for information on how to avoid this.
+
+   The `checkout' command also supports the `-j BRANCHNAME' flag.  The
+same effect as above could be achieved with this:
+
+     $ cvs checkout -j R1fix mod
+     $ cvs commit -m "Included R1fix"
+
+   It should be noted that `update -j TAGNAME' will also work but may
+not produce the desired result.  *Note Merging adds and removals::, for
+more.
+
+
 File: cvs.info,  Node: Merging more than once,  Next: Merging two revisions,  Prev: Merging a branch,  Up: Branching and merging
 
 Merging from a branch several times
@@ -1231,38 +1288,4 @@ time (unless explicitly overriden with `-f').
 * Editing files::               How to edit a file which is being watched
 * Watch information::           Information about who is watching and editing
 * Watches Compatibility::       Watches interact poorly with CVS 1.6 or earlier
-
-
-File: cvs.info,  Node: Setting a watch,  Next: Getting Notified,  Up: Watches
-
-Telling CVS to watch certain files
-----------------------------------
-
-   To enable the watch features, you first specify that certain files
-are to be watched.
-
- - Command: cvs watch on [`-lR'] [FILES]...
-     Specify that developers should run `cvs edit' before editing
-     FILES.  CVS will create working copies of FILES read-only, to
-     remind developers to run the `cvs edit' command before working on
-     them.
-
-     If FILES includes the name of a directory, CVS arranges to watch
-     all files added to the corresponding repository directory, and
-     sets a default for files added in the future; this allows the user
-     to set notification policies on a per-directory basis.  The
-     contents of the directory are processed recursively, unless the
-     `-l' option is given.  The `-R' option can be used to force
-     recursion if the `-l' option is set in `~/.cvsrc' (*note
-     ~/.cvsrc::).
-
-     If FILES is omitted, it defaults to the current directory.
-
-
- - Command: cvs watch off [`-lR'] [FILES]...
-     Do not create FILES read-only on checkout; thus, developers will
-     not be reminded to use `cvs edit' and `cvs unedit'.
-
-     The FILES and options are processed as for `cvs watch on'.
-
 

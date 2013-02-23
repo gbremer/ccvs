@@ -31,6 +31,9 @@ typedef struct cvsroot_s {
     char *username;		/* The username or NULL if method == local. */
     char *password;		/* The password or NULL if method == local. */
     char *hostname;		/* The hostname or NULL if method == local. */
+    char *cvs_rsh;		/* The $CVS_RSH or NULL if method != ext. */
+    char *cvs_server;		/* The $CVS_SERVER or NULL if
+				 * method != ext and method != fork. */
     int port;			/* The port or zero if method == local. */
     char *proxy_hostname;	/* The hostname of the proxy server, or NULL
 				 * when method == local or no proxy will be
@@ -38,6 +41,7 @@ typedef struct cvsroot_s {
 				 */
     int proxy_port;		/* The port of the proxy or zero, as above. */
     unsigned char isremote;	/* Nonzero if we are doing remote access. */
+    bool redirect;		/* False if we are to disable redirects. */
 #endif /* CLIENT_SUPPORT */
 } cvsroot_t;
 

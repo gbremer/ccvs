@@ -1,5 +1,29 @@
-Changes since 1.12.9:
-*********************
+Changes since 1.12.10:
+**********************
+
+NEW FEATURES
+
+* Thanks to Conrad Pino <conrad@pino.com>, the Windows build works once again.
+
+* CVSROOT methods and option names are now case insensitive
+
+* CVSROOT methods :ext: and :fork: now support the CVS_SERVER option.
+
+* CVSROOT method :ext: now supports the CVS_RSH and Redirect options.
+
+* Date handling has been improved slightly.
+
+* Miscellaneous bug fixes.
+
+* Miscellaneous documentation fixes.
+
+BUG FIXES
+
+* Thanks to a report from Chris Bohn <cbohn@rrinc.com>, all the source files
+  needed to build on Windows are now included in the source distribution.
+
+Changes from 1.12.9 to 1.12.10:
+*******************************
 
 NEW FEATURES
 

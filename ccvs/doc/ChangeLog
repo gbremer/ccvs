@@ -1,3 +1,57 @@
+2004-12-09  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Error messages): Note that old, val-tags, "no such tag"
+	problem has been fixed and expound.
+
+2004-12-09  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Remote repositories): Move method option data to...
+	(The connection method): ...this new node and rework.
+
+2004-12-09  Mark D. Baushke  <mdb@cvshome.org>
+
+	* cvs.texinfo (BUGS, What is CVS?): Remove Dr. Pascal Molli's CVS
+	URL from the documentation.
+	* cvs.man.footer: Ditto.
+	* cvs.1, stamp-vti, version.texi: Regenerated.
+
+2004-12-03  Mark D. Baushke  <mdb@cvshome.org>
+
+	* cvs.texinfo (Remote repositories): Add options CVS_RSH and
+	CVS_SERVER to the docs.
+	(Connecting via rsh): Ditto.
+	(getdate.texi): Replaced reference to getdate-cvs.texi file that
+	does not exist.
+	* stamp-1, stamp-vti, version-client.texi, version.texi:
+	Regenerated.
+	
+2004-11-30  Derek Price  <derek@ximbiot.com>
+
+	* cvsclient.texi (Responses): Document the `Referrer' response.
+
+2004-11-29  Larry Jones  <lawrence.jones@ugs.com>
+
+	* cvs.texinfo (Keyword list): Add LocalKeyword and KeywordExpand.
+
+2004-11-29  Mark D. Baushke  <mdb@cvshome.org>
+
+	* cvs.texinfo (Keyword list): LocalKeyword may only use the Id,
+	Header, and CVSHeader keywords at present, so document it.
+
+2004-11-29  Larry Jones  <lawrence.jones@ugs.com>
+
+	* cvs.texinfo: s/KeywordExpansion/KeywordExpand/.
+
+2004-11-24  Derek Price  <derek@ximbiot.com>
+
+	* cvs.texinfo (Write proxies): Mention version limitations on primary
+	and secondary write proxies.
+	(Error messages): List secondary out of sync message.
+
+2004-11-17  Derek Price  <derek@ximbiot.com>
+
+	* getdate.texi: Update from GNULIB.
+
 2004-11-15  Derek Price  <derek@ximbiot.com>
 
 	* Makefile.am (stamp-gdt): Replace dependency on Makefile with

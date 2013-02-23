@@ -20,6 +20,15 @@ Responses
      patches, it will include `update-patches' in this list.  The
      `update-patches' request does not actually do anything.
 
+`Referrer CVSROOT'
+     Request that the client store CVSROOT as the name of this server
+     and that this name be passed via a `Referrer' _request_ to any
+     subsequent servers contacted as a result of a `Redirect' response.
+     This can be useful to allow the secondary administrator to
+     configure the `CVSROOT' the primary should use to update the
+     secondary in case the client uses a non-standard name or even a
+     name that is unique to the client for some reason.
+
 `Redirect CVSROOT'
      Request that the client redirect its connection to CVSROOT and
      begin again.  This response is only valid in response to a

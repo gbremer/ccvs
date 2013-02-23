@@ -1,3 +1,185 @@
+2004-12-09 Derek Price <derek@ximbiot.com>
+
+	* log-buffer.c (buf_count_mem): Compile this for PROXY_SUPPORT.
+	(Report from Brad L. Chisholm <blc@bsdwins.com>.)
+
+2004-12-09 Derek Price <derek@ximbiot.com>
+
+	* sanity.sh (modules7): New test group.
+	(Based on a patch from Mark D. Baushke <mdb@cvshome.org>, based on a
+	report from Richard Verhoeven <Richard_Verhoeven@WestLB.de>.)
+
+2004-12-09  Derek Price  <derek@ximbiot.com>
+
+	* client.c (start_server): Avoid advertising the Redirect response when
+	the user asked us not to.
+	* root.h (cvsroot_t): Add redirect field.
+	* root.c (new_cvsroot_t): Init redirect field.
+	(parse_cvsroot_t): Parse Redirect method option.
+	* server.c (serve_command_prep): Don't throw proxy_log away when
+	Redirect isn't supported and it might be needed later.
+	* sanity.sh (parseroot): Improve comment, add a few new tests.
+	(writeproxy-ssh): Specify Redirect=yes explicitly.
+	(writeproxy-ssh-noredirect): New test group.
+
+2004-12-09  Mark D. Baushke  <mdb@cvshome.org>
+
+	* main.c (usg): Remove Dr. Pascal Molli's CVS URL from the
+	documentation.
+
+2004-12-08  Derek Price  <derek@ximbiot.com>
+
+	* root.c (Name_Root): s/TRACE_FUNCTION/TRACE_FLOW/.
+
+2004-12-08  Derek Price  <derek@ximbiot.com>
+
+	* root.c (parse_cvsroot): Suppress -Wall warning.
+
+2004-12-08  Derek Price  <derek@ximbiot.com>
+
+	* root.c (parse_cvsroot): findnode() compares LIST to NULL w/o help.
+
+2004-12-08  Derek Price  <derek@ximbiot.com>
+
+	* root.c (Name_root), server.c (serve_referrer): Don't free cvsroot_t.
+	* server.sh (reposmv): Reaccount for multiple potential warnings and
+	comment.
+
+2004-12-07  Derek Price  <derek@ximbiot.com>
+
+	* root.c (parse_cvsroot): Cache parsed values for efficiency and to
+	avoid printing warnings about non-fatal parsing errors multiple times.
+	* client.c,, login.c, main.c, recurse.c: Don't dispose of parsed roots,
+	parse_cvsroot() has control.
+	* sanity.sh (reposmv): Stop accounting for multiple warnings.
+
+2004-12-03  Mark D. Baushke  <mdb@cvshome.org>
+
+	* root.h (cvsroot_t): Add cvs_rsh and cvs_server for bookkeeping
+	purposes.
+	* root.c (new_cvsroot_t, free_cvsroot_t): Add support for case
+	insensitive options CVS_RSH and CVS_SERVER.
+	(parse_cvsroot): Ditto and make all keywords case insensitive.
+	* client.c (connect_to_forked_server): Add support for the new
+	"CVS_SERVER" option to CVSROOT.
+	* rsh-client.c (connect_to_forked_server): Ditto
+	(start_rsh_server): Ditto and add support for the new "CVS_RSH"
+	option to CVSROOT.
+	* sanity.sh (parseroot3): New tests for the new options to
+	CVSROOT.
+	
+2004-11-30  Larry Jones  <lawrence.jones@ugs.com>
+
+	* mkmodules.c (config_contents): Add LocalKeyword and KeywordExpand,
+	misc. cleanup.
+
+2004-11-30  Derek Price  <derek@ximbiot.com>
+
+	* parseinfo.c (readBool): Update quotes in error message for
+	consistency.  Move function to...
+	* subr.c (readBool): ...here.
+	(*): Gratuitous reformatting.
+	* cvs.h: Move all subr.c function prototypes to...
+	* subr.h: ...this new file.
+	* Makefile.am (cvs_SOURCES): Add subr.h.
+
+2004-11-30  Derek Price  <derek@ximbiot.com>
+
+	* parseinfo.c (readBool): Reorder arguments to error() and improve
+	header comment.
+
+2004-11-30  Derek Price  <derek@ximbiot.com>
+
+	* client.c (handle_referrer): New function.
+	(handle_redirect): Handle possibility that CLIENT_REFERRER was set via
+	a response.
+	* server.c (serve_command_prep): Send a normalized Referrer response
+	before a Redirect when the client supports it.
+
+2004-11-29  Mark D. Baushke  <mdb@cvshome.org>
+
+	* rcs.c (RCS_setlocalid): Do more configuration validation.
+	Include some gratuitous reformatting.
+	* sanity.sh (keywordexpand): Add tests for new validation code.
+
+2004-11-24  Derek Price  <derek@ximbiot.com>
+
+	* server.c (become_proxy): Note assumptions about syncronized primary
+	and secondary versions with `FIXME?' note.
+
+2004-11-22  Mark D. Baushke  <mdb@cvshome.org>
+
+	* sanity.sh (info): Ignore comments in verifymsg test.
+
+2004-11-22  Mark D. Baushke  <mdb@cvshome.org>
+
+	* mkmodules.c (loginfo_contents, verifymsg_contents,
+	commitinfo_contents, taginfo_contents, preproxy_contents,
+	postadmin_contents, postproxy_contents, posttag_contents,
+	postwatch_contents, notify_contents): Add comments regarding the
+	additional format strings that are available. Include some
+	gratuitous reformatting.
+
+2004-11-19  Derek Price  <derek@ximbiot.com>
+
+	* subr.c (Xasnprintf): Improve header comment block.
+
+2004-11-19  Derek Price  <derek@ximbiot.com>
+
+	* root.c (normalize_cvsroot): Improve header comment block.
+
+2004-11-19  Derek Price  <derek@ximbiot.com>
+
+	* server.c: Misc reformatting and comment corrections.
+
+2004-11-19  Derek Price  <derek@ximbiot.com>
+
+	* cvs.h (hostname): Redeclare as pointer rather than array.
+	* main.c: Include xgethostname.h.  Declare server_hostname.
+	(main): Use xgethostname().  Set server_hostname.
+	* server.c (MAXHOSTNAMELEN): Remove this macro.
+	(isThisHost): Reference global HOSTNAME rather than looking it up.
+	Improve header comment block.
+	(gserver_authenticate_connection): Likewise.
+	(serve_command_prep): Correct comment.
+	(serve_hostname): Don't bother to validate hostname length.
+
+2004-11-19  Derek Price  <derek@ximbiot.com>
+
+	* server.c (isThisHost): strcasecmp before consulting the DNS as an
+	optimization.
+
+2004-11-18  Mark D. Baushke  <mdb@cvshome.org>
+
+	* checkout.c (checkout_proc): Passing the repository to
+	tag_check_valid seems to stop the assertion failure in recurse.c
+	do_recursion.
+	* sanity.sh (basic2-21a): Removed.
+	(basic2-21c): Fixed.
+
+2004-11-18  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh (skip_always, notproxy): New functions.
+	(skip, remoteonly, sshstdio, client): Use new functions.
+
+2004-11-17  Mark D. Baushke  <mdb@cvshome.org>
+
+	* sanity.sh (basic2-21a): The val-tags file should have
+	at least 'rtagged-by-head y' in it. Test from cvs 1.11.18 that
+	shows fixed result.
+	(basic2-21b, basic2-21c): New tests showing a cvs bug when
+	val-tags is not present.
+	(Report from "John Elgin" <John@JCElgin.com>.)
+
+	* sanity.sh (basicb-21): POSIX 1003.2 specifies 'illegal option'
+	while lots of getopt implementations still use 'invalid option'.
+	Allow either form for this test.
+
+2004-11-17  Mark D. Baushke  <mdb@cvshome.org>
+
+	* buffer.c (fd_buffer_block): Deal with BSD and BSDI problems to
+	set block/nonblock on /dev/null.
+
 2004-11-17  Derek Price  <derek@ximbiot.com>
 
 	* Makefile.am (distclean-local): Clean check.plog~.

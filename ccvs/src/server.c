@@ -48,17 +48,7 @@ static int cvs_gssapi_wrapping;
 
 #ifdef SERVER_SUPPORT
 
-/* This isn't defined anywhere else that I know of.  We made it up.  Referenced
- * both times this file can call gethostname.
- *
- * FIXME: This should probably correspond to any hostname length limits defined
- * by POSIX or some appropriate internet standard, but I'm not sure where to
- * look and I haven't heard any complaints.  If you happen to know the correct
- * standard, it should probably at least be referenced in this comment.
- */
-# ifndef MAXHOSTNAMELEN
-#   define MAXHOSTNAMELEN (256)
-# endif
+extern char *server_hostname;
 
 # ifdef HAVE_WINSOCK_H
 #   include <winsock.h>
@@ -118,11 +108,11 @@ static char *Pserver_Repos = NULL;
 
 # endif /* AUTH_SERVER_SUPPORT */
 
-#ifdef HAVE_PAM
-# include <security/pam_appl.h>
+# ifdef HAVE_PAM
+#   include <security/pam_appl.h>
 
 static pam_handle_t *pamh = NULL;
-#endif
+# endif /* HAVE_PAM */
 
 
 
@@ -136,7 +126,7 @@ static struct buffer *buf_from_net;
 
 
 
-#ifdef PROXY_SUPPORT
+# ifdef PROXY_SUPPORT
 /* These are the secondary log buffers so that we can disable them after
  * creation, when it is determined that they are unneeded, regardless of what
  * other filters have been prepended to the buffer chain.
@@ -148,7 +138,7 @@ static struct buffer *proxy_log_out;
  * to some requests twice.
  */
 static bool reprocessing;
-#endif /* PROXY_SUPPORT */
+# endif /* PROXY_SUPPORT */
 
 
 
@@ -542,24 +532,25 @@ isSamePath (const char *path1_in, const char *path2_in)
 
 
 /* Return true if OTHERHOST resolves to this host in the DNS.
+ *
+ * GLOBALS
+ *   server_hostname	The name of this host, as determined by the call to
+ *			xgethostname() in main().
+ *
+ * RETURNS
+ *   true	If OTHERHOST equals or resolves to HOSTNAME.
+ *   false	Otherwise.
  */
 static inline bool
 isThisHost (const char *otherhost)
 {
-    /* THISHOST is static so that it may be cached.  Our hostname will not
-     * change from one call to the next.
-     */
-    static char *thishost = NULL;
     struct hostent *hinfo;
 
-    /* Our hostname must also match for this to be the primary.  */
-    if (!thishost)
-    {
-	thishost = xmalloc (MAXHOSTNAMELEN);
-	if (gethostname (thishost, MAXHOSTNAMELEN))
-	    error (1, errno, "Failed to retrieve hostname.");
-	thishost[MAXHOSTNAMELEN - 1] = '\0';
-    }
+    /* As an optimization, check the literal strings before looking up
+     * OTHERHOST in the DNS.
+     */
+    if (!strcasecmp (server_hostname, otherhost))
+	return true;
 
     if (!(hinfo = gethostbyname (otherhost)))
 #ifdef HAVE_HSTRERROR
@@ -570,7 +561,7 @@ isThisHost (const char *otherhost)
 	       otherhost, h_errno);
 #endif
 
-    return !strcasecmp (thishost, hinfo->h_name);
+    return !strcasecmp (server_hostname, hinfo->h_name);
 }
 
 
@@ -2493,6 +2484,25 @@ become_proxy (void)
 				       &got);
 			/* Verify that we are throwing away what we think we
 			 * are.
+			 *
+			 * It is valid to assume that the secondary and primary
+			 * are closely enough in sync that this portion of the
+			 * communication will be in sync beacuse if they were
+			 * not, then the secondary might provide a
+			 * valid-request string to the client which contained a
+			 * request that the primary didn't support.  If the
+			 * client later used the request, the primary server
+			 * would exit anyhow.
+			 *
+			 * FIXME?
+			 * An alternative approach might be to make sure that
+			 * the secondary provides the same string as the
+			 * primary regardless, for purposes like pointing a
+			 * secondary at an unwitting primary, in which case it
+			 * might be useful to have some way to override the
+			 * valid-requests string on a secondary, but it seems
+			 * much easier to simply sync the versions, at the
+			 * moment.
 			 */
 			if (memcmp (data, newdata, got))
 			    error (1, 0, "Secondary out of sync with primary!");
@@ -2748,16 +2758,8 @@ serve_notify (char *arg)
 static void
 serve_hostname (char *arg)
 {
-    if (strlen (hostname) >= MAXHOSTNAMELEN)
-    {
-	pending_error = 0;
-	if (alloc_pending (80))
-	    strcpy (pending_error_text,
-		    "E Protocol error; hostname too long.");
-	return;
-    }
-
-    strcpy (hostname, arg);
+    free (hostname);
+    hostname = xstrdup (arg);
     return;
 }
 
@@ -5535,32 +5537,68 @@ serve_expand_modules (char *arg)
 static void
 serve_command_prep (char *arg)
 {
-    bool supported;
+    bool redirect_supported;
+#ifdef PROXY_SUPPORT
+    bool ditch_log;
+#endif /* PROXY_SUPPORT */
 
     if (error_pending ()) return;
 
-    supported = supported_response ("Redirect");
-    if (config->PrimaryServer && supported
+    redirect_supported = supported_response ("Redirect");
+    if (redirect_supported
 	&& lookup_command_attribute (arg) & CVS_CMD_MODIFIES_REPOSITORY
-	/* I call isProxyServer() last because it is probably the slowest
-	 * call due to the call to gethostname().
+	/* I call isProxyServer() last because it can probably be the slowest
+	 * call due to the call to gethostbyname().
 	 */
 	&& isProxyServer ())
     {
+	/* Before sending a redirect, send a "Referrer" line to the client,
+	 * if possible, to give admins more control over canonicalizing roots
+	 * sent from the client.
+	 */
+	if (supported_response ("Referrer"))
+	{
+	    /* assume :ext:, since that is all we currently support for
+	     * proxies and redirection.
+	     */
+	    char *referrer = Xasprintf (":ext:%s@%s%s", getcaller(),
+					server_hostname,
+					current_parsed_root->directory);
+
+	    buf_output0 (buf_to_net, "Referrer ");
+	    buf_output0 (buf_to_net, referrer);
+	    buf_output0 (buf_to_net, "\n");
+
+	    free (referrer);
+	}
+
 	/* Send `Redirect' to redirect client requests to the primary.  */
 	buf_output0 (buf_to_net, "Redirect ");
 	buf_output0 (buf_to_net, config->PrimaryServer->original);
 	buf_output0 (buf_to_net, "\n");
 	buf_flush (buf_to_net, 1);
+#ifdef PROXY_SUPPORT
+	ditch_log = true;
+#endif /* PROXY_SUPPORT */
     }
     else
     {
 	/* Send `ok' so the client can proceed.  */
 	buf_output0 (buf_to_net, "ok\n");
 	buf_flush (buf_to_net, 1);
+#ifdef PROXY_SUPPORT
+	if (lookup_command_attribute (arg) & CVS_CMD_MODIFIES_REPOSITORY
+            && isProxyServer ())
+	    /* Don't ditch the log for write commands on a proxy server.  We
+	     * we got here because the `Redirect' response was not supported.
+	     */
+	    ditch_log = false;
+	else
+	    ditch_log = true;
+#endif /* PROXY_SUPPORT */
     }
 #ifdef PROXY_SUPPORT
-    if (proxy_log && supported)
+    if (proxy_log && ditch_log)
     {
 	/* If the client supported the redirect response, then they will always
 	 * be redirected if they are preparing for a write request.  It is
@@ -5589,7 +5627,8 @@ serve_command_prep (char *arg)
  *
  * ASSUMPTIONS
  *   The `Root' request has already been processed.
- *   If referrer is set it may be disposed.
+ *   There is no need to dispose of REFERRER if it is set.  It's memory is
+ *   tracked by parse_root().
  *
  * RETURNS
  *   Nothing.
@@ -5599,17 +5638,12 @@ serve_referrer (char *arg)
 {
     if (error_pending ()) return;
 
-    if (referrer)
-	free_cvsroot_t (referrer);
     referrer = parse_cvsroot (arg);
 
     if (!referrer
 	&& alloc_pending (80 + strlen (arg)))
-	/* The explicitness is to aid people who are writing clients.
-	   I don't see how this information could help an
-	   attacker.  */
-	sprintf (pending_error_text, "\
-E Protocol error: Invalid Referrer: `%s'",
+	sprintf (pending_error_text,
+		 "E Protocol error: Invalid Referrer: `%s'",
 		 arg);
 }
 
@@ -6863,10 +6897,10 @@ check_password (char *username, char *password, char *repository)
 
     /* No cvs password found, so try /etc/passwd. */
 #ifdef HAVE_PAM
-    if ( check_pam_password(&username, password) )
-#else
-    if ( check_system_password(username, password) )
-#endif
+    if (check_pam_password (&username, password))
+#else /* !HAVE_PAM */
+    if (check_system_password (username, password))
+#endif /* HAVE_PAM */
 	host_user = xstrdup (username);
     else
 	host_user = NULL;
@@ -7187,13 +7221,16 @@ error 0 kerberos: %s\n", krb_get_err_text(status));
 
 #ifdef HAVE_GSSAPI
 /* Authenticate a GSSAPI connection.  This is called from
-   pserver_authenticate_connection, and it handles success and failure
-   the same way.  */
-
+ * pserver_authenticate_connection, and it handles success and failure
+ * the same way.
+ *
+ * GLOBALS
+ *   server_hostname	The name of this host, as set via a call to
+ *			xgethostname() in main().
+ */
 static void
 gserver_authenticate_connection (void)
 {
-    char hostname[MAXHOSTNAMELEN];
     struct hostent *hp;
     gss_buffer_desc tok_in, tok_out;
     char buf[1024];
@@ -7205,8 +7242,7 @@ gserver_authenticate_connection (void)
     int nbytes;
     gss_OID mechid;
 
-    gethostname (hostname, sizeof hostname);
-    hp = gethostbyname (hostname);
+    hp = gethostbyname (server_hostname);
     if (hp == NULL)
 	error (1, 0, "can't get canonical hostname");
 

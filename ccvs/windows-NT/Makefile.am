@@ -20,6 +20,8 @@
 # GNU General Public License for more details.
 
 EXTRA_DIST = \
+	JmgStat.c \
+	JmgStat.h \
 	config.h \
 	config.h.in \
 	config.h.in.in \
@@ -37,6 +39,7 @@ EXTRA_DIST = \
 	run.c \
 	sockerror.c \
 	startserver.c \
+	unistd.h \
 	waitpid.c \
 	woe32.c \
 	.cvsignore

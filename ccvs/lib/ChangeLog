@@ -1,3 +1,23 @@
+2004-11-30  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libcvs.dep: Regenerated for "../cvsnt.dsp" change.
+	* libcvs.mak: Regenerated for "../cvsnt.dsp" change.
+
+2004-11-21  Mark D. Baushke  <mdb@cvshome.org>
+
+	* libcvs.dep, libcvs.dsp, libcvs.mak: Add "xgethostname.c" to
+	project.
+
+2004-11-19  Derek Price  <derek@ximbiot.com>
+
+	* xgethostname.h, xgethostname.c: New files from GNULIB.
+	* Makefile.am (libcvs_a_SOURCES): Add new files.
+
+2004-11-17  Derek Price  <derek@ximbiot.com>
+
+	* getdate.y, getopt.c, getopt1.c, getopt_.h, getopt_int.h, xgetcwd.c:
+	Update from GNULIB.
+
 2004-11-15  Derek Price  <derek@ximbiot.com>
 
 	* Makefile.am (libcvs_a_LIBADD): Add @ALLOCA@.
