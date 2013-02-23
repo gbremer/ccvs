@@ -1,0 +1,245 @@
+# Files for which we are not the source.
+
+# In the "Local Modifications" fields below, "I" means the source files were
+# imported using the CVS import command and "NI" means CVS import was not used.
+
+GNU ZLib
+Stream compression and decompression libraries.
+License: zlib/README (Public Domain, but do not misrepresent source.)
+Bug Report Email: bug-zlib@gnu.org
+GNU Web Page: http://www.gnu.org/directory/GNU/zlib.html
+Last Web Location: http://www.gzip.org/zlib
+
+Imported files					CVS		Local
+						Directory	Modifications
+----------------------------------------------- --------------- ---------------
+$GNUZLIB/*					zlib		build scripts
+								only I
+
+
+
+GNU Diffutils
+License: GPL
+Bug Report Email: bug-gnu-utils@gnu.org
+GNU Web Page: http://www.gnu.org/directory/GNU/diffutils.html
+Project Web Page: http://savannah.gnu.org/projects/diffutils/
+
+Imported files					CVS		Local
+						Directory	Modifications
+----------------------------------------------- --------------- ---------------
+$GNUDIFF/*					diff		yes NI
+
+
+
+GNULib
+Portable implementations of useful functions found on some platforms but not
+others.  We update these files directly from the GNULIB CVS repository.
+License: GPL
+Bug Report Email: bug-gnulib@gnu.org
+Project Web Page: http://savannah.gnu.org/projects/gnulib
+CVS Repository (via SSH): :ext:anoncvs@savannah.gnu.org/cvsroot/gnulib
+
+Imported files					CVS		Local
+						Directory	Modifications
+----------------------------------------------- --------------- ---------------
+# $GNULIB/modules/alloca
+$GNULIB/lib/alloca.c				lib		no NI
+$GNULIB/lib/alloca_.h				lib		no NI
+$GNULIB/m4/alloca.m4				m4		no NI
+# $GNULIB/modules/atexit
+$GNULIB/lib/atexit.c				lib		no NI
+$GNULIB/m4/atexit.m4				m4		no NI
+# $GNULIB/modules/dirname
+$GNULIB/lib/basename.c				lib		no NI
+$GNULIB/lib/dirname.c				lib		no NI
+$GNULIB/lib/dirname.h				lib		no NI
+$GNULIB/lib/stripslash.				lib		no NI
+$GNULIB/m4/dirname.m4				m4		no NI
+$GNULIB/m4/dos.m4				m4		no NI
+# The following error module is only half-imported to support getdate.y's test
+# hooks when xmalloc, which calls error(), is needed.  We cannot completely
+# import the error module since it would conflict with CVS's error() function,
+# which is needed to send errors across the connection to the client.
+# $GNULIB/modules/error
+$GNULIB/lib/error.c				lib		no NI
+$GNULIB/m4/strerror_r.m4			lib		no NI
+# $GNULIB/modules/exit
+$GNULIB/lib/exit.h				lib		no NI
+# $GNULIB/modules/exitfail
+$GNULIB/lib/exitfail.h				lib		no NI
+$GNULIB/lib/exitfail.c				lib		no NI
+$GNULIB/m4/exitfail.m4				m4		no NI
+# $GNULIB/modules/extensions
+$GNULIB/m4/extensions.m4			m4		no NI
+# $GNULIB/modules/fnmatch-posix
+# $GNULIB/modules/fnmatch
+$GNULIB/lib/fnmatch.c				lib		no NI
+$GNULIB/lib/fnmatch_.h				lib		no NI
+$GNULIB/lib/fnmatch_loop.c			lib		no NI
+$GNULIB/m4/mbstate_t.m4				m4		no NI
+$GNULIB/m4/fnmatch.m4				m4		no NI
+# $GNULIB/modules/getdate
+$GNULIB/lib/getdate.h				lib		no NI
+$GNULIB/lib/getdate.y				lib		no NI
+$GNULIB/m4/bison.m4				m4		yes NI
+$GNULIB/m4/getdate.m4				m4		no NI
+$GNULIB/m4/tm_gmtoff.m4				m4		no NI
+# $GNULIB/modules/gethostname
+$GNULIB/lib/gethostname.c			lib		no NI
+$GNULIB/m4/gethostname.m4			m4		no NI
+# $GNULIB/modules/getline
+$GNULIB/lib/getline.c				lib		yes NI
+$GNULIB/lib/getline.h				lib		no NI
+$GNULIB/lib/getndelim2.c			lib		yes NI
+$GNULIB/lib/getndelim2.h			lib		yes NI
+$GNULIB/m4/getline.m4				m4		no NI
+$GNULIB/m4/getndelim2.m4			m4		no NI
+$GNULIB/m4/ssize_t.m4				m4		no NI
+# $GNULIB/modules/getndelim2
+$GNULIB/lib/getndelim2.c			lib		yes NI
+$GNULIB/lib/getndelim2.h			lib		yes NI
+$GNULIB/m4/getndelim2.m4			m4		no NI
+$GNULIB/m4/ssize_t.m4				m4		no NI
+# $GNULIB/modules/getnline
+$GNULIB/lib/getnline.c				lib		yes NI
+$GNULIB/lib/getnline.h				lib		yes NI
+$GNULIB/m4/getnline.m4				m4		no NI
+$GNULIB/m4/ssize_t.m4				m4		no NI
+# $GNULIB/modules/getopt
+$GNULIB/lib/getopt.c				lib		no NI
+$GNULIB/lib/getopt1.c				lib		no NI
+$GNULIB/lib/getopt.h				lib		no NI
+$GNULIB/m4/getopt.m4				m4		no NI
+# $GNULIB/modules/getpass-gnu
+$GNULIB/lib/getpass.c				lib		no NI
+$GNULIB/m4/getpass.m4				m4		no NI
+# $GNULIB/modules/gettext
+$GNULIB/lib/gettext.h				lib		no NI
+$GNULIB/m4/codeset.m4				m4		no NI
+$GNULIB/m4/gettext.m4				m4		yes NI
+$GNULIB/m4/glibc21.m4				m4		no NI
+$GNULIB/m4/iconv.m4				m4		no NI
+$GNULIB/m4/intdiv0.m4				m4		no NI
+$GNULIB/m4/inttypes-pri.m4			m4		no NI
+$GNULIB/m4/inttypes.m4				m4		no NI
+$GNULIB/m4/inttypes_h.m4			m4		no NI
+$GNULIB/m4/isc-posix.m4				m4		no NI
+$GNULIB/m4/lcmessage.m4				m4		no NI
+$GNULIB/m4/lib-ld.m4				m4		no NI
+$GNULIB/m4/lib-link.m4				m4		no NI
+$GNULIB/m4/lib-prefix.m4			m4		no NI
+$GNULIB/m4/nls.m4				m4		no NI
+$GNULIB/m4/po.m4				m4		no NI
+$GNULIB/m4/progtest.m4				m4		no NI
+$GNULIB/m4/stdint_h.m4				m4		no NI
+$GNULIB/m4/uintmax_t.m4				m4		no NI
+$GNULIB/m4/ulonglong.m4				m4		no NI
+# $GNULIB/modules/gettime
+$GNULIB/lib/gettime.c				lib		no NI
+$GNULIB/m4/clock_time.m4			m4		no NI
+$GNULIB/m4/gettime.m4				m4		no NI
+# $GNULIB/modules/gettimeofday
+$GNULIB/lib/gettimeofday.c			lib		no NI
+$GNULIB/m4/gettimeofday.m4			m4		no NI
+# $GNULIB/modules/lstat
+$GNULIB/lib/lstat.c				lib		no NI
+$GNULIB/m4/lstat.m4				m4		yes NI
+# $GNULIB/modules/malloc
+$GNULIB/lib/malloc.c				lib		no NI
+$GNULIB/m4/malloc.m4				m4		no NI
+# $GNULIB/modules/memmove
+$GNULIB/lib/memmove.c				lib		no NI
+$GNULIB/m4/memmove.m4				m4		no NI
+# $GNULIB/modules/mkstemp
+$GNULIB/lib/mkstemp.c				lib		no NI
+$GNULIB/lib/tempname.c				lib		no NI
+$GNULIB/m4/mkstemp.m4				m4		no NI
+$GNULIB/m4/inttypes_h.m4			m4		no NI
+$GNULIB/m4/onceonly_2_57.m4			m4		no NI
+$GNULIB/m4/stdint_h.m4				m4		no NI
+$GNULIB/m4/uintmax_t.m4				m4		no NI
+$GNULIB/m4/ulonglong.m4				m4		no NI
+# $GNULIB/modules/mktime
+$GNULIB/lib/mktime.c				lib		no NI
+$GNULIB/m4/mktime.m4				m4		no NI
+# $GNULIB/modules/nanosleep
+$GNULIB/lib/nanosleep.c				lib		no NI
+$GNULIB/m4/nanosleep.m4				m4		no NI
+# $GNULIB/modules/pathmax
+$GNULIB/lib/pathmax.h				lib		no NI
+$GNULIB/m4/onceonly_2_57.m4			m4		no NI
+$GNULIB/m4/pathmax.m4				m4		no NI
+# $GNULIB/modules/realloc
+$GNULIB/lib/realloc.c				lib		no NI
+$GNULIB/m4/realloc.m4				m4		no NI
+# $GNULIB/modules/regex
+$GNULIB/lib/regex.c				lib		no NI
+$GNULIB/lib/regex.h				lib		no NI
+$GNULIB/m4/regex.m4				m4		no NI
+# $GNULIB/modules/restrict
+$GNULIB/m4/restrict.m4				m4		no NI
+# $GNULIB/modules/stat
+$GNULIB/lib/stat.c				lib		yes NI
+$GNULIB/m4/stat.m4				m4		no NI
+# $GNULIB/modules/stdbool
+$GNULIB/lib/stdbool_.h				lib		no NI
+$GNULIB/m4/stdbool.m4				m4		no NI
+# $GNULIB/modules/strerror
+$GNULIB/lib/strerror.c				lib		no NI
+$GNULIB/m4/strerror.m4				m4		no NI
+# $GNULIB/modules/strerror
+$GNULIB/lib/strftime.c				lib		no NI
+$GNULIB/m4/mbstate_t.m4				m4		no NI
+$GNULIB/m4/tm_gmtoff.m4				m4		no NI
+$GNULIB/m4/strftime.m4				m4		no NI
+# $GNULIB/modules/time_r
+$GNULIB/lib/time_r.c				lib		no NI
+$GNULIB/lib/time_r.h				lib		no NI
+$GNULIB/m4/time_r.m4				m4		no NI
+# $GNULIB/modules/timespec
+$GNULIB/lib/timespec.h				lib		no NI
+$GNULIB/m4/st_mtim.m4				m4		no NI
+$GNULIB/m4/timespec.m4				m4		no NI
+# $GNULIB/modules/tzset
+$GNULIB/m4/tzset.m4				m4		no NI
+# $GNULIB/modules/unlocked-io
+$GNULIB/lib/unlocked-io.h			lib		no NI
+$GNULIB/m4/onceonly_2_57.m4			m4		no NI
+$GNULIB/m4/unlocked-io.m4			m4		no NI
+# $GNULIB/modules/vasnprintf
+$GNULIB/lib/asnprintf.c				lib		no NI
+$GNULIB/lib/printf-args.c			lib		no NI
+$GNULIB/lib/printf-args.h			lib		no NI
+$GNULIB/lib/printf-parse.c			lib		no NI
+$GNULIB/lib/printf-parse.h			lib		no NI
+$GNULIB/lib/vasnprintf.c			lib		no NI
+$GNULIB/lib/vasnprintf.h			lib		no NI
+$GNULIB/m4/intmax_t.m4				m4		no NI
+$GNULIB/m4/longdouble.m4			m4		no NI
+$GNULIB/m4/longlong.m4				m4		no NI
+$GNULIB/m4/signed.m4				m4		no NI
+$GNULIB/m4/vasnprintf.m4			m4		no NI
+$GNULIB/m4/wchar_t.m4				m4		no NI
+$GNULIB/m4/wint_t.m4				m4		no NI
+# $GNULIB/modules/xalloc
+$GNULIB/lib/xalloc.h				lib		no NI
+$GNULIB/lib/xmalloc.c				lib		no NI
+$GNULIB/lib/xstrdup.c				lib		yes NI
+$GNULIB/m4/xalloc.m4				m4		no NI
+# $GNULIB/modules/xsize
+$GNULIB/lib/xsize.h				lib		no NI
+$GNULIB/m4/xsize.m4				m4		no NI
+$GNULIB/m4/size_max.m4				m4		no NI
+# shared
+$GNULIB/lib/getndelim2.c			lib		yes NI
+$GNULIB/lib/getndelim2.h			lib		yes NI
+$GNULIB/lib/getnline.c				lib		yes NI
+$GNULIB/lib/getnline.h				lib		yes NI
+$GNULIB/m4/getndelim2.m4			m4		no NI
+$GNULIB/m4/getnline.m4				m4		no NI
+$GNULIB/m4/inttypes_h.m4			m4		no NI
+$GNULIB/m4/onceonly_2_57.m4			m4		no NI
+$GNULIB/m4/ssize_t.m4				m4		no NI
+$GNULIB/m4/stdint_h.m4				m4		no NI
+$GNULIB/m4/uintmax_t.m4				m4		no NI
+$GNULIB/m4/ulonglong.m4				m4		no NI
