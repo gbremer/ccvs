@@ -10,6 +10,58 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
+File: cvs.info,  Node: ~/.cvsrc,  Next: Global options,  Prev: Exit status,  Up: CVS commands
+
+Default options and the ~/.cvsrc file
+=====================================
+
+   There are some `command_options' that are used so often that you
+might have set up an alias or some other means to make sure you always
+specify that option.  One example (the one that drove the
+implementation of the `.cvsrc' support, actually) is that many people
+find the default output of the `diff' command to be very hard to read,
+and that either context diffs or unidiffs are much easier to understand.
+
+   The `~/.cvsrc' file is a way that you can add default options to
+`cvs_commands' within cvs, instead of relying on aliases or other shell
+scripts.
+
+   The format of the `~/.cvsrc' file is simple.  The file is searched
+for a line that begins with the same name as the `cvs_command' being
+executed.  If a match is found, then the remainder of the line is split
+up (at whitespace characters) into separate options and added to the
+command arguments _before_ any options from the command line.
+
+   If a command has two names (e.g., `checkout' and `co'), the official
+name, not necessarily the one used on the command line, will be used to
+match against the file.  So if this is the contents of the user's
+`~/.cvsrc' file:
+
+     log -N
+     diff -uN
+     rdiff -u
+     update -Pd
+     checkout -P
+     release -d
+
+the command `cvs checkout foo' would have the `-P' option added to the
+arguments, as well as `cvs co foo'.
+
+   With the example file above, the output from `cvs diff foobar' will
+be in unidiff format.  `cvs diff -c foobar' will provide context diffs,
+as usual.  Getting "old" format diffs would be slightly more
+complicated, because `diff' doesn't have an option to specify use of
+the "old" format, so you would need `cvs -f diff foobar'.
+
+   In place of the command name you can use `cvs' to specify global
+options (*note Global options::).  For example the following line in
+`.cvsrc'
+
+     cvs -z6
+
+causes CVS to use compression level 6.
+
+
 File: cvs.info,  Node: Global options,  Next: Common options,  Prev: ~/.cvsrc,  Up: CVS commands
 
 Global options
@@ -259,12 +311,15 @@ options that conflict even with these standard options.*
      `watch', and `watchers'.
 
 `-r TAG'
-     Use the revision specified by the TAG argument instead of the
-     default "head" revision.  As well as arbitrary tags defined with
-     the `tag' or `rtag' command, two special tags are always
-     available: `HEAD' refers to the most recent version available in
-     the repository, and `BASE' refers to the revision you last checked
-     out into the current working directory.
+
+`-r TAG[:DATE]'
+     Use the revision specified by the TAG argument (and the DATE
+     argument for the commands which accept it) instead of the default
+     "head" revision.  As well as arbitrary tags defined with the `tag'
+     or `rtag' command, two special tags are always available: `HEAD'
+     refers to the most recent version available in the repository, and
+     `BASE' refers to the revision you last checked out into the
+     current working directory.
 
      The tag specification is sticky when you use this with `checkout'
      or `update' to make your own copy of a file: CVS remembers the tag
@@ -274,7 +329,9 @@ options that conflict even with these standard options.*
 
      The tag can be either a symbolic or numeric tag, as described in
      *Note Tags::, or the name of a branch, as described in *Note
-     Branching and merging::.
+     Branching and merging::.  When TAG is the name of a branch, some
+     commands accept the optional DATE argument to specify the
+     revisions as of the given date on the branch.
 
      Specifying the `-q' global option along with the `-r' command
      option is often useful, to suppress the warning messages when the
@@ -283,9 +340,10 @@ options that conflict even with these standard options.*
      *Note: this is not the same as the overall `cvs -r' option, which
      you can specify to the left of a CVS command!*
 
-     `-r' is available with the `annotate', `checkout', `commit',
-     `diff', `history', `export', `rdiff', `rtag', and `update'
-     commands.
+     `-r TAG' is available with the `commit' and `history' commands.
+
+     `-r TAG[:DATE]' is available with the `annotate', `checkout',
+     `diff', `export', `rdiff', `rtag', and `update' commands.
 
 `-W'
      Specify file names that should be filtered.  You can use this
@@ -503,13 +561,15 @@ derived from Latin which uses `12m' for noon and `12pm' for midnight.)
 
    The time may alternatively be followed by a time zone correction,
 expressed as `SHHMM', where S is `+' or `-', HH is a number of zone
-hours and MM is a number of zone minutes.  When a time zone correction
-is given this way, it forces interpretation of the time relative to
-Coordinated Universal Time (UTC), overriding any previous specification
-for the time zone or the local time zone.  The MINUTE part of the time
-of day may not be elided when a time zone correction is used.  This is
-the best way to specify a time zone correction by fractional parts of
-an hour.
+hours and MM is a number of zone minutes.  You can also separate HH
+from MM with a colon.  When a time zone correction is given this way, it
+forces interpretation of the time relative to Coordinated Universal
+Time (UTC), overriding any previous specification for the time zone or
+the local time zone.  For example, `+0530' and `+05:30' both stand for
+the time zone 5.5 hours ahead of UTC (e.g., India).  The MINUTE part of
+the time of day may not be elided when a time zone correction is used.
+This is the best way to specify a time zone correction by fractional
+parts of an hour.
 
    Either `am'/`pm' or a time zone correction may be specified, but not
 both.
@@ -525,7 +585,10 @@ by a small set of letters, e.g., `UTC' or `Z' for Coordinated Universal
 Time.  Any included periods are ignored.  By following a
 non-daylight-saving time zone by the string `DST' in a separate word
 (that is, separated by some white space), the corresponding daylight
-saving time zone may be specified.
+saving time zone may be specified.  Alternatively, a
+non-daylight-saving time zone can be followed by a time zone
+correction, to add the two values.  This is normally done only for
+`UTC'; for example, `UTC+05:30' is equivalent to `+05:30'.
 
    Time zone items other than `UTC' and `Z' are obsolescent and are not
 recommended, because they are ambiguous; for example, `EST' has a
@@ -1063,8 +1126,10 @@ options::, for a complete description of them):
 `-F'
      Annotate binary files.
 
-`-r REVISION'
-     Annotate file as of specified revision/tag.
+`-r TAG[:DATE]'
+     Annotate file as of specified revision/tag or, when DATE is
+     specified and TAG is a branch tag, the version from the branch TAG
+     as it existed on DATE.  See *Note Common options::.
 
 `-D DATE'
      Annotate file as of specified date.
@@ -1094,69 +1159,4 @@ diff::).
 and can be used to select the files and revisions to annotate.  The
 options are described in more detail there and in *Note Common
 options::.
-
-
-File: cvs.info,  Node: checkout,  Next: commit,  Prev: annotate,  Up: CVS commands
-
-checkout--Check out sources for editing
-=======================================
-
-   * Synopsis: checkout [options] modules...
-
-   * Requires: repository.
-
-   * Changes: working directory.
-
-   * Synonyms: co, get
-
-   Create or update a working directory containing copies of the source
-files specified by MODULES.  You must execute `checkout' before using
-most of the other CVS commands, since most of them operate on your
-working directory.
-
-   The MODULES are either symbolic names for some collection of source
-directories and files, or paths to directories or files in the
-repository.  The symbolic names are defined in the `modules' file.
-*Note modules::.
-
-   Depending on the modules you specify, `checkout' may recursively
-create directories and populate them with the appropriate source files.
-You can then edit these source files at any time (regardless of
-whether other software developers are editing their own copies of the
-sources); update them to include new changes applied by others to the
-source repository; or commit your work as a permanent change to the
-source repository.
-
-   Note that `checkout' is used to create directories.  The top-level
-directory created is always added to the directory where `checkout' is
-invoked, and usually has the same name as the specified module.  In the
-case of a module alias, the created sub-directory may have a different
-name, but you can be sure that it will be a sub-directory, and that
-`checkout' will show the relative path leading to each file as it is
-extracted into your private work area (unless you specify the `-Q'
-global option).
-
-   The files created by `checkout' are created read-write, unless the
-`-r' option to CVS (*note Global options::) is specified, the `CVSREAD'
-environment variable is specified (*note Environment variables::), or a
-watch is in effect for that file (*note Watches::).
-
-   Note that running `checkout' on a directory that was already built
-by a prior `checkout' is also permitted.  This is similar to specifying
-the `-d' option to the `update' command in the sense that new
-directories that have been created in the repository will appear in
-your work area.  However, `checkout' takes a module name whereas
-`update' takes a directory name.  Also to use `checkout' this way it
-must be run from the top level directory (where you originally ran
-`checkout' from), so before you run `checkout' to update an existing
-directory, don't forget to change your directory to the top level
-directory.
-
-   For the output produced by the `checkout' command see *Note update
-output::.
-
-* Menu:
-
-* checkout options::            checkout options
-* checkout examples::           checkout examples
 

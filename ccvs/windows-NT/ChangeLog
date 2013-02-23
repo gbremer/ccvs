@@ -1,3 +1,98 @@
+2005-03-22  Mark D. Baushke  <mdb@cvshome.org>
+
+	* Makefile.am, stdint.h: Updated from GNULIB.
+	* Makefile.in: Regenerated.
+
+2005-03-16  Derek Price  <derek@ximbiot.com>
+
+	* filesubr.c (open_file): Remove this function.
+
+2005-03-09  Derek Price  <derek@ximbiot.com>
+
+	* .cvsignore: Remove mkconfig & fix-msvc-mak.
+	* Makefile.am (EXTRA_DIST): Include mkconfig.pl & fix-msvc-mak.pl.
+	(stamp-chi): Call $(PERL) mkconfig.pl explicitly.
+	* plhead.pl: Remove this file.
+	* mkconfig.pl, fix-msvc-mak.pl: Turn on warnings.
+
+2005-03-07  Conrad T. Pino  <Conrad@Pino.com>
+
+	* config.h, config.h.in: Regenerate for config.h.in.in change.
+
+2005-03-07  Conrad T. Pino  <Conrad@Pino.com>
+
+	* config.h.in.in: Synchronize with ../config.h.in file.
+	Removed:
+		#define HAVE_GETCWD 1
+		#define HAVE_GETCWD_NULL 1
+		#undef HAVE_MKDIR
+		#undef HAVE_RENAME
+		#undef HAVE_VALLOC
+	Added:
+		#undef D_INO_IN_DIRENT
+		#undef HAVE_CFLOCALECOPYCURRENT
+		#undef HAVE_CFPREFERENCESCOPYAPPVALUE
+		#define HAVE_CHSIZE 1
+		#define HAVE_DECL___FPENDING 0
+		#define HAVE_DECL_GETCWD 1
+		#define HAVE_ISWPRINT 1
+		#undef HAVE_MAP_ANONYMOUS
+		#define HAVE_MBRTOWC 1
+		#undef HAVE_MBSINIT
+		#undef HAVE_MEMRCHR
+		#undef HAVE_NANOTIME
+		#undef HAVE_OPENAT
+		#undef HAVE_PARTLY_WORKING_GETCWD
+		#undef HAVE_POSIX_MEMALIGN
+		#define HAVE_STRTOL 1
+		#undef HAVE___FPENDING
+		#undef MAP_ANONYMOUS
+		#define PENDING_OUTPUT_N_BYTES ( fp ? fp->_ptr - fp->_base : 0 )
+		#undef RENAME_TRAILING_SLASH_BUG
+		#undef __GETCWD_PREFIX
+		#undef __OPENAT_PREFIX
+		#undef mkdir
+		#undef rename
+	Changed:
+		#undef HAVE_WCHAR_H replaced with #define HAVE_WCHAR_H 1
+		#undef HAVE_WCHAR_T replaced with #define HAVE_WCHAR_T 1
+
+2005-03-01  Derek Price  <derek@ximbiot.com>
+
+	* config.h.in.footer: Remove obsolete timeb stuff.
+
+2005-02-22  Derek Price  <derek@ximbiot.com>
+
+	* run.c: Sync with src/run.c.
+	(Patch from Conrad Pino <conrad@pino.com>.)
+
+	* run.c (run_add_arg): Some cleanup.
+
+2005-02-22  Derek Price  <derek@ximbiot.com>
+
+	* run.c: Remove several unneeded declarations.
+	(Suggestion from Conrad Pino <conrad@pino.com>.)
+
+2005-01-31  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am: Update copyright notices.
+
+2004-12-14  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (stamp-chi): Comment dist stamp-chi reasoning.
+
+2004-12-14  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (EXTRA_DIST): Add stamp-chi.
+	(config.h.in, stamp-chi, DISTCLEANFILES, MAINTAINERCLEANFILES):
+	Reorganize for distributing stamp-chi.
+	* stamp-chi: Restore this file.
+
+2004-12-14  Derek Price  <derek@ximbiot.com>
+
+	* stamp-chi: Remove this file - it is generated only in maintainer
+	mode.
+
 2004-11-29  Conrad T. Pino  <Conrad@Pino.com>
 
 	* unistd.h: FIXME gethostname prototype for lib/xgethostname.c

@@ -10,12 +10,242 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
+File: cvs.info,  Node: log options,  Next: log examples,  Up: log
+
+log options
+-----------
+
+   By default, `log' prints all information that is available.  All
+other options restrict the output.  Note that the revision selection
+options (`-d', `-r', `-s', and `-w') have no effect, other than
+possibly causing a search for files in Attic directories, when used in
+conjunction with the options that restrict the output to only `log'
+header fields (`-b', `-h', `-R', and `-t') unless the `-S' option is
+also specified.
+
+`-b'
+     Print information about the revisions on the default branch,
+     normally the highest branch on the trunk.
+
+`-d DATES'
+     Print information about revisions with a checkin date/time in the
+     range given by the semicolon-separated list of dates.  The date
+     formats accepted are those accepted by the `-D' option to many
+     other CVS commands (*note Common options::).  Dates can be
+     combined into ranges as follows:
+
+    `D1<D2'
+    `D2>D1'
+          Select the revisions that were deposited between D1 and D2.
+
+    `<D'
+    `D>'
+          Select all revisions dated D or earlier.
+
+    `D<'
+    `>D'
+          Select all revisions dated D or later.
+
+    `D'
+          Select the single, latest revision dated D or earlier.
+
+     The `>' or `<' characters may be followed by `=' to indicate an
+     inclusive range rather than an exclusive one.
+
+     Note that the separator is a semicolon (;).
+
+`-h'
+     Print only the name of the RCS file, name of the file in the
+     working directory, head, default branch, access list, locks,
+     symbolic names, and suffix.
+
+`-l'
+     Local; run only in current working directory.  (Default is to run
+     recursively).
+
+`-N'
+     Do not print the list of tags for this file.  This option can be
+     very useful when your site uses a lot of tags, so rather than
+     "more"'ing over 3 pages of tag information, the log information is
+     presented without tags at all.
+
+`-R'
+     Print only the name of the RCS file.
+
+`-rREVISIONS'
+     Print information about revisions given in the comma-separated
+     list REVISIONS of revisions and ranges.  The following table
+     explains the available range formats:
+
+    `REV1:REV2'
+          Revisions REV1 to REV2 (which must be on the same branch).
+
+    `REV1::REV2'
+          The same, but excluding REV1.
+
+    `:REV'
+    `::REV'
+          Revisions from the beginning of the branch up to and
+          including REV.
+
+    `REV:'
+          Revisions starting with REV to the end of the branch
+          containing REV.
+
+    `REV::'
+          Revisions starting just after REV to the end of the branch
+          containing REV.
+
+    `BRANCH'
+          An argument that is a branch means all revisions on that
+          branch.
+
+    `BRANCH1:BRANCH2'
+    `BRANCH1::BRANCH2'
+          A range of branches means all revisions on the branches in
+          that range.
+
+    `BRANCH.'
+          The latest revision in BRANCH.
+
+     A bare `-r' with no revisions means the latest revision on the
+     default branch, normally the trunk.  There can be no space between
+     the `-r' option and its argument.
+
+`-S'
+     Suppress the header if no revisions are selected.
+
+`-s STATES'
+     Print information about revisions whose state attributes match one
+     of the states given in the comma-separated list STATES.
+
+`-t'
+     Print the same as `-h', plus the descriptive text.
+
+`-wLOGINS'
+     Print information about revisions checked in by users with login
+     names appearing in the comma-separated list LOGINS.  If LOGINS is
+     omitted, the user's login is assumed.  There can be no space
+     between the `-w' option and its argument.
+
+   `log' prints the intersection of the revisions selected with the
+options `-d', `-s', and `-w', intersected with the union of the
+revisions selected by `-b' and `-r'.
+
+
+File: cvs.info,  Node: log examples,  Prev: log options,  Up: log
+
+log examples
+------------
+
+   Since `log' shows dates in local time, you might want to see them in
+Coordinated Universal Time (UTC) or some other timezone.  To do this
+you can set your `$TZ' environment variable before invoking CVS:
+
+     $ TZ=UTC cvs log foo.c
+     $ TZ=EST cvs log bar.c
+
+   (If you are using a `csh'-style shell, like `tcsh', you would need
+to prefix the examples above with `env'.)
+
+
+File: cvs.info,  Node: ls & rls,  Next: rdiff,  Prev: log,  Up: CVS commands
+
+ls & rls
+========
+
+   * ls [-e | -l] [-RP] [-r tag[:date]] [-D date] [path...]
+
+   * Requires: repository for `rls', repository & working directory for
+     `ls'.
+
+   * Changes: nothing.
+
+   * Synonym: `dir' & `list' are synonyms for `ls' and `rdir' & `rlist'
+     are synonyms for `rls'.
+
+   The `ls' and `rls' commands are used to list files and directories
+in the repository.
+
+   By default `ls' lists the files and directories that belong in your
+working directory, what would be there after an `update'.
+
+   By default `rls' lists the files and directories on the tip of the
+trunk in the topmost directory of the repository.
+
+   Both commands accept an optional list of file and directory names,
+relative to the working directory for `ls' and the topmost directory of
+the repository for `rls'.  Neither is recursive by default.
+
+* Menu:
+
+* ls & rls options::         ls & rls options
+* rls examples:              rls examples
+
+
+File: cvs.info,  Node: ls & rls options,  Next: rls examples,  Up: ls & rls
+
+ls & rls options
+----------------
+
+   These standard options are supported by `ls' & `rls':
+
+`-d'
+     Show dead revisions (with tag when specified).
+
+`-e'
+     Display in CVS/Entries format.  This format is meant to remain
+     easily parsable by automation.
+
+`-l'
+     Display all details.
+
+`-P'
+     Don't list contents of empty directories when recursing.
+
+`-R'
+     List recursively.
+
+`-r TAG[:DATE]'
+     Show files specified by TAG or, when DATE is specified and TAG is
+     a branch tag, the version from the branch TAG as it existed on
+     DATE.  See *Note Common options::.
+
+`-D DATE'
+     Show files from date.
+
+
+File: cvs.info,  Node: rls examples,  Prev: ls & rls options,  Up: ls & rls
+
+rls examples
+------------
+
+     $ cvs rls
+     cvs rls: Listing module: `.'
+     CVSROOT
+     first-dir
+
+     $ cvs rls CVSROOT
+     cvs rls: Listing module: `CVSROOT'
+     checkoutlist
+     commitinfo
+     config
+     cvswrappers
+     loginfo
+     modules
+     notify
+     rcsinfo
+     taginfo
+     verifymsg
+
+
 File: cvs.info,  Node: rdiff,  Next: release,  Prev: ls & rls,  Up: CVS commands
 
 rdiff--'patch' format diffs between releases
 ============================================
 
-   * rdiff [-flags] [-V vn] [-r t|-D d [-r t2|-D d2]] modules...
+   * rdiff [-flags] [-V vn] (-r tag1[:date1] | -D date1) [-r
+     tag2[:date2] | -D date2] modules...
 
    * Requires: repository.
 
@@ -67,7 +297,9 @@ options::, for a complete description of them):
      Examine directories recursively.  This option is on by default.
 
 `-r TAG'
-     Use revision TAG.
+     Use the revision specified by TAG, or when DATE is specified and
+     TAG is a branch tag, the version from the branch TAG as it existed
+     on DATE.  See *Note Common options::.
 
    In addition to the above, these options are available:
 
@@ -236,7 +468,7 @@ update--Bring work tree in sync with repository
 ===============================================
 
    * update [-ACdflPpR] [-I name] [-j rev [-j rev]] [-k kflag] [-r
-     tag|-D date] [-W spec] files...
+     tag[:date] | -D date] [-W spec] files...
 
    * Requires: repository, working directory.
 
@@ -272,9 +504,9 @@ options::, for a complete description of them):
      information on sticky tags/dates.
 
 `-f'
-     Only useful with the `-D DATE' or `-r TAG' flags.  If no matching
-     revision is found, retrieve the most recent revision (instead of
-     ignoring the file).
+     Only useful with the `-D' or `-r' flags.  If no matching revision
+     is found, retrieve the most recent revision (instead of ignoring
+     the file).
 
 `-k KFLAG'
      Process keywords according to KFLAG.  See *Note Keyword
@@ -297,10 +529,12 @@ options::, for a complete description of them):
      Update directories recursively (default).  *Note Recursive
      behavior::.
 
-`-r rev'
-     Retrieve revision/tag REV.  This option is sticky, and implies
-     `-P'.  See *Note Sticky tags::, for more information on sticky
-     tags/dates.
+`-r TAG[:DATE]'
+     Retrieve the revisions specified by TAG or, when DATE is specified
+     and TAG is a branch tag, the version from the branch TAG as it
+     existed on DATE.  This option is sticky, and implies `-P'.  See
+     *Note Sticky tags::, for more information on sticky tags/dates.
+     Also see *Note Common options::.
 
    These special options are also available with `update'.
 
@@ -613,8 +847,10 @@ run the `cvs --help' command, or see *Note Index::.
     `-R'
           Operate recursively (default).  *Note Recursive behavior::.
 
-    `-r TAG'
-          Annotate revision TAG.  See *Note Common options::.
+    `-r TAG[:DATE]'
+          Annotate revisions specified by TAG or, when DATE is specified
+          and TAG is a branch tag, the version from the branch TAG as it
+          existed on DATE.  See *Note Common options::.
 
 `checkout [OPTIONS] MODULES...'
      Get a copy of the sources.  See *Note checkout::.
@@ -637,8 +873,11 @@ run the `cvs --help' command, or see *Note Index::.
           Use head revision if tag/date not found.  See *Note Common
           options::.
 
-    `-j REV'
-          Merge in changes.  See *Note checkout options::.
+    `-j TAG[:DATE]'
+          Merge in the change specified by TAG, or when DATE is
+          specified and TAG is a branch tag, the version from the
+          branch TAG as it existed on DATE.  See *Note checkout
+          options::.
 
     `-k KFLAG'
           Use KFLAG keyword expansion.  See *Note Substitution modes::.
@@ -665,8 +904,10 @@ run the `cvs --help' command, or see *Note Index::.
     `-R'
           Operate recursively (default).  *Note Recursive behavior::.
 
-    `-r TAG'
-          Checkout revision TAG (is sticky).  See *Note Common
+    `-r TAG[:DATE]'
+          Checkout the revision already tagged with TAG or, when DATE is
+          specified and TAG is a branch tag, the version from the
+          branch TAG as it existed on DATE.  This .  See *Note Common
           options::.
 
     `-s'
@@ -728,12 +969,17 @@ run the `cvs --help' command, or see *Note Index::.
     `-R'
           Operate recursively (default).  *Note Recursive behavior::.
 
-    `-r REV1'
-          Diff revision for REV1 against working file.  See *Note diff
-          options::.
+    `-r TAG1[:DATE1]'
+          Diff the revisions specified by TAG1 or, when DATE1 is
+          specified and TAG1 is a branch tag, the version from the
+          branch TAG1 as it existed on DATE1, against the working file.
+          See *Note diff options:: and *Note Common options::.
 
-    `-r REV2'
-          Diff REV1/DATE1 against REV2.  See *Note diff options::.
+    `-r TAG2[:DATE2]'
+          Diff the revisions specified by TAG2 or, when DATE2 is
+          specified and TAG2 is a branch tag, the version from the
+          branch TAG2 as it existed on DATE2, against REV1/DATE1.  See
+          *Note diff options:: and *Note Common options::.
 
 `edit [OPTIONS] [FILES...]'
      Get ready to edit a watched file.  See *Note Editing files::.
@@ -799,8 +1045,10 @@ run the `cvs --help' command, or see *Note Index::.
     `-R'
           Operate recursively (default).  *Note Recursive behavior::.
 
-    `-r TAG'
-          Checkout revision TAG.  See *Note Common options::.
+    `-r TAG[:DATE]'
+          Export the revisions specified by TAG or, when DATE is
+          specified and TAG is a branch tag, the version from the
+          branch TAG as it existed on DATE.  See *Note Common options::.
 
 `history [OPTIONS] [FILES...]'
      Show repository access history.  See *Note history::.
@@ -967,8 +1215,10 @@ run the `cvs --help' command, or see *Note Index::.
     `-R'
           Operate recursively (default).  *Note Recursive behavior::.
 
-    `-r TAG'
-          Annotate revision TAG.  See *Note Common options::.
+    `-r TAG[:DATE]'
+          Annotate the revision specified by TAG or, when DATE is
+          specified and TAG is a branch tag, the version from the
+          branch TAG as it existed on DATE.  See *Note Common options::.
 
 `rdiff [OPTIONS] MODULES...'
      Show differences between releases.  See *Note rdiff::.
@@ -991,8 +1241,11 @@ run the `cvs --help' command, or see *Note Index::.
     `-R'
           Operate recursively (default).  *Note Recursive behavior::.
 
-    `-r REV'
-          Select revisions based on REV.  See *Note Common options::.
+    `-r TAG[:DATE]'
+          Select the revisions specified by TAG or, when DATE is
+          specified and TAG is a branch tag, the version from the
+          branch TAG as it existed on DATE.  See *Note diff options::
+          and *Note Common options::.
 
     `-s'
           Short patch - one liner per file.  See *Note rdiff options::.
@@ -1106,8 +1359,11 @@ run the `cvs --help' command, or see *Note Index::.
     `-R'
           Operate recursively (default).  *Note Recursive behavior::.
 
-    `-r REV'
-          Tag existing tag REV.  See *Note Tagging by date/tag::.
+    `-r TAG[:DATE]'
+          Tag the revision already tagged with TAG or, when DATE is
+          specified and TAG is a branch tag, the version from the
+          branch TAG as it existed on DATE.  See *Note Tagging by
+          date/tag:: and *Note Common options::.
 
 `server'
      Rsh server.  See *Note Connecting via rsh::.
@@ -1157,8 +1413,11 @@ run the `cvs --help' command, or see *Note Index::.
     `-R'
           Operate recursively (default).  *Note Recursive behavior::.
 
-    `-r REV'
-          Tag existing tag REV.  See *Note Tagging by date/tag::.
+    `-r TAG[:DATE]'
+          Tag the revision already tagged with TAG, or when DATE is
+          specified and TAG is a branch tag, the version from the
+          branch TAG as it existed on DATE.  See *Note Tagging by
+          date/tag:: and *Note Common options::.
 
 `unedit [OPTIONS] [FILES...]'
      Undo an edit command.  See *Note Editing files::.
@@ -1197,8 +1456,11 @@ run the `cvs --help' command, or see *Note Index::.
           More files to ignore (! to reset).  See *Note import
           options::.
 
-    `-j REV'
-          Merge in changes.  See *Note update options::.
+    `-j TAG[:DATE]'
+          Merge in changes from revisions specified by TAG or, when
+          DATE is specified and TAG is a branch tag, the version from
+          the branch TAG as it existed on DATE.  See *Note update
+          options::.
 
     `-k KFLAG'
           Use KFLAG keyword expansion.  See *Note Substitution modes::.
@@ -1217,9 +1479,10 @@ run the `cvs --help' command, or see *Note Index::.
     `-R'
           Operate recursively (default).  *Note Recursive behavior::.
 
-    `-r TAG'
-          Checkout revision TAG (is sticky).  See *Note Common
-          options::.
+    `-r TAG[:DATE]'
+          Checkout the revisions specified by TAG or, when DATE is
+          specified and TAG is a branch tag, the version from the
+          branch TAG as it existed on DATE.  See *Note Common options::.
 
     `-W SPEC'
           More wrappers.  See *Note import options::.
@@ -1277,7 +1540,7 @@ defines the modules inside the repository.
 
 * modules::                     Defining modules
 * Wrappers::                    Specify binary-ness based on file name
-* script hooks::		Launch scripts in response to server events
+* Trigger Scripts::		Launch scripts in response to server events
 * rcsinfo::                     Templates for the log messages
 * cvsignore::                   Ignoring files via cvsignore
 * checkoutlist::                Adding your own administrative files
@@ -1317,274 +1580,4 @@ a file `sfile'.
 * Module options::            Regular and ampersand modules can take options
 * Module program options::    How the modules ``program options'' programs
                               are run.
-
-
-File: cvs.info,  Node: Alias modules,  Next: Regular modules,  Up: modules
-
-Alias modules
--------------
-
-   Alias modules are the simplest kind of module:
-
-`MNAME -a ALIASES...'
-     This represents the simplest way of defining a module MNAME.  The
-     `-a' flags the definition as a simple alias: CVS will treat any
-     use of MNAME (as a command argument) as if the list of names
-     ALIASES had been specified instead.  ALIASES may contain either
-     other module names or paths.  When you use paths in aliases,
-     `checkout' creates all intermediate directories in the working
-     directory, just as if the path had been specified explicitly in
-     the CVS arguments.
-
-   For example, if the modules file contains:
-
-     amodule -a first-dir
-
-then the following two commands are equivalent:
-
-     $ cvs co amodule
-     $ cvs co first-dir
-
-and they each would provide output such as:
-
-     cvs checkout: Updating first-dir
-     U first-dir/file1
-     U first-dir/file2
-     cvs checkout: Updating first-dir/sdir
-     U first-dir/sdir/sfile
-
-
-File: cvs.info,  Node: Regular modules,  Next: Ampersand modules,  Prev: Alias modules,  Up: modules
-
-Regular modules
----------------
-
-`MNAME [ options ] DIR [ FILES... ]'
-     In the simplest case, this form of module definition reduces to
-     `MNAME DIR'.  This defines all the files in directory DIR as
-     module mname.  DIR is a relative path (from `$CVSROOT') to a
-     directory of source in the source repository.  In this case, on
-     checkout, a single directory called MNAME is created as a working
-     directory; no intermediate directory levels are used by default,
-     even if DIR was a path involving several directory levels.
-
-   For example, if a module is defined by:
-
-     regmodule first-dir
-
-then regmodule will contain the files from first-dir:
-
-     $ cvs co regmodule
-     cvs checkout: Updating regmodule
-     U regmodule/file1
-     U regmodule/file2
-     cvs checkout: Updating regmodule/sdir
-     U regmodule/sdir/sfile
-     $
-
-   By explicitly specifying files in the module definition after DIR,
-you can select particular files from directory DIR.  Here is an example:
-
-     regfiles first-dir/sdir sfile
-
-With this definition, getting the regfiles module will create a single
-working directory `regfiles' containing the file listed, which comes
-from a directory deeper in the CVS source repository:
-
-     $ cvs co regfiles
-     U regfiles/sfile
-     $
-
-
-File: cvs.info,  Node: Ampersand modules,  Next: Excluding directories,  Prev: Regular modules,  Up: modules
-
-Ampersand modules
------------------
-
-   A module definition can refer to other modules by including
-`&MODULE' in its definition.
-     MNAME [ options ] &MODULE...
-
-   Then getting the module creates a subdirectory for each such module,
-in the directory containing the module.  For example, if modules
-contains
-
-     ampermod &first-dir
-
-then a checkout will create an `ampermod' directory which contains a
-directory called `first-dir', which in turns contains all the
-directories and files which live there.  For example, the command
-
-     $ cvs co ampermod
-
-will create the following files:
-
-     ampermod/first-dir/file1
-     ampermod/first-dir/file2
-     ampermod/first-dir/sdir/sfile
-
-   There is one quirk/bug: the messages that CVS prints omit the
-`ampermod', and thus do not correctly display the location to which it
-is checking out the files:
-
-     $ cvs co ampermod
-     cvs checkout: Updating first-dir
-     U first-dir/file1
-     U first-dir/file2
-     cvs checkout: Updating first-dir/sdir
-     U first-dir/sdir/sfile
-     $
-
-   Do not rely on this buggy behavior; it may get fixed in a future
-release of CVS.
-
-
-File: cvs.info,  Node: Excluding directories,  Next: Module options,  Prev: Ampersand modules,  Up: modules
-
-Excluding directories
----------------------
-
-   An alias module may exclude particular directories from other
-modules by using an exclamation mark (`!') before the name of each
-directory to be excluded.
-
-   For example, if the modules file contains:
-
-     exmodule -a !first-dir/sdir first-dir
-
-then checking out the module `exmodule' will check out everything in
-`first-dir' except any files in the subdirectory `first-dir/sdir'.
-
-
-File: cvs.info,  Node: Module options,  Next: Module program options,  Prev: Excluding directories,  Up: modules
-
-Module options
---------------
-
-   Either regular modules or ampersand modules can contain options,
-which supply additional information concerning the module.
-
-`-d NAME'
-     Name the working directory something other than the module name.
-
-`-e PROG'
-     Specify a program PROG to run whenever files in a module are
-     exported.  PROG runs with a single argument, the module name.
-
-`-o PROG'
-     Specify a program PROG to run whenever files in a module are
-     checked out.  PROG runs with a single argument, the module name.
-     See *Note Module program options:: for information on how PROG is
-     called.
-
-`-s STATUS'
-     Assign a status to the module.  When the module file is printed
-     with `cvs checkout -s' the modules are sorted according to
-     primarily module status, and secondarily according to the module
-     name.  This option has no other meaning.  You can use this option
-     for several things besides status: for instance, list the person
-     that is responsible for this module.
-
-`-t PROG'
-     Specify a program PROG to run whenever files in a module are
-     tagged with `rtag'.  PROG runs with two arguments: the module name
-     and the symbolic tag specified to `rtag'.  It is not run when
-     `tag' is executed.  Generally you will find that the `taginfo'
-     file is a better solution (*note taginfo::).
-
-   You should also see *note Module program options:: about how the
-"program options" programs are run.
-
-
-File: cvs.info,  Node: Module program options,  Prev: Module options,  Up: modules
-
-How the modules file "program options" programs are run
--------------------------------------------------------
-
-For checkout, rtag, and export, the program is server-based, and as
-such the following applies:-
-
-   If using remote access methods (pserver, ext, etc.), CVS will
-execute this program on the server from a temporary directory. The path
-is searched for this program.
-
-   If using "local access" (on a local or remote NFS file system, i.e.
-repository set just to a path), the program will be executed from the
-newly checked-out tree, if found there, or alternatively searched for
-in the path if not.
-
-   The programs are all run after the operation has effectively
-completed.
-
-
-File: cvs.info,  Node: Wrappers,  Next: script hooks,  Prev: modules,  Up: Administrative files
-
-The cvswrappers file
-====================
-
-   Wrappers refers to a CVS feature which lets you control certain
-settings based on the name of the file which is being operated on.  The
-settings are `-k' for binary files, and `-m' for nonmergeable text
-files.
-
-   The `-m' option specifies the merge methodology that should be used
-when a non-binary file is updated.  `MERGE' means the usual CVS
-behavior: try to merge the files.  `COPY' means that `cvs update' will
-refuse to merge files, as it also does for files specified as binary
-with `-kb' (but if the file is specified as binary, there is no need to
-specify `-m 'COPY'').  CVS will provide the user with the two versions
-of the files, and require the user using mechanisms outside CVS, to
-insert any necessary changes.
-
-   *WARNING: do not use `COPY' with CVS 1.9 or earlier - such versions
-of CVS will copy one version of your file over the other, wiping out
-the previous contents.* The `-m' wrapper option only affects behavior
-when merging is done on update; it does not affect how files are
-stored.  See *Note Binary files::, for more on binary files.
-
-   The basic format of the file `cvswrappers' is:
-
-     wildcard     [option value][option value]...
-     
-     where option is one of
-     -m           update methodology      value: MERGE or COPY
-     -k           keyword expansion       value: expansion mode
-     
-     and value is a single-quote delimited value.
-
-   For example, the following command imports a directory, treating
-files whose name ends in `.exe' as binary:
-
-     cvs import -I ! -W "*.exe -k 'b'" first-dir vendortag reltag
-
-
-File: cvs.info,  Node: script hooks,  Next: rcsinfo,  Prev: Wrappers,  Up: Administrative files
-
-The scripting hooks
-===================
-
-   Script hooks are used to launch external programs at various points
-during the execution of CVS commands.  These hooks can be used to
-prevent certain actions, log them, and/or maintain anything else you
-deem practical.
-
-* Menu:
-
-* syntax::                      The common syntax
-
-* commit files::                The commit support files (commitinfo,
-                                verifymsg, loginfo)
-*   commitinfo::                Pre-commit checking
-*   verifymsg::                 How are log messages evaluated?
-*   loginfo::                   Where should log messages be sent?
-
-* postadmin::			Logging admin commands
-* taginfo::                     Verifying/Logging tags
-* posttag::                     Logging tags
-* postwatch::			Logging watch commands
-
-* preproxy::			Launch a script on a secondary server prior
-				to becoming a write proxy
-* postproxy::			Launch a script on a secondary server after
-				completing proxy operations
 

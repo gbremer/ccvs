@@ -10,7 +10,285 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: cvs.info,  Node: syntax,  Next: commit files,  Up: script hooks
+File: cvs.info,  Node: Alias modules,  Next: Regular modules,  Up: modules
+
+Alias modules
+-------------
+
+   Alias modules are the simplest kind of module:
+
+`MNAME -a ALIASES...'
+     This represents the simplest way of defining a module MNAME.  The
+     `-a' flags the definition as a simple alias: CVS will treat any
+     use of MNAME (as a command argument) as if the list of names
+     ALIASES had been specified instead.  ALIASES may contain either
+     other module names or paths.  When you use paths in aliases,
+     `checkout' creates all intermediate directories in the working
+     directory, just as if the path had been specified explicitly in
+     the CVS arguments.
+
+   For example, if the modules file contains:
+
+     amodule -a first-dir
+
+then the following two commands are equivalent:
+
+     $ cvs co amodule
+     $ cvs co first-dir
+
+and they each would provide output such as:
+
+     cvs checkout: Updating first-dir
+     U first-dir/file1
+     U first-dir/file2
+     cvs checkout: Updating first-dir/sdir
+     U first-dir/sdir/sfile
+
+
+File: cvs.info,  Node: Regular modules,  Next: Ampersand modules,  Prev: Alias modules,  Up: modules
+
+Regular modules
+---------------
+
+`MNAME [ options ] DIR [ FILES... ]'
+     In the simplest case, this form of module definition reduces to
+     `MNAME DIR'.  This defines all the files in directory DIR as
+     module mname.  DIR is a relative path (from `$CVSROOT') to a
+     directory of source in the source repository.  In this case, on
+     checkout, a single directory called MNAME is created as a working
+     directory; no intermediate directory levels are used by default,
+     even if DIR was a path involving several directory levels.
+
+   For example, if a module is defined by:
+
+     regmodule first-dir
+
+then regmodule will contain the files from first-dir:
+
+     $ cvs co regmodule
+     cvs checkout: Updating regmodule
+     U regmodule/file1
+     U regmodule/file2
+     cvs checkout: Updating regmodule/sdir
+     U regmodule/sdir/sfile
+     $
+
+   By explicitly specifying files in the module definition after DIR,
+you can select particular files from directory DIR.  Here is an example:
+
+     regfiles first-dir/sdir sfile
+
+With this definition, getting the regfiles module will create a single
+working directory `regfiles' containing the file listed, which comes
+from a directory deeper in the CVS source repository:
+
+     $ cvs co regfiles
+     U regfiles/sfile
+     $
+
+
+File: cvs.info,  Node: Ampersand modules,  Next: Excluding directories,  Prev: Regular modules,  Up: modules
+
+Ampersand modules
+-----------------
+
+   A module definition can refer to other modules by including
+`&MODULE' in its definition.
+     MNAME [ options ] &MODULE...
+
+   Then getting the module creates a subdirectory for each such module,
+in the directory containing the module.  For example, if modules
+contains
+
+     ampermod &first-dir
+
+then a checkout will create an `ampermod' directory which contains a
+directory called `first-dir', which in turns contains all the
+directories and files which live there.  For example, the command
+
+     $ cvs co ampermod
+
+will create the following files:
+
+     ampermod/first-dir/file1
+     ampermod/first-dir/file2
+     ampermod/first-dir/sdir/sfile
+
+   There is one quirk/bug: the messages that CVS prints omit the
+`ampermod', and thus do not correctly display the location to which it
+is checking out the files:
+
+     $ cvs co ampermod
+     cvs checkout: Updating first-dir
+     U first-dir/file1
+     U first-dir/file2
+     cvs checkout: Updating first-dir/sdir
+     U first-dir/sdir/sfile
+     $
+
+   Do not rely on this buggy behavior; it may get fixed in a future
+release of CVS.
+
+
+File: cvs.info,  Node: Excluding directories,  Next: Module options,  Prev: Ampersand modules,  Up: modules
+
+Excluding directories
+---------------------
+
+   An alias module may exclude particular directories from other
+modules by using an exclamation mark (`!') before the name of each
+directory to be excluded.
+
+   For example, if the modules file contains:
+
+     exmodule -a !first-dir/sdir first-dir
+
+then checking out the module `exmodule' will check out everything in
+`first-dir' except any files in the subdirectory `first-dir/sdir'.
+
+
+File: cvs.info,  Node: Module options,  Next: Module program options,  Prev: Excluding directories,  Up: modules
+
+Module options
+--------------
+
+   Either regular modules or ampersand modules can contain options,
+which supply additional information concerning the module.
+
+`-d NAME'
+     Name the working directory something other than the module name.
+
+`-e PROG'
+     Specify a program PROG to run whenever files in a module are
+     exported.  PROG runs with a single argument, the module name.
+
+`-o PROG'
+     Specify a program PROG to run whenever files in a module are
+     checked out.  PROG runs with a single argument, the module name.
+     See *Note Module program options:: for information on how PROG is
+     called.
+
+`-s STATUS'
+     Assign a status to the module.  When the module file is printed
+     with `cvs checkout -s' the modules are sorted according to
+     primarily module status, and secondarily according to the module
+     name.  This option has no other meaning.  You can use this option
+     for several things besides status: for instance, list the person
+     that is responsible for this module.
+
+`-t PROG'
+     Specify a program PROG to run whenever files in a module are
+     tagged with `rtag'.  PROG runs with two arguments: the module name
+     and the symbolic tag specified to `rtag'.  It is not run when
+     `tag' is executed.  Generally you will find that the `taginfo'
+     file is a better solution (*note taginfo::).
+
+   You should also see *note Module program options:: about how the
+"program options" programs are run.
+
+
+File: cvs.info,  Node: Module program options,  Prev: Module options,  Up: modules
+
+How the modules file "program options" programs are run
+-------------------------------------------------------
+
+For checkout, rtag, and export, the program is server-based, and as
+such the following applies:-
+
+   If using remote access methods (pserver, ext, etc.), CVS will
+execute this program on the server from a temporary directory. The path
+is searched for this program.
+
+   If using "local access" (on a local or remote NFS file system, i.e.
+repository set just to a path), the program will be executed from the
+newly checked-out tree, if found there, or alternatively searched for
+in the path if not.
+
+   The programs are all run after the operation has effectively
+completed.
+
+
+File: cvs.info,  Node: Wrappers,  Next: Trigger Scripts,  Prev: modules,  Up: Administrative files
+
+The cvswrappers file
+====================
+
+   Wrappers refers to a CVS feature which lets you control certain
+settings based on the name of the file which is being operated on.  The
+settings are `-k' for binary files, and `-m' for nonmergeable text
+files.
+
+   The `-m' option specifies the merge methodology that should be used
+when a non-binary file is updated.  `MERGE' means the usual CVS
+behavior: try to merge the files.  `COPY' means that `cvs update' will
+refuse to merge files, as it also does for files specified as binary
+with `-kb' (but if the file is specified as binary, there is no need to
+specify `-m 'COPY'').  CVS will provide the user with the two versions
+of the files, and require the user using mechanisms outside CVS, to
+insert any necessary changes.
+
+   *WARNING: do not use `COPY' with CVS 1.9 or earlier - such versions
+of CVS will copy one version of your file over the other, wiping out
+the previous contents.* The `-m' wrapper option only affects behavior
+when merging is done on update; it does not affect how files are
+stored.  See *Note Binary files::, for more on binary files.
+
+   The basic format of the file `cvswrappers' is:
+
+     wildcard     [option value][option value]...
+     
+     where option is one of
+     -m           update methodology      value: MERGE or COPY
+     -k           keyword expansion       value: expansion mode
+     
+     and value is a single-quote delimited value.
+
+   For example, the following command imports a directory, treating
+files whose name ends in `.exe' as binary:
+
+     cvs import -I ! -W "*.exe -k 'b'" first-dir vendortag reltag
+
+
+File: cvs.info,  Node: Trigger Scripts,  Next: rcsinfo,  Prev: Wrappers,  Up: Administrative files
+
+The Trigger Scripts
+===================
+
+   Several of the administrative files support triggers, or the
+launching external scripts or programs at specific times before or
+after particular events, during the execution of CVS commands.  These
+hooks can be used to prevent certain actions, log them, and/or maintain
+anything else you deem practical.
+
+   All the trigger scripts are launched in a copy of the user sandbox
+being committed, on the server, in client-server mode.  In local mode,
+the scripts are actually launched directly from the user sandbox
+directory being committed.  For most intents and purposes, the same
+scripts can be run in both locations without alteration.
+
+* Menu:
+
+* syntax::                      The common syntax
+* Trigger Script Security::	Trigger script security
+
+* commit files::                The commit support files (commitinfo,
+                                verifymsg, loginfo)
+*   commitinfo::                Pre-commit checking
+*   verifymsg::                 How are log messages evaluated?
+*   loginfo::                   Where should log messages be sent?
+
+* postadmin::			Logging admin commands
+* taginfo::                     Verifying/Logging tags
+* posttag::                     Logging tags
+* postwatch::			Logging watch commands
+
+* preproxy::			Launch a script on a secondary server prior
+				to becoming a write proxy
+* postproxy::			Launch a script on a secondary server after
+				completing proxy operations
+
+
+File: cvs.info,  Node: syntax,  Next: Trigger Script Security,  Up: Trigger Scripts
 
 The common syntax
 -----------------
@@ -26,7 +304,7 @@ are described later on.  The common syntax is described here.
      and `DEFAULT' keywords, this is a basic regular expression in the
      syntax used by GNU emacs.  See the descriptions of the individual
      script hooks for information on whether the `ALL' keyword is
-     supported (*note script hooks::).
+     supported (*note Trigger Scripts::).
 
    * A whitespace separator--one or more spaces and/or tabs.
 
@@ -42,7 +320,7 @@ regular expression is used and all lines containing `ALL' is used for
 the hooks which support the `ALL' keyword.  The rest of the line is
 used as a file name or command-line template as appropriate.  See the
 descriptions of the individual script hooks for information on whether
-the `ALL' keyword is supported (*note script hooks::).
+the `ALL' keyword is supported (*note Trigger Scripts::).
 
 _Note:  The following information on format strings is valid as long as
 the line `UseNewInfoFmtStrings=yes' appears in your repository's config
@@ -108,7 +386,7 @@ R
      primary server with a write proxy setup.
 
    Other format strings are file specific.  See the docs on the
-particular script hooks for more information (*note script hooks::).
+particular script hooks for more information (*note Trigger Scripts::).
 
    As an example, the following line in a `loginfo' file would match
 only the directory `module' and any subdirectories of `module':
@@ -132,7 +410,34 @@ should be appended to commitlog:
      A log message.
 
 
-File: cvs.info,  Node: commit files,  Next: commitinfo,  Prev: syntax,  Up: script hooks
+File: cvs.info,  Node: Trigger Script Security,  Next: commit files,  Prev: syntax,  Up: Trigger Scripts
+
+Security and the Trigger Scripts
+--------------------------------
+
+   Security is a huge subject, and implementing a secure system is a
+non-trivial task.  This section will barely touch on all the issues
+involved, but it is well to note that, as with any script you will be
+allowing an untrusted user to run on your server, there are measures
+you can take to help prevent your trigger scripts from being abused.
+
+   For instance, since the CVS trigger scripts all run in a copy of the
+user's sandbox on the server, a naively coded Perl trigger script which
+attempts to use a Perl module that is not installed on the system can
+be hijacked by any user with commit access who is checking in a file
+with the correct name.  Other scripting languages may be vulnerable to
+similar hacks.
+
+   One way to make a script more secure, at least with Perl, is to use
+scripts which invoke the `-T', or "taint-check" switch on their `#!'
+line.  In the most basic terms, this causes Perl to avoid running code
+that may have come from an external source.  Please run the `perldoc
+perlsec' command for more on Perl security.  Again, other languages may
+implement other security verification hooks which look more or less
+like Perl's "taint-check" mechanism.
+
+
+File: cvs.info,  Node: commit files,  Next: commitinfo,  Prev: Trigger Script Security,  Up: Trigger Scripts
 
 The commit support files
 ------------------------
@@ -262,7 +567,7 @@ all support for the old format strings is removed from CVS, so you can
 just put up with the deprecation warnings for awhile if you like.
 
 
-File: cvs.info,  Node: commitinfo,  Next: verifymsg,  Prev: commit files,  Up: script hooks
+File: cvs.info,  Node: commitinfo,  Next: verifymsg,  Prev: commit files,  Up: Trigger Scripts
 
 Commitinfo
 ----------
@@ -275,8 +580,8 @@ that the changed files conform to to your site's standards for coding
 practice.
 
    The `commitinfo' file has the standard form for script hooks (*note
-script hooks::), where each line is a regular expression followed by a
-command to execute.  It supports only the DEFAULT keywords.
+Trigger Scripts::), where each line is a regular expression followed by
+a command to execute.  It supports only the DEFAULT keywords.
 
    In addition to the common format strings (*note syntax::),
 `commitinfo' supports:
@@ -311,7 +616,7 @@ destination branch, commit message, and command line options specified,
 is not available to the command.
 
 
-File: cvs.info,  Node: verifymsg,  Next: loginfo,  Prev: commitinfo,  Up: script hooks
+File: cvs.info,  Node: verifymsg,  Next: loginfo,  Prev: commitinfo,  Up: Trigger Scripts
 
 Verifying log messages
 ----------------------
@@ -327,8 +632,8 @@ contains the required fields.
 (*note rcsinfo::).
 
    The `verifymsg' file has the standard form for script hooks (*note
-script hooks::), where each line is a regular expression followed by a
-command to execute.  It supports only the DEFAULT keywords.
+Trigger Scripts::), where each line is a regular expression followed by
+a command to execute.  It supports only the DEFAULT keywords.
 
    In addition to the common format strings (*note syntax::),
 `verifymsg' supports:
@@ -444,7 +749,7 @@ log message.
      RereadLogAfterVerify=always
 
 
-File: cvs.info,  Node: loginfo,  Next: postadmin,  Prev: verifymsg,  Up: script hooks
+File: cvs.info,  Node: loginfo,  Next: postadmin,  Prev: verifymsg,  Up: Trigger Scripts
 
 Loginfo
 -------
@@ -456,8 +761,8 @@ log tagging information and *Note postadmin:: for how to log changes
 due to the `admin' command.
 
    The `loginfo' file has the standard form for script hooks (*note
-script hooks::), where each line is a regular expression followed by a
-command to execute.  It supports the ALL and DEFAULT keywords.
+Trigger Scripts::), where each line is a regular expression followed by
+a command to execute.  It supports the ALL and DEFAULT keywords.
 
    Any specified scripts are called:
 
@@ -568,14 +873,14 @@ its subdirectories to update the checked out tree in
 `/u/www/local-docs'.
 
 
-File: cvs.info,  Node: postadmin,  Next: taginfo,  Prev: loginfo,  Up: script hooks
+File: cvs.info,  Node: postadmin,  Next: taginfo,  Prev: loginfo,  Up: Trigger Scripts
 
 Logging admin commands
 ----------------------
 
    The `postadmin' file defines programs to execute after an `admin'
 command modifies files.  The `postadmin' file has the standard form for
-script hooks (*note script hooks::), where each line is a regular
+script hooks (*note Trigger Scripts::), where each line is a regular
 expression followed by a command to execute.  It supports the ALL and
 DEFAULT keywords.
 
@@ -583,16 +888,16 @@ DEFAULT keywords.
 ones (*note syntax::),
 
 
-File: cvs.info,  Node: taginfo,  Next: posttag,  Prev: postadmin,  Up: script hooks
+File: cvs.info,  Node: taginfo,  Next: posttag,  Prev: postadmin,  Up: Trigger Scripts
 
 Taginfo
 -------
 
    The `taginfo' file defines programs to execute when someone executes
 a `tag' or `rtag' command.  The `taginfo' file has the standard form
-for script hooks (*note script hooks::), where each line is a regular
-expression followed by a command to execute.  It supports the ALL and
-DEFAULT keywords.
+for script hooks (*note Trigger Scripts::), where each line is a
+regular expression followed by a command to execute.  It supports the
+ALL and DEFAULT keywords.
 
    In addition to the common format strings (*note syntax::), `taginfo'
 supports:
@@ -643,14 +948,14 @@ Where `/usr/local/cvsroot/CVSROOT/loggit' contains the following script:
      echo "$@" >>/home/kingdon/cvsroot/CVSROOT/taglog
 
 
-File: cvs.info,  Node: posttag,  Next: postwatch,  Prev: taginfo,  Up: script hooks
+File: cvs.info,  Node: posttag,  Next: postwatch,  Prev: taginfo,  Up: Trigger Scripts
 
 Logging tags
 ------------
 
    The `posttag' file defines programs to execute after a `tag' or
 `rtag' command modifies files.  The `posttag' file has the standard
-form for script hooks (*note script hooks::), where each line is a
+form for script hooks (*note Trigger Scripts::), where each line is a
 regular expression followed by a command to execute.  It supports the
 ALL and DEFAULT keywords.
 
@@ -658,7 +963,7 @@ ALL and DEFAULT keywords.
 `taginfo' file (*note taginfo::),
 
 
-File: cvs.info,  Node: postwatch,  Next: preproxy,  Prev: posttag,  Up: script hooks
+File: cvs.info,  Node: postwatch,  Next: preproxy,  Prev: posttag,  Up: Trigger Scripts
 
 Logging watch commands
 ----------------------
@@ -666,9 +971,9 @@ Logging watch commands
    The `postwatch' file defines programs to execute after any command
 (for instance, `watch', `edit', `unedit', or `commit') modifies any
 `CVS/fileattr' file in the repository (*note Watches::).  The
-`postwatch' file has the standard form for script hooks (*note script
-hooks::), where each line is a regular expression followed by a command
-to execute.  It supports the ALL and DEFAULT keywords.
+`postwatch' file has the standard form for script hooks (*note Trigger
+Scripts::), where each line is a regular expression followed by a
+command to execute.  It supports the ALL and DEFAULT keywords.
 
    The `postwatch' file supports no format strings other than the common
 ones (*note syntax::), but it is worth noting that the `%c' format
@@ -678,7 +983,7 @@ notification of the file attribute change to be sent the next time the
 client contacts the server for whatever other reason,
 
 
-File: cvs.info,  Node: preproxy,  Next: postproxy,  Prev: postwatch,  Up: script hooks
+File: cvs.info,  Node: preproxy,  Next: postproxy,  Prev: postwatch,  Up: Trigger Scripts
 
 Launch a Script before Proxying
 -------------------------------
@@ -694,8 +999,8 @@ request, with the repository argument (if requested) set from the
 topmost directory sent by the client.
 
    The `preproxy' file has the standard form for script hooks (*note
-script hooks::), where each line is a regular expression followed by a
-command to execute.  It supports the ALL and DEFAULT keywords.
+Trigger Scripts::), where each line is a regular expression followed by
+a command to execute.  It supports the ALL and DEFAULT keywords.
 
    In addition to the common format strings, the `preproxy' file
 supports the following format string:
@@ -704,7 +1009,7 @@ P
      the CVSROOT string which specifies the primary server
 
 
-File: cvs.info,  Node: postproxy,  Prev: preproxy,  Up: script hooks
+File: cvs.info,  Node: postproxy,  Prev: preproxy,  Up: Trigger Scripts
 
 Launch a Script after Proxying
 ------------------------------
@@ -723,8 +1028,8 @@ repository on the secondary server.
    `postproxy' scripts are called once per directory.
 
    The `postproxy' file has the standard form for script hooks (*note
-script hooks::), where each line is a regular expression followed by a
-command to execute.  It supports the ALL and DEFAULT keywords.
+Trigger Scripts::), where each line is a regular expression followed by
+a command to execute.  It supports the ALL and DEFAULT keywords.
 
    In addition to the common format strings, the `postproxy' file
 supports the following format string:
@@ -733,7 +1038,7 @@ P
      the CVSROOT string which specifies the primary server
 
 
-File: cvs.info,  Node: rcsinfo,  Next: cvsignore,  Prev: script hooks,  Up: Administrative files
+File: cvs.info,  Node: rcsinfo,  Next: cvsignore,  Prev: Trigger Scripts,  Up: Administrative files
 
 Rcsinfo
 =======
@@ -895,267 +1200,4 @@ is used to set up the repository (*note Creating a repository::).
 in the CVS source code, but generally programs should use the `cvs
 history' command to access it anyway, in case the format changes with
 future releases of CVS.
-
-
-File: cvs.info,  Node: Variables,  Next: config,  Prev: history file,  Up: Administrative files
-
-Expansions in administrative files
-==================================
-
-   Sometimes in writing an administrative file, you might want the file
-to be able to know various things based on environment CVS is running
-in.  There are several mechanisms to do that.
-
-   To find the home directory of the user running CVS (from the `HOME'
-environment variable), use `~' followed by `/' or the end of the line.
-Likewise for the home directory of USER, use `~USER'.  These variables
-are expanded on the server machine, and don't get any reasonable
-expansion if pserver (*note Password authenticated::) is in use;
-therefore user variables (see below) may be a better choice to
-customize behavior based on the user running CVS.
-
-   One may want to know about various pieces of information internal to
-CVS.  A CVS internal variable has the syntax `${VARIABLE}', where
-VARIABLE starts with a letter and consists of alphanumeric characters
-and `_'.  If the character following VARIABLE is a non-alphanumeric
-character other than `_', the `{' and `}' can be omitted.  The CVS
-internal variables are:
-
-`CVSROOT'
-     This is the absolute path to the current CVS root directory.
-     *Note Repository::, for a description of the various ways to
-     specify this, but note that the internal variable contains just
-     the directory and not any of the access method information.
-
-`RCSBIN'
-     In CVS 1.9.18 and older, this specified the directory where CVS
-     was looking for RCS programs.  Because CVS no longer runs RCS
-     programs, specifying this internal variable is now an error.
-
-`CVSEDITOR'
-`EDITOR'
-`VISUAL'
-     These all expand to the same value, which is the editor that CVS
-     is using.  *Note Global options::, for how to specify this.
-
-`USER'
-     Username of the user running CVS (on the CVS server machine).
-     When using pserver, this is the user specified in the repository
-     specification which need not be the same as the username the
-     server is running as (*note Password authentication server::).  Do
-     not confuse this with the environment variable of the same name.
-
-   If you want to pass a value to the administrative files which the
-user who is running CVS can specify, use a user variable.  To expand a
-user variable, the administrative file contains `${=VARIABLE}'.  To set
-a user variable, specify the global option `-s' to CVS, with argument
-`VARIABLE=VALUE'.  It may be particularly useful to specify this option
-via `.cvsrc' (*note ~/.cvsrc::).
-
-   For example, if you want the administrative file to refer to a test
-directory you might create a user variable `TESTDIR'.  Then if CVS is
-invoked as
-
-     cvs -s TESTDIR=/work/local/tests
-
-and the administrative file contains `sh ${=TESTDIR}/runtests', then
-that string is expanded to `sh /work/local/tests/runtests'.
-
-   All other strings containing `$' are reserved; there is no way to
-quote a `$' character so that `$' represents itself.
-
-   Environment variables passed to administrative files are:
-
-`CVS_USER'
-     The CVS-specific username provided by the user, if it can be
-     provided (currently just for the pserver access method), and to
-     the empty string otherwise.  (`CVS_USER' and `USER' may differ
-     when `$CVSROOT/CVSROOT/passwd' is used to map CVS usernames to
-     system usernames.)
-
-`LOGNAME'
-     The username of the system user.
-
-`USER'
-     Same as `LOGNAME'.  Do not confuse this with the internal variable
-     of the same name.
-
-
-File: cvs.info,  Node: config,  Prev: Variables,  Up: Administrative files
-
-The CVSROOT/config configuration file
-=====================================
-
-   The administrative file `config' contains various miscellaneous
-settings which affect the behavior of CVS.  The syntax is slightly
-different from the other administrative files.  Variables are not
-expanded.  Lines which start with `#' are considered comments.  Other
-lines consist of a keyword, `=', and a value.  Note that this syntax is
-very strict.  Extraneous spaces or tabs are not permitted.
-
-   Currently defined keywords are:
-
-`RCSBIN=BINDIR'
-     For CVS 1.9.12 through 1.9.18, this setting told CVS to look for
-     RCS programs in the BINDIR directory.  Current versions of CVS do
-     not run RCS programs; for compatibility this setting is accepted,
-     but it does nothing.
-
-`SystemAuth=VALUE'
-     If VALUE is `yes', then pserver should check for users in the
-     system's user database if not found in `CVSROOT/passwd'.  If it is
-     `no', then all pserver users must exist in `CVSROOT/passwd'.  The
-     default is `yes'.  For more on pserver, see *Note Password
-     authenticated::.
-
-`LocalKeyword=VALUE'
-     Specify a local alias for a standard keyword.  For example,
-     `LocalKeyword=MYCVS=CVSHeader'.  For more on local keywords, see
-     *Note Keyword substitution::.
-
-`KeywordExpand=VALUE'
-     Specify `i' followed by a list of keywords to be expanded (for
-     example, `KeywordExpand=iMYCVS,Name,Date'), or `e' followed by a
-     list of keywords not to be expanded (for example,
-     `KeywordExpand=eCVSHeader').  For more on keyword expansion, see
-     *Note Configuring keyword expansion::.
-
-`TopLevelAdmin=VALUE'
-     Modify the `checkout' command to create a `CVS' directory at the
-     top level of the new working directory, in addition to `CVS'
-     directories created within checked-out directories.  The default
-     value is `no'.
-
-     This option is useful if you find yourself performing many
-     commands at the top level of your working directory, rather than
-     in one of the checked out subdirectories.  The `CVS' directory
-     created there will mean you don't have to specify `CVSROOT' for
-     each command.  It also provides a place for the `CVS/Template'
-     file (*note Working directory storage::).
-
-`LockDir=DIRECTORY'
-     Put CVS lock files in DIRECTORY rather than directly in the
-     repository.  This is useful if you want to let users read from the
-     repository while giving them write access only to DIRECTORY, not
-     to the repository.  It can also be used to put the locks on a very
-     fast in-memory file system to speed up locking and unlocking the
-     repository.  You need to create DIRECTORY, but CVS will create
-     subdirectories of DIRECTORY as it needs them.  For information on
-     CVS locks, see *Note Concurrency::.
-
-     Before enabling the LockDir option, make sure that you have
-     tracked down and removed any copies of CVS 1.9 or older.  Such
-     versions neither support LockDir, nor will give an error
-     indicating that they don't support it.  The result, if this is
-     allowed to happen, is that some CVS users will put the locks one
-     place, and others will put them another place, and therefore the
-     repository could become corrupted.  CVS 1.10 does not support
-     LockDir but it will print a warning if run on a repository with
-     LockDir enabled.
-
-`LogHistory=VALUE'
-     Control what is logged to the `CVSROOT/history' file (*note
-     history::).  Default of `TOEFWUPCGMAR' (or simply `all') will log
-     all transactions.  Any subset of the default is legal.  (For
-     example, to only log transactions that modify the `*,v' files, use
-     `LogHistory=TMAR'.)
-
-`RereadLogAfterVerify=VALUE'
-     Modify the `commit' command such that CVS will reread the log
-     message after running the program specified by `verifymsg'.  VALUE
-     may be one of `yes' or `always', indicating that the log message
-     should always be reread; `no' or `never', indicating that it
-     should never be reread; or VALUE may be `stat', indicating that
-     the file should be checked with the file system `stat()' function
-     to see if it has changed (see warning below) before rereading.
-     The default value is `always'.
-
-     *Note: the `stat' mode can cause CVS to pause for up to one extra
-     second per directory committed.  This can be less IO and CPU
-     intensive but is not recommended for use with large repositories*
-
-     *Note verifymsg::, for more information on how verifymsg may be
-     used.
-
-`UserAdminOptions=VALUE'
-     Control what options will be allowed with the `cvs admin' command
-     (*note admin::) for users not in the `cvsadmin' group.  The VALUE
-     string is a list of single character options which should be
-     allowed.  If a user who is not a member of the `cvsadmin' group
-     tries to execute any `cvs admin' option which is not listed they
-     will will receive an error message reporting that the option is
-     restricted.
-
-     If no `cvsadmin' group exists on the server, CVS will ignore the
-     `UserAdminOptions' keyword (*note admin::).
-
-     When not specified, `UserAdminOptions' defaults to `k'.  In other
-     words, it defaults to allowing users outside of the `cvsadmin'
-     group to use the `cvs admin' command only to change the default
-     keyword expansion mode for files.
-
-     As an example, to restrict users not in the `cvsadmin' group to
-     using `cvs admin' to change the default keyword substitution mode,
-     lock revisions, unlock revisions, and replace the log message, use
-     `UserAdminOptions=klum'.
-
-`UseNewInfoFmtStrings=VALUE'
-     Specify whether CVS should support the new or old command line
-     template model for the commit support files (*note commit files::).
-     This configuration variable began life in deprecation and is only
-     here in order to give people time to update legacy repositories to
-     use the new format string syntax before support for the old syntax
-     is removed.  For information on updating your repository to
-     support the new model, please see *Note Updating Commit Files::.
-
-     _Note that new repositories (created with the `cvs init' command)
-     will have this value set to `yes', but the default value is `no'._
-
-`ImportNewFilesToVendorBranchOnly=VALUE'
-     Specify whether `cvs import' should always behave as if the `-X'
-     flag was specified on the command line.  VALUE may be either `yes'
-     or `no'.  If set to `yes', all uses of `cvs import' on the
-     repository will behave as if the `-X' flag was set.  The default
-     value is `no'.
-
-`PrimaryServer=CVSROOT'
-     When specified, and the repository specified by CVSROOT is not the
-     one currently being accessed, then the server will turn itself
-     into a transparent proxy to CVSROOT for write requests.  The
-     HOSTNAME configured as part of CVSROOT must resolve to the same
-     string returned by the `uname' command on the primary server for
-     this to work.  Host name resolution is performed via some
-     combination of `named', a broken out line from `/etc/hosts', and
-     the Network Information Service (NIS or YP), depending on the
-     configuration of the particular system.
-
-     Only the `:ext:' method is currently supported for primaries
-     (actually, `:fork:' is supported as well, but only for testing -
-     if you find another use for accessing a primary via the `:fork:'
-     method, please send a note to <bug-cvs@gnu.org> about it).  See
-     *Note Write proxies:: for more on configuring and using write
-     proxies.
-
-`MaxCommentLeaderLength=LENGTH'
-     Set to some length, in bytes, where a trailing `k', `M', `G', or
-     `T' causes the preceding nubmer to be interpreted as kilobytes,
-     megabytes, gigabytes, or terrabytes, respectively, will cause
-     `$Log$' keywords (*note Keyword substitution::), with more than
-     LENGTH bytes preceding it on a line to be ignored (or to fall back
-     on the comment leader set in the RCS archive file - see
-     `UseArchiveCommentLeader' below).  Defaults to 20 bytes to allow
-     checkouts to proceed normally when they include binary files
-     containing `$Log$' keywords and which users have neglected to mark
-     as binary.
-
-`UseArchiveCommentLeader=VALUE'
-     Set to `true', if the text preceding a `$Log$' keyword is found to
-     exceed `MaxCommentLeaderLength' bytes, then the comment leader set
-     in the RCS archive file (*note admin::), if any, will be used
-     instead.  If there is no comment leader set in the archive file or
-     VALUE is set to `false', then the keyword will not be expanded
-     (*note Keyword list::).  To force the comment leader in the RCS
-     archive file to be used exclusively (and `$Log$' expansion skipped
-     in files where the comment leader has not been set in the archive
-     file), set VALUE and set `MaxCommentLeaderLength' to `0'.
 

@@ -1,3 +1,736 @@
+2005-04-08  Derek Price  <derek@ximbiot.com>
+
+	* edit.c (edit_fileproc, unedit_fileproc): s/GMT/-0000/.
+	* rcs.c (RCS_getrevtime): Ditto, & replace a sprintf into a static
+	buffer with an Xasprintf which creates a dynamic one.
+	* sanity.sh: Update tests to compensate.
+	(Original bug report from Ian Abbott <abbotti@mev.co.uk>.)
+
+2005-03-26  Mark D. Baushke  <mdb@cvshome.org>
+
+	* checkout.c (checkout_proc): Use Xasprintf/xstrdup instead of
+	xmalloc/strcpy+strcat.
+
+2005-03-22  Mark D. Baushke  <mdb@cvshome.org>
+
+	* Makefile.in: Regenerated.
+
+2005-03-22  Mark D. Baushke  <mdb@cvshome.org>
+
+	* rcs.c (linevector_add): Use xnrealloc.
+	* server.c (serve_argument): Ditto.
+
+2005-03-22  Mark D. Baushke  <mdb@cvshome.org>
+
+	* rcs.c (linevector_copy): Use xtimes in argument.
+
+	* patch.c (patch): Remove dead code.
+
+	* lock.c (set_readlock_name): Use Xasprintf instead of
+	xmalloc/sprintf.
+	(lock_exists, set_promotable_lock, lock_wait): Ditto.
+	(lock_obtained, lock_dir_for_write): Ditto.
+	* log.c (rlog_proc): Ditto.
+
+	* ignore.c (ign_dir_add): Use xnrealloc.
+	* modules.c (save_d): Ditto.
+	* rcs.c (linevector_copy): Ditto.
+
+	* add.c (add): Use xstrdup instead of xmalloc/strcpy.
+	* client.c (client_process_import_file): Ditto.
+	* kerberos4-client.c (start_kerberos4_server): Ditto.
+	* logmsg.c (verifymsg_proc): Ditto.
+	* log.c (log_expand_revlist): Ditto.
+	* patch.c (patch_fileproc): Ditto.
+	* rcs.c (RCS_tag2rev, RCS_nodeisbranch, RCS_getbranch): Ditto.
+	(RCS_getdatebranch, expand_keywords, RCS_addbranch): Ditto.
+	(RCS_checkin): Ditto.
+	* remove.c (remove_fileproc): Ditto.
+
+2005-03-18  Derek Price  <derek@ximbiot.com>
+
+	* server.c: Reindent pragmas.
+	(become_proxy): Add parentheses for -Wall.
+
+2005-03-18  Derek Price  <derek@ximbiot.com>
+
+	* error.c (error): Simplify using vasnprintf.
+
+2005-03-17  Mark D. Baushke  <mdb@cvshome.org>
+
+	* admin.c (postadmin_proc): Cast NULL when it is an argument to
+	stdarg function to ensure it is the correct type.
+	* commit.c (precommit_proc): Ditto.
+	* edit.c (notify_proc): Ditto.
+	* fileattr.c (postwatch_proc): Ditto.
+	* logmsg.c (logfile_write, verifymsg_proc): Ditto.
+	* server.c (prepost_proxy_proc): Ditto.
+	* subr.c (cmdlineescape): Ditto.
+	* tag.c (posttag_proc): Ditto.
+	(Thanks to a report from Derek Price <derek@ximbiot.com>.)
+	
+2005-03-17  Derek Price  <derek@ximbiot.com>
+
+	* rcs.h (RCSNode): Improve comment.
+	* rcs.c (RCS_head): Ditto, plus gratuitous reformatting.
+
+2005-03-17  Derek Price  <derek@ximbiot.com>
+
+	* rcs.c (RCS_deltas): Use rcs->print_path.
+
+2005-03-17  Derek Price  <derek@ximbiot.com>
+
+	* login.c (password_entry_parseline): Avoid using uninitialized
+	variable.
+	* rcs.c (RCS_deltas): Avoid buffer overflow.
+	(RCS_checkout): Avoid using uninitialized loglen.
+	* patch.c (patch_fileproc): Free original pointer, not one that may
+	have been incremented.
+	(Thanks to report from Alen Zukich <alen.zukich@klocwork.com>.)
+
+2005-03-17  Derek Price  <derek@ximbiot.com>
+
+	* commit.c (checkaddfile): Avoid dereferencing a NULL pointer in
+	response to a rare error.
+	* admin.c (admin_fileproc), log.c (log_expand_revlist), mkmodules.c
+	(checkout_file), rcs.c (RCS_getdate, RCS_deltas, RCS_findlock_or_tip,
+	RCS_tag2rev): Avoid dereferencing NULL pointer.
+	(Thanks to report from Alen Zukich <alen.zukich@klocwork.com>.)
+
+2005-03-17  Derek Price  <derek@ximbiot.com>
+
+	* rcs.c (RCS_reparsercsfile): Avoid memory leak.
+	(Thanks to report from Alen Zukich <alen.zukich@klocwork.com>.)
+
+2005-03-17  Derek Price  <derek@ximbiot.com>
+
+	* log.c (log_expand_revlist): Suppress message and not error handling
+	when really_quiet.
+
+2005-03-16  Mark D. Baushke  <mdb@cvshome.org>
+
+	* buffer.c (fd_buffer_shutdown): Replace (int *) 0 with NULL.
+	* server.c (do_cvs_command): Ditto.
+
+	* client.c (update_entries): Use xnmalloc.
+
+	* checkin.c (Checkin): Replace (char *) 0 with NULL.
+	* patch.c (patch_fileproc): Ditto.
+	* update.c (update_fileproc): Ditto.
+	* no_diff.c (No_Difference): Ditto.
+	* patch.c (patch_fileproc): Ditto.
+	* rcscmds.c (call_diff_setup, call_diff_add_arg): Ditto.
+
+	* update.c (join_file): Replace (RCSCHECKOUTPROC)0 with NULL.
+	* rcs.c (RCS_checkin, RCS_cmp_file, RCS_delete_revs) 
+	(RCS_delete_revs): Ditto.
+	* rcscmds.c (RCS_merge, RCS_exec_rcsdiff): Ditto.
+	
+	* annotate.c, checkin.c, classify.c, fileattr.c, find_names.c,
+	hash.c, lock.c, login.c, logmsg.c, main.c, modules.c, myndbm.c,
+	no_diff.c, patch.c, rcs.c, rcscmds.c, remove.c, server.c,
+	status.c, subr.c, tag.c, update.c, vers_ts.c: Avoid casting NULL.
+
+2005-03-17  Derek Price  <derek@ximbiot.com>
+
+	* client.c (call_in_directory): Put function call after var decls.
+
+2005-03-16  Derek Price  <derek@ximbiot.com>
+
+	* client.c (call_in_directory), commit.c (commit_filesdoneproc), log.c
+	(log_expand_revlist, log_version), logmsg.c (logfile_write), modules
+	(my_module), no_diff.c (No_Difference), parseinfo.c (Parse_Info), rcs.c
+	(RCS_deltas, RCS_checkin, RCS_addbranch, do_locks, do_symbols),
+	rcscmds.c (RCS_merge), root.c (parse_cvsroot, normalize_cvsroot),
+	update.c (merge_file): Verify assumptions via assertions.
+	(Thanks to (probably) incorrect reports from Alen Zukich
+	<alen.zukich@klocwork.com>.)
+
+2005-03-16  Mark D. Baushke  <mdb@cvshome.org>
+
+	* rcs.c (RCS_check_kflag): Use Xasprintf instead of
+	sprintf/xstrdup.
+
+	* mkmodules.c (checkout_file): Use Xasprintf instead of
+	xmalloc/strcpy+strcat.
+	* wrapper.c (wrap_unparse_rcs_options): Ditto.
+	(wrap_rcsoption): Ditto.
+
+	* subr.c (getcaller): Use Xasprintf instead of sprintf/xstrdup.
+
+	* history.c (history): Use Xasprintf instead of xmalloc/sprintf.
+	* lock.c (lock_name, set_lockers_name): Ditto.
+	* main.c (cmd_synonyms, main): Ditto.
+	* mkmodules.c (rename_rcsfile, init): Ditto
+	* modules.c (cat_module): Ditto.
+	* parseinfo.c (Parse_Info): Ditto.
+	* rcscmds.c (diff_exec, RCS_output_diff_options): Ditto.
+	* recurse.c (start_recursion, do_dir_proc): Ditto.
+	* remove.c (remove_fileproc): Ditto.
+	* repos.c (Name_Repository): Ditto.
+	* root.c (Name_Root, Create_Root): Ditto.
+	* status.c (status_fileproc, tag_list_proc): Ditto. 
+	* wrapper.c (wrap_setup, wrap_tocvs_process_file): Ditto.
+
+	* hash.c (sortlist): Use xnmalloc.
+	* main.c (cmd_synonyms): Ditto.
+	* server.c (cvs_pam_conv): Ditto.
+
+	* create_adm.c (Create_Admin): Clean up use of Xasprintf/xstrdup.
+	* entries.c (WriteTag, base_walk): Ditto.
+	* modules.c (my_module): Ditto.
+
+	* wrapper.c (wrap_fromcvs_process_file): Use Xasprintf instead of
+	xmalloc/sprintf and clean up control flow.
+
+2005-03-16  Derek Price  <derek@ximbiot.com>
+
+	* history.c (history_write): Remove test that always evaluates to
+	false.
+
+2005-03-16  Derek Price  <derek@ximbiot.com>
+
+	* server.c (become_proxy): Close pipe to primary when pipe from it
+	closes.
+
+2005-03-16  Mark D. Baushke  <mdb@cvshome.org>
+
+	* sanity.sh (debug-log-nonfatal): Only set CVS_CLIENT_LOG to the
+	old value if it was previously set.
+
+2005-03-16  Derek Price  <derek@ximbiot.com>
+
+	* server.c (create_adm_p, serve_entry), tag.c (rtag_proc): Avoid memory
+	leaks.
+	(Thanks to report from Alen Zukich <alen.zukich@klocwork.com>.)
+
+2005-03-16  Derek Price  <derek@ximbiot.com>
+
+	* logmsg.c (do_verify): Don't check for NULL return from xfopen().
+
+2005-03-16  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh (debug-log-nonfatal): New test.
+
+2005-03-16  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh (writeproxy-ssh-noredirect): Don't unconditionally create
+	a primary debug log.
+
+2005-03-16  Derek Price  <derek@ximbiot.com>
+
+	* cvs.h (open_file): Move proto...
+	* subr.h (xfopen): ...here and rename.
+	* filesubr.c (open_file): Move function...
+	* subr.c (xfopen): ...here, with additional commenting and minor
+	cosmetic changes.
+	* add.c, checkout.c, client.c, cvsrc.c, edit.c, entries.c, filesubr.c,
+	logmsg.c, mkmodules.c, modules,c, patch.c, root.c, subr.c:
+	s/open_file/xfopen/.
+
+2005-03-16  Derek Price  <derek@ximbiot.com>
+
+	* log-buffer.c (setup_logfiles): Failure to open a debug log file
+	should be non-fatal.
+
+2005-03-16  Derek Price  <derek@ximbiot.com>
+
+	* server.c (cvs_outerr): Quote error text in syslog messages.
+
+2005-03-15  Mark D. Baushke  <mdb@cvshome.org>
+
+	* history.c (select_hrec): Avoid possible memory leak.
+
+2005-03-15  Derek Price  <derek@ximbiot.com>
+
+	* patch.c (patch_proc): Avoid memory leak.
+	(Thanks to report from Alen Zukich <alen.zukich@klocwork.com>.)
+
+2005-03-12  Mark D. Baushke  <mdb@cvshome.org>
+
+	* server.c (receive_partial_file): Use ssize_t to deal with < 0
+	return value from write().
+
+2005-03-12  Mark D. Baushke  <mdb@cvshome.org>
+
+	* history.c (save_file): Bug fix from last change.
+
+2005-03-11  Mark D. Baushke  <mdb@cvshome.org>
+
+	* update.c (get_linkinfo_proc): Use Xasprintf instead of
+	xmalloc/sprintf.  Gratuitous reformatting.
+	(update_ignproc, update_dirent_proc, checkout_file): Ditto.
+	(patch_file, merge_file, join_file): Ditto.
+	* modules.c (open_module): Ditto.
+
+	* modules (my_module): Use Xasprintf instead of xmalloc/sprintf
+	and avoid possibility of trying to free(NULL).
+
+	* subr.c (backup_file): Use Xasprintf instead of xmalloc/sprintf.
+	(cmdlinequote): Use Xasprintf instead of xmalloc/strcat+strlen.
+	* modules.c (my_module): Ditto.
+
+	* client.c (handle_module_expansion): Use xnmalloc, xnrealloc,
+	and xstrdup in place of xmalloc, xrealloc, and xmalloc/strcpy.
+	(start_server): Do not assume gzip_level precision encoding.
+	(send_modified): Do not assume 1024 bytes is sufficient for
+	a temporary filename.
+
+	* modules.c (my_module): Use xnmalloc and xnrealloc. Gratuitous
+	reformatting.
+	* subr.c (line2argv): Ditto.
+
+2005-03-11  Mark D. Baushke  <mdb@cvshome.org>
+
+	* modules.c (my_module): Protect against free (NULL) code path.
+
+2005-03-11  Derek Price  <derek@ximbiot.com>
+
+	* annotate.c (rannotate_proc), fileattr.c (fileattr_write), rcs.c
+	(RCS_deltas), server.c (check_repository_password), update.c (update):
+	Avoid memory leaks.
+	(Thanks to report from Alen Zukich <alen.zukich@klocwork.com>.)
+
+2005-03-10  Derek Price  <derek@ximbiot.com>
+
+	* diff.c (diff_fileproc): Remove unnecessary check for NULL.
+
+2005-03-10  Mark D. Baushke  <mdb@cvshome.org>
+
+	* commit.c: Gratuitous reformatting.
+	* entries.c: Ditto.
+	* import.c (import, import_descend): Ditto.
+
+	* commit.c (commit): Use xnmalloc. Gratuitous reformatting.
+	* history.c (save_user, save_file, save_module, read_hrecs): Ditto.
+	* ignore.c (ign_add): Ditto.
+
+	* hardlink.c (lookup_file_by_inode): Use Xasprintf instead of
+	xmalloc/sprintf.  Gratuitous reformatting.
+	(update_hardlink_info, list_linked_files_on_disk): Ditto.
+	(find_checkedout_proc): Ditto.
+	* history.c (history, history_write, save_file): Ditto.
+	(select_hrec): Ditto. 
+	* ignore.c (ign_setup, ignore_files): Ditto.
+	* import.c (process_import_file, import_descend_dir): Ditto.
+
+	* import.c (import_descend_dir): Use Xasprintf instead of
+	xmalloc/strcpy+strcat+strcat.
+
+	* history.c (read_hrecs): Make function argument a const.
+	
+2005-03-10  Derek Price  <derek@ximbiot.com>
+
+	* fileattr.c (fileattr_read): Only eat a newline when it really is a
+	newline.
+
+2005-03-10  Mark D. Baushke  <mdb@cvshome.org>
+
+	* zlib.c: Include "pagealign_alloc.h".
+
+2005-03-09  Derek Price  <derek@ximbiot.com>
+
+	* add.c (add, add_directory), buffer.c (allocate_buffer_datas),
+	client.c (update_entries), commit.c (checkaddfile), entries.c
+	(Entries_Open), fileattr.c (fileattr_read), ignore.c (ign_add),
+	import.c (import), main.c (main), parseinfo.c (parse_config), rcs.c
+	(RCS_reparsercsfile, RCS_getbranchpoint, RCS_checkout,
+	RCS_delete_revs, apply_rcs_changes): Avoid memory leaks.
+	(Thanks to report from Alen Zukich <alen.zukich@klocwork.com>.)
+
+	* hardlink.c, hardlink.h: Avoid compiling entire contents of these
+	files w/o preserve permissions support.
+
+2005-03-09  Mark D. Baushke  <mdb@cvshome.org>
+
+	* history.c (history, save_file): Cleanup the API to match the
+	comments.
+
+2005-03-08  Derek Price  <derek@ximbiot.com>
+
+	* rcs.c: Define MAP_FILE & MAP_FAILED when necessary.
+
+2005-03-08  Derek Price  <derek@ximbiot.com>
+
+	* zlib.c (compress_buffer_input): Use pagealign_xalloc when allocating
+	buffer datas.
+	(compress_buffer_output, compress_buffer_flush,
+	compress_buffer_shutdown_output): Don't assume that BUFFER_DATA_SIZE is
+	a constant.
+	(Thanks to report from Larry Jones <lawrence.jones@ugs.com>.)
+
+2005-03-08  Larry Jones  <lawrence.jones@ugs.com>
+
+	* release.c (release): Remove unneeded code.
+
+2005-03-07  Conrad T. Pino  <Conrad@Pino.com>
+
+	* buffer.h (buf_free_data): Compile with proxy disabled.
+	(Thanks to report from Larry Jones <lawrence.jones@ugs.com>.)
+
+2005-03-07  Mark D. Baushke  <mdb@cvshome.org>
+
+	* add.c (add_directory): Xasprintf instead of xmalloc/sprintf+strcat.
+	* admin.c (arg_add): Ditto.
+	(admin_fileproc, postadmin_proc, admin_fileproc): Gratuitous
+	reformatting.
+
+	* client.c (mode_to_string): Use Xasprintf.
+	
+	* checkout.c (checkout): Xasprintf instead of xmalloc/sprintf.
+	Gratuitous reformatting.
+	* entries.c (WriteTag): Ditto
+	(subdir_record, base_walk): Ditto.
+	* fileattr.c (fileattr_read, fileattr_set, fileattr_write): Ditto.
+	* filesubr.c (deep_remove_dir, cvs_temp_file): Ditto.
+	(strcat_filename_onto_homedir): Ditto.
+	* find_names.c (Find_Names): Ditto.
+
+	* filesubr.c (expand_wild): Use xnmalloc instead of xmalloc.
+
+2005-03-07  Derek Price  <derek@ximbiot.com>
+
+	* buffer.c (buf_free_data): Compile with proxy disabled.
+	(Thanks to report from Larry Jones <lawrence.jones@ugs.com>.)
+
+2005-03-07  Derek Price  <derek@ximbiot.com>
+
+	* buffer.c (packetizing_buffer_input, packetizing_buffer_output): Don't
+	assume BUFFER_DATA_SIZE is a constant.
+	(Thanks to report from Larry Jones <lawrence.jones@ugs.com>.)
+
+2005-03-03  Derek Price  <derek@ximbiot.com>
+
+	Use new pagealign_alloc() and pagealign_free() functions in
+	lieu of maintaining pointers for reuse.  On most systems this should be
+	faster.
+	* buffer.c: Include "pagealign_alloc.h".
+	(free_buffer_data): Remove this global.
+	(allocate_buffer_datas): Remove this function.
+	(buf_free, buf_send_output): Call buf_free_data().
+	(get_buffer_data): Use pagealign_alloc().
+	(buf_free_datas): New function.
+	(buf_send_output, buf_free_data, buf_read_file, buf_read_file_to_eof,
+	buf_read_short_line, buf_read_data, buf_copy_counted): Call
+	buf_free_datas().
+	* buffer.h: Include "getpagesize.h".
+	(BUFFER_DATA_SIZE): Default to getpagesize ();
+	* rcs.c: Lean on m4/mmap-anon.m4 to simplify mmap setup.
+
+2005-03-02  Jim Meyering  <jim@meyering.net>
+
+	Detect and report write failure for e.g., cvs up -p FILE > /dev/full
+	* main.c: Include "closeout.h".
+	(main): Arrange to close standard output upon exit.
+	* sanity.sh (close-stdout): New test for this fix.
+
+2005-03-01  Mark D. Baushke  <mdb@cvshome.org>
+
+	* checkout.c (emptydir_name): Xasprintf instead of
+	xmalloc/sprintf.
+
+	* add.c (add): Xasprintf instead of xmalloc/sprintf.
+	Gratuitous reformatting.
+	(add_directory, build_entry): Ditto.
+	* annotate.c (rannotate_proc): Ditto.
+	* checkout.c (checkout_proc): Ditto.
+	* client.c (call_in_directory): Ditto.
+	(template, send_dirent_proc): Ditto.
+	(client_process_import_file): Ditto.
+	* commit.c (check_fileproc, precommit_proc): Ditto.
+	(commit_fileproc, finaladd): Ditto.
+	(checkaddfile): Ditto.
+	* create_adm.c (Create_Admin): Ditto.
+	* edit.c (notify_do): Ditto.
+
+2005-03-01  Derek Price  <derek@ximbiot.com>
+
+	* subr.c (get_date): Minor reformatting.
+
+2005-03-01  Derek Price  <derek@ximbiot.com>
+
+	* subr.c (get_date): Replace obsolete timeb cruft in this stub.
+
+2005-02-28  Mark D. Baushke  <mdb@cvshome.org>
+
+	* admin.c (arg_add): Use xnmalloc and xnrealloc.
+	(admin): Use xnmalloc. Minor reformatting.
+	Xasprintf instead of xmalloc/strcpy+strcat.
+	* client.c (client_expand_modules): Use xnmalloc.
+	Minor reformatting.
+	* cvsrc.c (read_cvsrc): Use xnmalloc and xnrealloc.
+	Minor reformatting.
+	* history.c (read_hrecs): Use xnrealloc. Minor reformatting.
+	* ignore.c (ign_add): Use xnrealloc. Minor reformatting.
+	* rcscmds.c (call_diff_add_arg): Use xnrealloc.
+	* wrapper.c (wrap_add_entry): Use xnrealloc. Gratuitous
+	reformatting.
+
+2005-02-28  Derek Price  <derek@ximbiot.com>
+
+	* edit.c (notify_proc), logmsg.c (logfile_write): Minor reformatting.
+
+2005-02-28  Derek Price  <derek@ximbiot.com>
+
+	* root.c (parse_root): Trigger a later error message rather than
+	maintaining two copies.
+
+2005-02-27  Mark D. Baushke  <mdb@cvshome.org>
+
+	* client.c (connect_to_pserver): Use TRACE_FUNCTION, not 1 in
+	TRACE() calls.
+	(connect_to_pserver,send_modified): Ditto.
+	* create_adm.c (Create_Admin): Ditto.
+	* entries.c (Register, Scratch_Entry, WriteTemplate): Ditto.
+	* filesubr.c (copy_file, xchmod, rename_file): Ditto.
+	* history.c (history_write): Ditto.
+	* kerberos4-client.c (start_kerberos4_server): Ditto.
+	* no_diff.c (No_Difference): Ditto.
+	* parseinfo.c (Parse_Info): Ditto.
+	* rcs.c (RCS_checkout): Ditto.
+	* server.c (server_register): Ditto.
+	* update.c (join_file): Ditto.
+
+	* no_diff.c (No_Difference): Gratuitous reformatting.
+	* kerberos4-client.c (start_kerberos4_server): Ditto.
+
+2005-02-27  Jim Meyering  <jim@meyering.net>
+
+	* login.c (password_entry_operation): Exit nonzero when
+	failing to close a just-appended-to .cvspass file.
+
+2005-02-26  Derek Price  <derek@ximbiot.com>
+
+	* root.c: Gratuitous reformatting.
+
+2005-02-26  Mark D. Baushke  <mdb@cvshome.org>
+
+	* root.c (parse_cvsroot): Handle another Bad CVSROOT.
+	* sanity.sh (parseroot-8r): Test for it.
+	(Problem report from Hiroyuki Ikezoe <poincare@ikezoe.net>.)
+
+2005-02-26  Derek Price  <derek@ximbiot.com>
+
+	* server.c: Include netdb.h with server support.  Other reformatting.
+
+2005-02-25  Derek Price  <derek@ximbiot.com>
+
+	* sanity.sh (multiroot2-9a): Correct for new TRACE message.
+
+2005-02-25  Derek Price  <derek@ximbiot.com>
+
+	* cvs.h (tag_check_valid): Declare NAME arg const.
+	* tag.c (tag_check_valid): Ditto, update to account for this.
+	Xasprintf instead of xmalloc/sprintf.
+
+2005-02-25  Derek Price  <derek@ximbiot.com>
+
+	* client.c (send_modified): Suppress a -Wall warning.
+
+2005-02-25  Derek Price  <derek@ximbiot.com>
+
+	* cvs.h (global_session_id): New global declaration.
+	* import.c (add_rcs_file), rcs.c (RCS_checkin): Save commitid.
+	* log.c (log_version), status.c (status_fileproc): Output commitid.
+	* main.c (global_session_id): Define new global.
+	(main): Create session ID.
+	* sanity.sh: Update to compensate.
+	(Original patch from Frank Hemer <frank@hemer.org>.)
+
+2005-02-24 Derek Price <derek@ximbiot.com>
+
+	* subr.h (cvs_trace, TRACE*): Move to...
+	* server.h: ...here.
+	* subr.c: Ditto, but to...
+	* server.c: ...here, and print out 'P' instead of 'S' for traces from
+	secondary (proxy) servers.
+
+2005-02-24 Derek Price <derek@ximbiot.com>
+
+	* admin.c (admin): Suppress warning with -Wall and --disable-client.
+	* server.c: Don't declare functions that won't be defined when
+	--disable-server.
+
+2005-02-24 Derek Price <derek@ximbiot.com>
+
+	* sanity.sh (primary-wrapper): Rename CVS_SERVER_LOG for the primary in
+	writeproxy mode to avoid overwriting.
+
+2005-02-24 Derek Price <derek@ximbiot.com>
+
+	* client.c (open_connection_to_server): Fail with an expressive error
+	message when connection is attempted via an unsupported protocol since
+	this is no longer caught in parse_root().
+	* edit.c (edit_fileproc), import.c (import): Don't verify
+	current_parsed_root->isremote without client support.
+	* parseinfo.c (parse_config): Parse PrimaryServer without proxy
+	support.  Postpone method verification until the connect phase.
+	* parseinfo.h (struct config): Always include PrimaryServer.
+	* root.c (primary_root_translate, primary_root_inverse_translate):
+	Don't declare vars without PROXY_SUPPORT when they won't be used.
+	(parse_cvsroot): Parse remote connection methods with server support
+	for PrimaryServer/Redirects.  Delay method support verification until
+	the connect phase.
+	* root.h (cvsroot_t): Include remote elements with SERVER_SUPPORT.
+	* server.c (isProxyServer): Delay method verification until the connect
+	phase.
+
+2005-02-23 Derek Price <derek@ximbiot.com>
+
+	* tag.c (tag): Handle -r<tag>:<date>.
+	* sanity.sh (tagdate-13.*): New tests.
+
+2005-02-23 Derek Price <derek@ximbiot.com>
+
+	* annotate.c (annotate), ls.c (ls): Handle -r<tag>:<date>.
+
+2005-02-23 Derek Price <derek@ximbiot.com>
+
+	* diff.c: Some reformatting.
+	(diff): Handle -r<tag>:<date>.
+	* sanity.sh (tagdate-13b): New test.
+
+2005-02-23 Derek Price <derek@ximbiot.com>
+
+	* checkout.c (checkout): Use parse_tagdate.
+	* tag.c (tag_check_valid_join): Remove this function.
+	* cvs.h (tag_check_valid_join): Ditto for the proto.
+	(parse_tagdate): New proto.
+	(Make_Date): Make arg const.
+	* main.c (Make_Date): Ditto.
+	(parse_tagdate): New function.
+	* update.c (date_rev1, date_rev2): Rename these globals...
+	(join_date1, join_date2): ...to this.
+	(update): Use parse_tagdate.
+	(do_update): Use new API.
+	* update.h (do_update): Update proto.
+	* sanity.sh: Misc reformatting.
+	(tagdate-12): This test now passes.
+	(tagdate-12b): New test.
+	(multiroot-9a): Handle new TRACE.
+
+2005-02-23 Derek Price <derek@ximbiot.com>
+
+	* rsh-client.c (start_rsh_server): Update comment.  Replace
+	malloc/sprintf combo with a call to Xasprintf.
+
+2005-02-22 Derek Price <derek@ximbiot.com>
+
+	* error.c (error): Handle unsigned int format char.
+	* parseinfo.c (parse_error): New function.
+	(parse_config): Keep track of line number and output it in error
+	messages.
+	* rcs.c (RCS_setlocalid): Accept file path and line number for error
+	messages.  Add header comment block.
+	* rcs.h (RCS_setlocalid): Update prototype to match.
+	* parseinfo.h (parse_error): Declare new function.
+	* sanity.sh: Accept new --noredirect argument.
+	(checklongoptarg): Accept longoptmode as an argument
+	rather than via an environment variable.
+	(notnoredirect): New function.
+	(newroot): Handle root options.
+	(keywordexpand, config): Skip in noredirect mode.  Update for new
+	config error messages.
+	(multiroot): Some reformatting.
+	(writeproxy, writeproxy-noredirect): Skip in noredirect mode.
+	(commit, writeproxy-noredirect): Quote CVSROOT arguments since they
+	might contain semicolons.
+
+2005-02-21  Mark D. Baushke  <mdb@cvshome.org>
+
+	* import.c (import): Avoid using assert with side effects it may
+	be configured away using NDEBUG.
+	(Patch from Frank Hemer <frank@hemer.org>.)
+
+2005-02-20  Mark D. Baushke  <mdb@cvshome.org>
+
+	* main.c (main): Check the results from xgethostname(). Print a
+	message with the errno and use "localhost" if NULL is returned.
+
+2005-02-20 Derek Price <derek@ximbiot.com>
+
+	* cvs.h (run_arg): Rename to...
+	(run_add_arg): New function.
+	* run.c (run_arg): Remove.
+	(run_add_arg): Remove static declaration.
+	(run_piped): New function.
+	* logmsg.c, modules.c: s/run_arg/run_add_arg/.
+	* release.c (release): Replace use of piped_child with a call
+	to run_piped to avoid quoting issues.
+	* sanity.sh (info-cleanup-0): Expect success.
+
+2005-02-19 Derek Price <derek@ximbiot.com>
+
+	* edit.c (unedit_fileproc, mark_up_to_date): Replace xmallc/strcat
+	sequence with single call to Xasprintf.
+
+2005-02-08 Derek Price <derek@ximbiot.com>
+
+	* rsh-client.c: Some reformatting.
+
+2005-02-04 Derek Price <derek@ximbiot.com>
+
+	* zlib.c (compress_buffer_input): Don't return EOF when there is data
+	pending.
+
+2005-02-01 Derek Price <derek@ximbiot.com>
+
+	* main.c: Update year in copyright notice to match GNU standards.
+	* sanity.sh (version-1): Update to match.
+
+2005-02-01  Larry Jones  <lawrence.jones@ugs.com>
+
+	* log.c (log_fileproc, log_expand_revlist): Add support for BASE tag.
+	* sanity.sh (log): New tests for above.
+
+2005-01-31 Derek Price <derek@ximbiot.com>
+
+	* main.c: Rephrase --version message.
+	* sanity.sh (version-1): Update to match.
+
+2005-01-31 Derek Price <derek@ximbiot.com>
+
+	* Makefile.am, add.c, admin.c, annotate.c, checkin.c, checkout.c,
+	classify.c, commit.c, create_adm.c, cvs.h, cvsrc.c, diff.c, entries.c,
+	find_names.c, hash.c, hash.h, history.h, import.c, lock.c, log.c,
+	login.c, logmsg.c, main.c, mkmodules.c, modules.c, myndbm.c, no_diff.c,
+	parseinfo.c, patch.c, rcs.c, rcs.h, rcscmds.c, recurse.c, remove.c,
+	repos.c, root.c, root.h, server.h, stack.c, stack.h, status.c, subr.c,
+	tag.c, update.c, vers_ts.c, version.c: Update copyright notices.
+
+2005-01-29 Derek Price <derek@ximbiot.com>
+
+	* log.c (log_usage): Add note about using -S with revision info
+	supression and selection.
+	(Suggestion from Dan Peterson <dbpete@aol.com>.)
+
+2005-01-29 Derek Price <derek@ximbiot.com>
+
+	* sanity.sh (writeproxy-ssh-noredirect): Remove some commented out
+	code.
+
+2005-01-25  Larry Jones  <lawrence.jones@ugs.com>
+
+	* expand_path.c (expand_path): Rewrite using offsets instead of
+	pointers to simplify and avoid reallocation bugs.
+	(Inspired by Jeremy Bopp <jeremy@motive.com>.)
+
+2005-01-20 Brian Murphy <brian@murphy.dk>
+
+	* server.c fixing the style of the pam function calls and if
+	statements
+
+2005-01-19 Brian Murphy <brian@murphy.dk>
+
+	* server.c (pam_username, pam_password) new global static
+	variables to hold the username and pasword for cvs_pam_conv.
+	(cvs_pam_conv) using pam_username and pam_password.
+	(check_pam_password) set pam_username, pam_password before
+	authentication and clear them when authentication is finished.
+	(server, switch_to_user) Check for pamh being set before using
+	pam functionality, NULL indicating that this user was authenticated
+	using the repository password file.
+
 2004-12-09 Derek Price <derek@ximbiot.com>
 
 	* log-buffer.c (buf_count_mem): Compile this for PROXY_SUPPORT.
@@ -67,7 +800,7 @@
 	option to CVSROOT.
 	* sanity.sh (parseroot3): New tests for the new options to
 	CVSROOT.
-	
+
 2004-11-30  Larry Jones  <lawrence.jones@ugs.com>
 
 	* mkmodules.c (config_contents): Add LocalKeyword and KeywordExpand,
@@ -294,7 +1027,7 @@
 	the log file too.
 
 2004-11-04  Mark D. Baushke  <mdb@cvshome.org>
-	
+
 	* sanity.sh (set_bad_tool, is_bad_tool): Avoid printing errors
 	about the same tool multiple times.
 
@@ -390,7 +1123,7 @@
 
 	* filesubr.c (xreadlink): Make sure allocation is tried once at the
 	maximum buffer size.  Protect against overflow.
-	
+
 2004-10-29  Derek Price  <derek@ximbiot.com>
 
 	* server.c (isSameHost): Handle gethostname & gethostbyname errors.
@@ -408,7 +1141,7 @@
 
 	* filesubr.c (SIZE_MAX, SSIZE_MAX): Use #include "xsize.h" instead.
 	(xreadlink): Use xrealloc instead of xmalloc/free.
-	
+
 2004-10-29  Mark D. Baushke  <mdb@cvshome.org>
 
 	* filesubr.c (SIZE_MAX, SSIZE_MAX): New constants.
@@ -443,7 +1176,7 @@
 	isaccessible), subr.c (isabsolute): Ditto.  Some reformatting.
 	* filesubr.c (xresolvepath): Use save_cwd in place of xgetwd.  Some
 	reformatting.
-	
+
 2004-10-28  Derek Price  <derek@ximbiot.com>
 
 	* client.c (handle_redirect): Detect redirect loops.
@@ -480,7 +1213,7 @@
 	added to a branch. Fixes FIXCVS for tagdate tests.
 	* sanity.sh (tagdate): Update to expect correct results.
 	(death2, branch-after-import, join, ignore-on-branch): Ditto.
-	
+
 2004-10-26  Mark D. Baushke  <mdb@cvshome.org>
 
 	* server.c (isProxyServer): Fix hostname setup.
@@ -540,7 +1273,7 @@
 	* sanity.sh (getrlogdate): New shell function.
 	(tagdate-{13,14,16}): Use it to avoid 'sleep 60' by using
 	the exact 1.1.4.1 timestamp for tagdate-14 and tagdate-16.
-	
+
 2004-10-25  Derek Price  <derek@ximbiot.com>
 
 	* sanity.sh (depends_on_rsync): Redirect rsync output to /dev/null when
@@ -610,7 +1343,7 @@
 	(depends_on_rsync): New function.
 	(writeproxy, writeproxy-noredirect, writeproxy-ssh): Skip these tests
 	gracefully when rsync is missing.
-	
+
 2004-10-21  Mark D. Baushke  <mdb@cvshome.org>
 
 	* add.c (add): Pay attention to cvswrite mode when resurrecting a
@@ -699,7 +1432,7 @@
 
 	* server.c (server_pause_check, do_cvs_command, server_cleanup):
 	Avoid typecasts.
-	
+
 2004-10-14  Derek Price  <derek@ximbiot.com>
 
 	* gssapi-client.c: Use new size_t buffer APIs.
@@ -762,7 +1495,7 @@
 	* client.c (send_arg, send_option_string, option_with_arg): Make
 	args of function const.
 	* client.h (send_arg, send_option_string, option_with_arg): Ditto.
-	
+
 	* checkout.c (checkout): Make valid_options const.
 
 2004-10-06  Derek Price  <derek@ximbiot.com>
@@ -892,7 +1625,7 @@
 	* server.h (referrer): Add extern decl.
 	* sanity.sh (ssh-wrapper): Use in remote mode too.
 	(writeproxy-ssh): New tests.
-	
+
 2004-10-04 Derek Price <derek@ximbiot.com>
 
 	* cvs.h (CVSROOT_DFLT): Undef rather than defining to NULL.
@@ -916,7 +1649,7 @@
 	* main.c (main): Initialize CVSroot before it is used.
 	(Report and patch by Martin Neitzel <neitzel@sco.gaertner.de>.)
 	* sanity.sh (status): Test it.
-	
+
 2004-10-01  Derek Price <derek@ximbiot.com>
 
 	* checkout.c (checkout_proc), fileattr.c (fileattr_read), find_names.c
@@ -1276,7 +2009,7 @@
 	* rcs.c (RCS_checkout): Allow noexec to do checkouts when
 	server_active is true.
 	* sanity.sh (join7): Test above change (fixes a FIXCVS).
-	
+
 2004-09-09  Derek Price  <derek@ximbiot.com>
 
 	* buffer.c (stuct packetizing_buffer): Use size_t & bool as appropriate
@@ -1323,7 +2056,7 @@
 	* server.c (server_updated): Deal with cvs -n update -jt1 -jt2
 	"protocol error: uncounted data discarded" problem.
 	* sanity.sh (join7): New test for this case.
-	
+
 2004-09-04  Derek Price  <derek@ximbiot.com>
 
 	* socket-client.c (socket_client_initialize): Pass new args to
@@ -1334,7 +2067,7 @@
 	Silence `gcc -Wall'.
 
 	* buffer.c (buf_initialize): Remove unnecessary typecasts by using
-	size_t instead of int or bool as args.  
+	size_t instead of int or bool as args.
 	* buffer.c, import.c, log-buffer.c, ms-buffer.c, zlib.c: Change all
 	callers.
 	* buffer.h, cvs.h: Update protos.
@@ -1405,7 +2138,7 @@
 
 	* sanity.sh (sync-secondary): 'dirname -b' fails during the
 	spacefiles-5 test on FreeBSD, so use 'dirname -- "\$dir"' for now
-	and look to AS_DIRNAME at some future date.	
+	and look to AS_DIRNAME at some future date.
 
 2004-08-19  Derek Price  <derek@ximbiot.com>
 
@@ -1595,7 +2328,7 @@
 	(become_proxy): Ditto.
 	(server_cleanup): No need to clean up logfiles any longer.
 	(server): Use new log_buffer_initialize API.
-	
+
 2004-08-04  Derek Price  <derek@ximbiot.com>
 
 	* buffer.c (buf_read_data): s/abort/assert/.
@@ -1744,7 +2477,7 @@
 	(rtag_fileproc): ...here.  Consolidate returns at single location.
 	(*): Misc reformatting.
 	* sanity.sh (sync-secondary): Include more data in the update-log.
-	
+
 2004-07-13  Derek Price  <derek@ximbiot.com>
 
 	* .cvsignore: Ignore coverage data generated by GCC.
@@ -2118,7 +2851,7 @@
 2004-08-24  Derek Price <derek@ximbiot.com>
 
 	* tag.c (tag_check_valid): Use RCS_valid_rev() rather than duplicating
-	code.  Misc error message improvements.  
+	code.  Misc error message improvements.
 
 2004-08-24  Mark D. Baushke  <mdb@cvshome.org>
 
@@ -2129,7 +2862,7 @@
 	<wilson@specifixinc.com>.)
 	* sanity.sh (modules4): Add some more tests testing the above
 	change.
-	
+
 2004-08-20  Mark D. Baushke  <mdb@cvshome.org>
 
 	* sanity.sh (binfiles): Cleanup the 2a temporary directory.
@@ -2193,7 +2926,7 @@
 
 	* log-buffer.c (log_buffer_input): Protect call to fsync()
 	with #ifdef HAVE_FSYNC.
-	
+
 2004-08-17  Mark D. Baushke  <mdb@cvshome.org>
 
 	* sanity.sh (sshstdio): Fix comment typo plus gratuitous
@@ -2208,7 +2941,7 @@
 
 	* client.c (handle_e): Similar fix for stderr.
 	* sanity.sh (sshstdio): New test for non-blocking stdio via ssh.
-	
+
 2004-08-11  Derek Price <derek@ximbiot.com>
 
 	* sanity.sh (basicc): Work around a problem in Linux 2.2 & Bash 2.05b
@@ -2237,10 +2970,10 @@
 2004-07-17  Mark D. Baushke  <mdb@cvshome.org>
 
 	* sanity.sh (basic2-14): Use DOTSTAR to be more portable.
-	
+
 	* status.c (status_fileproc): Print datetimes using output_cvs_tagged.
 	* sanity.sh (basic2-14): Allow for an extra blank line at the end.
-	
+
 2004-07-16  Derek Price  <derek@ximbiot.com>
 
 	* server.c (pamh): New global static to hold the PAM handle.
@@ -2737,7 +3470,7 @@
 	for "cvspserver" rather than the CVS_PROXY_PORT.
 	(Fixes parseroot-3r on machines without "cvspserver" in
 	their /etc/services file.)
-	
+
 2004-04-07  Derek Price  <derek@ximbiot.com>
 
 	* sanity.sh (parseroot): s/oberon/$username/.
@@ -2752,7 +3485,7 @@
 	* client.h (CVS_PROXY_PORT): Define.
 	* root.c (parse_cvsroot): Parse method options.
 	* sanity.sh (parseroot): Add new tests.
-	
+
 2004-04-06  Derek Price  <derek@ximbiot.com>
 
 	* root.h (cvsroot_t): Move username, password, hostname, port inside
@@ -3197,7 +3930,7 @@
 	* run.c (format_cmdline): Don't accept printf `L' modifier at all when
 	long doubles are not available.  Allow UNIQUE_FLOAT_TYPE_LONG_DOUBLE to
 	imply HAVE_LONG_DOUBLE.
-	
+
 2004-02-19  Derek Price  <derek@ximbiot.com>
 
 	* run.c: Remove include of stddef.h - it is already included via
@@ -3419,7 +4152,7 @@
 
 	* server.c (do_cvs_command): Plug a memory leak.
 	(Use buf_free() rather than free().)
-	
+
 2004-02-12  Derek Price  <derek@ximbiot.com>
 
 	* sanity.sh (lockfiles): Reformat a comment for 80 characters.  Fix a
@@ -3870,7 +4603,7 @@
 	being missing from the current file.
 	* sanity.sh (join6): New tests for this case.
 	(trace): Renumber test cases.
-	
+
 2003-11-24  Larry Jones  <lawrence.jones@eds.com>
 
 	* diff.c (diff_file_nodiff): use_rev1 does *not* imply that diff_rev1
@@ -3881,7 +4614,7 @@
 
 	* client.c (connect_to_forked_server): Avoid passing NULL strings
 	to TRACE. Calling printf("%s",NULL) is not defined and may
-	segfault on some systems.	
+	segfault on some systems.
 	* diff.c (diff_file_nodiff): Ditto.
 	* main.c (main): Ditto.
 	* modules.c (do_module): Ditto.
@@ -4079,7 +4812,7 @@
 	* sanity.sh (parseroot): Use dokeep function.
 
 	* sanity.sh (parseroot): Perform this test in a subdirectory.
-	It should avoid problems on case-insensitive systems where 
+	It should avoid problems on case-insensitive systems where
 	CVSROOT and cvsroot are the same directory (eg, MacOS X).
 
 2003-10-24  Derek Price  <derek@ximbiot.com>
@@ -4140,7 +4873,7 @@
 	* sanity.sh (join6): New testcase for above.
 	(Suggested by Paul Edwards, from somewhere in Australia.)
 	(import): Fix collateral damage.
-	
+
 2003-10-23  Derek Price  <derek@ximbiot.com>
 
 	* sanity.sh (fail): Refer the user to the `TESTS' and `check.log' files
@@ -4172,7 +4905,7 @@
 	exists.
 	(Reported by Rodolfo Schulz de Lima <rodolfo@rodsoft.org>.)
 	* sanity.sh (admin): Test these changes.
-	
+
 2003-10-17  Mark D. Baushke  <mdb@cvshome.org>
 
 	* admin.c (admin_fileproc): Force tag match on admin
@@ -4594,7 +5327,7 @@
 	* subr.c: Ditto.
 	(Original patch from Rainer Orth <ro@TechFak.Uni-Bielefeld.DE>
 	to fix IRIX 5.3 problem.)
-	
+
 2003-08-01  Derek Price  <derek@ximbiot.com>
 
 	* sanity.sh (join5): Use $SPROG rather than $PROG.
@@ -4936,7 +5669,7 @@
 
 	* client.c: Reapply Alexey's changes to client.c from three commits
 	back they were left out of the diff.
- 
+
 2003-06-23  Derek Price  <derek@ximbiot.com>
 
 	* add.c (add): Fix xmalloc's strlen() of wrong variable.
@@ -5633,7 +6366,7 @@
 	pid of the parent cvs process.
 	* main.c (main): Initialize it.
 	* sanity.sh (env): Test it.
- 
+
 2003-03-19  Derek Price  <derek@ximbiot.com>
 
 	* sanity.config.sh.in: New file.
@@ -5810,7 +6543,7 @@
 	rtag' as various parts of cvs "know" how to automatically branch files
 	(eg: cvs add). Trying to remember state is getting "Too Hard (TM)")
 	* sanity.sh (branches3): Test the CVS_LOCAL_BRANCH_NUM feature.
-	
+
 2003-03-04  Derek Price  <derek@ximbiot.com>
 
 	* history.c (history_write): Remove unneeded O_CREAT in the call to
@@ -5861,7 +6594,7 @@
 
 	This bug was discovered and fixed for FreeBSD cvs. See v 1.21 of
 	<http://www.freebsd.org/cgi/cvsweb.cgi/src/contrib/cvs/src/rcs.c.diff>
-        for more information. 
+        for more information.
 
 	* sanity.sh (rcs4): Tests for same.
 	(Patch from Mark D. Baushke <mdb@cvshome.org>.)

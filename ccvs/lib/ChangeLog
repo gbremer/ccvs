@@ -1,3 +1,116 @@
+2005-04-15  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (DISTCLEANFILES): Add getdate.log.
+	* .cvsignore: Ditto.
+	* test-getdate.sh: Add new tests.
+	(verify, skip, valid_timezone): New functions.
+
+2005-04-12  Derek Price  <derek@ximbiot.com>
+
+	* getdate.y: Update from GNULIB.
+
+2005-04-06  Derek Price  <derek@ximbiot.com>
+
+	* getdate.y: Update from GNULIB.
+
+2005-04-03  Mark D. Baushke  <mdb@cvshome.org>
+
+	* strtol.c: Update from GNULIB.
+
+2005-03-29  Mark D. Baushke  <mdb@cvshome.org>
+
+	* mktime.c, strftime.c: Update from GNULIB.
+
+2005-03-23  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (getdate_SOURCES): Remove sources that are now included
+	via $(noinst_LIBRARIES).
+
+2005-03-22  Mark D. Baushke  <mdb@cvshome.org>
+
+	* mktime.c, regex.c, stdint_.h, strftime.c, strtol.c: Update from
+	GNULIB.
+
+2005-03-10  Mark D. Baushke  <mdb@cvshome.org>
+
+	* mktime.c, save-cwd.c, strftime.c, strtol.c: Update from GNULIB.
+
+2005-03-08  Conrad T. Pino  <Conrad@Pino.com>
+
+	* .cvsignore: Add stdint.h entry.
+
+2005-03-07  Conrad T. Pino  <Conrad@Pino.com>
+
+	* libcvs.dsp: Synchronize with GNULIB updates.
+	Remove valloc.c file. Add files __fpending.c, __fpending.h,
+	chdir-long.h, closeout.c, closeout.h, getcwd.h,
+	pagealign_alloc.c, pagealign_alloc.h, quotearg.c, quotearg.h.
+	* libcvs.dep, libcvs.mak: Regenerate for libcvs.dsp change.
+
+2005-03-07  Mark D. Baushke  <mdb@cvshome.org>
+
+	* pagealign_alloc.c: Update from GNULIB.
+
+2005-03-04  Jim Hyslop  <jhyslop@ieee.org>
+
+	* xtime.h: added include guards to fix compile errors on IRIX 5.3
+	(Patch from Georg Schwarz <georg.scwarz@freenet.de>.)
+
+2005-03-03  Derek Price  <derek@ximbiot.com>
+
+	* pagealign_alloc.c, pagealign_alloc.h: New files from GNULIB.
+	* valloc.c: Remove this obsolete file.
+
+2005-03-02  Jim Meyering  <jim@meyering.net>
+
+	* Makefile.am (libcvs_a_SOURCES): Add the following to support
+	the GNULIB closeout module: closeout.c, closeout.h, quotearg.c,
+	quotearg.h, __fpending.h.
+	* closeout.c, closeout.h: New files.
+	* quotearg.c, quotearg.h: New files.
+	* __fpending.c, __fpending.h: New files.
+	* Makefile.gnulib: Regenerate.
+
+2005-03-02  Derek Price  <derek@ximbiot.com>
+
+	* gettext.h, setenv.c, vasnprintf.c, vasprintf.c: Update from GNULIB.
+
+2005-03-01  Derek Price  <derek@ximbiot.com>
+
+	Update installed GNULIB modules.
+	* Makefile.am: Tweak for new GNULIB updates.
+	* alloca_.h, dup2.c, error.c, ftruncate.c, getdate.c, getdate.y,
+	getopt_.h, gettext.h, gettime.c, malloc.c, mkdir.c, mktime.c,
+	realloc.c, rename.c, save-cwd.c, strstr.c, strtoul.c, timespec.h,
+	xgetcwd.c: Update these files.
+	* chdir-long.c, chdir-long.h, getcwd.c, getcwd.h, mempcpy.c, mempcpy.h,
+	memrchr.c, memrchr.h, openat.c, openat.h, strstr.h, strtol.c: New files
+	from GNULIB.
+
+2005-03-01  Derek Price  <derek@ximbiot.com>
+
+	* xtime.h: Remove obsolete timeb stuff.
+
+2005-02-20  Mark D. Baushke  <mdb@cvshome.org>
+
+	* xgethostname.c (xgethostname): Check for ENOMEM, which is
+	returned by OSX/Darwin if the specified buffer is not large
+	enough for the hostname.
+	(Problem reported by Neil Conway <neilc@samurai.com>.)
+
+2005-02-08  Derek Price  <derek@ximbiot.com>
+
+	* fncase.c (OSX_filename_classes): Mac OSX doesn't need \ mapped to /.
+	* system.h (FOLD_FN_CASE): Clarify comment.
+
+2005-01-31  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am: Update copyright notices.
+
+2004-12-14  Derek Price  <derek@ximbiot.com>
+
+	* Makefile.am (EXTRA_DIST): Add Makefile.gnulib.
+
 2004-11-30  Conrad T. Pino  <Conrad@Pino.com>
 
 	* libcvs.dep: Regenerated for "../cvsnt.dsp" change.
@@ -85,7 +198,7 @@
 
 	* sunos57-select.c: Move '#undef select' before system #include
 	statements to avoid conflicting declarations on BSDI BSD/OS 4.2.
-	
+
 2004-11-03  Mark D. Baushke  <mdb@cvshome.org>
 
 	* Makefile.am: Update from GNULIB.
@@ -158,7 +271,7 @@
 2004-10-22  Mark D. Baushke  <mdb@cvshome.org>
 
 	* Makefile.am (libcvs_a_OBJECTS): Fix typo for $(ALLOCA_H) and
-	($STDBOOL_H). Also update rules for stdint GNULIB module.	
+	($STDBOOL_H). Also update rules for stdint GNULIB module.
 	* Makefile.in: Regenerated.
 
 2004-10-22  Conrad T. Pino  <Conrad@Pino.com>
@@ -223,7 +336,7 @@
 
 	* Makefile.am (all-local): Fix typo.
 	* Makefile.in: Regenerated.
-	
+
 2004-10-21  Conrad T. Pino  <Conrad@Pino.com>
 
 	* libcvs.mak: Regenerated for "../zlib/lib.dsp" change.
@@ -480,7 +593,7 @@
 
 	* Makefile.in (check-TESTS): Correct the script to deal with some
 	make (BSD) that use 'sh -e' which will terminate whenever a
-	command (such as test -n "") fails.	
+	command (such as test -n "") fails.
 
 2004-05-03  Derek Price  <derek@ximbiot.com>
 
@@ -502,7 +615,7 @@
 	and progname for getdate test program on some systems.
 	* error.c, progname.c: New file.
 	(Report from Mark D. Baushke <mdb@cvshome.org>.)
-	
+
 2004-04-29  Derek Price  <derek@ximbiot.com>
 
 	* getdate.y: Restore unforked version from GNULIB.
@@ -836,7 +949,7 @@
 	* ftello.c (ftello): Ditto.
 	* system.h (ftello): Add prototype if !defined(HAVE_FTELLO).
 	* Makefile.in: Regenerated.
-	
+
 2003-12-09  Larry Jones  <lawrence.jones@eds.com>
 
 	* getdate.c: Regenerated.
@@ -1289,7 +1402,7 @@
 
 	* regex.c: Removed unused `compile_range' declaration.
 	(Patch from John Tytgat <John.Tytgat@aaug.net>.)
-	
+
 2002-05-09  Larry Jones  <lawrence.jones@eds.com>
 
 	* getline.c (getstr): Make terminator int instead of char to avoid
@@ -1457,7 +1570,7 @@
 	(GETLINE_NO_LIMIT): new #define.
 	(getline_safe): new function, takes limit arg and passes it on.
 	(getline): pass GETLINE_NO_LIMIT to getstr().
-	
+
 	See related change of same date in ../src/ChangeLog.
 
 2000-06-19  Larry Jones  <larry.jones@sdrc.com>

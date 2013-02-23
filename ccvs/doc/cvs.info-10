@@ -10,6 +10,269 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
+File: cvs.info,  Node: Variables,  Next: config,  Prev: history file,  Up: Administrative files
+
+Expansions in administrative files
+==================================
+
+   Sometimes in writing an administrative file, you might want the file
+to be able to know various things based on environment CVS is running
+in.  There are several mechanisms to do that.
+
+   To find the home directory of the user running CVS (from the `HOME'
+environment variable), use `~' followed by `/' or the end of the line.
+Likewise for the home directory of USER, use `~USER'.  These variables
+are expanded on the server machine, and don't get any reasonable
+expansion if pserver (*note Password authenticated::) is in use;
+therefore user variables (see below) may be a better choice to
+customize behavior based on the user running CVS.
+
+   One may want to know about various pieces of information internal to
+CVS.  A CVS internal variable has the syntax `${VARIABLE}', where
+VARIABLE starts with a letter and consists of alphanumeric characters
+and `_'.  If the character following VARIABLE is a non-alphanumeric
+character other than `_', the `{' and `}' can be omitted.  The CVS
+internal variables are:
+
+`CVSROOT'
+     This is the absolute path to the current CVS root directory.
+     *Note Repository::, for a description of the various ways to
+     specify this, but note that the internal variable contains just
+     the directory and not any of the access method information.
+
+`RCSBIN'
+     In CVS 1.9.18 and older, this specified the directory where CVS
+     was looking for RCS programs.  Because CVS no longer runs RCS
+     programs, specifying this internal variable is now an error.
+
+`CVSEDITOR'
+`EDITOR'
+`VISUAL'
+     These all expand to the same value, which is the editor that CVS
+     is using.  *Note Global options::, for how to specify this.
+
+`USER'
+     Username of the user running CVS (on the CVS server machine).
+     When using pserver, this is the user specified in the repository
+     specification which need not be the same as the username the
+     server is running as (*note Password authentication server::).  Do
+     not confuse this with the environment variable of the same name.
+
+   If you want to pass a value to the administrative files which the
+user who is running CVS can specify, use a user variable.  To expand a
+user variable, the administrative file contains `${=VARIABLE}'.  To set
+a user variable, specify the global option `-s' to CVS, with argument
+`VARIABLE=VALUE'.  It may be particularly useful to specify this option
+via `.cvsrc' (*note ~/.cvsrc::).
+
+   For example, if you want the administrative file to refer to a test
+directory you might create a user variable `TESTDIR'.  Then if CVS is
+invoked as
+
+     cvs -s TESTDIR=/work/local/tests
+
+and the administrative file contains `sh ${=TESTDIR}/runtests', then
+that string is expanded to `sh /work/local/tests/runtests'.
+
+   All other strings containing `$' are reserved; there is no way to
+quote a `$' character so that `$' represents itself.
+
+   Environment variables passed to administrative files are:
+
+`CVS_USER'
+     The CVS-specific username provided by the user, if it can be
+     provided (currently just for the pserver access method), and to
+     the empty string otherwise.  (`CVS_USER' and `USER' may differ
+     when `$CVSROOT/CVSROOT/passwd' is used to map CVS usernames to
+     system usernames.)
+
+`LOGNAME'
+     The username of the system user.
+
+`USER'
+     Same as `LOGNAME'.  Do not confuse this with the internal variable
+     of the same name.
+
+
+File: cvs.info,  Node: config,  Prev: Variables,  Up: Administrative files
+
+The CVSROOT/config configuration file
+=====================================
+
+   The administrative file `config' contains various miscellaneous
+settings which affect the behavior of CVS.  The syntax is slightly
+different from the other administrative files.  Variables are not
+expanded.  Lines which start with `#' are considered comments.  Other
+lines consist of a keyword, `=', and a value.  Note that this syntax is
+very strict.  Extraneous spaces or tabs are not permitted.
+
+   Currently defined keywords are:
+
+`RCSBIN=BINDIR'
+     For CVS 1.9.12 through 1.9.18, this setting told CVS to look for
+     RCS programs in the BINDIR directory.  Current versions of CVS do
+     not run RCS programs; for compatibility this setting is accepted,
+     but it does nothing.
+
+`SystemAuth=VALUE'
+     If VALUE is `yes', then pserver should check for users in the
+     system's user database if not found in `CVSROOT/passwd'.  If it is
+     `no', then all pserver users must exist in `CVSROOT/passwd'.  The
+     default is `yes'.  For more on pserver, see *Note Password
+     authenticated::.
+
+`LocalKeyword=VALUE'
+     Specify a local alias for a standard keyword.  For example,
+     `LocalKeyword=MYCVS=CVSHeader'.  For more on local keywords, see
+     *Note Keyword substitution::.
+
+`KeywordExpand=VALUE'
+     Specify `i' followed by a list of keywords to be expanded (for
+     example, `KeywordExpand=iMYCVS,Name,Date'), or `e' followed by a
+     list of keywords not to be expanded (for example,
+     `KeywordExpand=eCVSHeader').  For more on keyword expansion, see
+     *Note Configuring keyword expansion::.
+
+`TopLevelAdmin=VALUE'
+     Modify the `checkout' command to create a `CVS' directory at the
+     top level of the new working directory, in addition to `CVS'
+     directories created within checked-out directories.  The default
+     value is `no'.
+
+     This option is useful if you find yourself performing many
+     commands at the top level of your working directory, rather than
+     in one of the checked out subdirectories.  The `CVS' directory
+     created there will mean you don't have to specify `CVSROOT' for
+     each command.  It also provides a place for the `CVS/Template'
+     file (*note Working directory storage::).
+
+`LockDir=DIRECTORY'
+     Put CVS lock files in DIRECTORY rather than directly in the
+     repository.  This is useful if you want to let users read from the
+     repository while giving them write access only to DIRECTORY, not
+     to the repository.  It can also be used to put the locks on a very
+     fast in-memory file system to speed up locking and unlocking the
+     repository.  You need to create DIRECTORY, but CVS will create
+     subdirectories of DIRECTORY as it needs them.  For information on
+     CVS locks, see *Note Concurrency::.
+
+     Before enabling the LockDir option, make sure that you have
+     tracked down and removed any copies of CVS 1.9 or older.  Such
+     versions neither support LockDir, nor will give an error
+     indicating that they don't support it.  The result, if this is
+     allowed to happen, is that some CVS users will put the locks one
+     place, and others will put them another place, and therefore the
+     repository could become corrupted.  CVS 1.10 does not support
+     LockDir but it will print a warning if run on a repository with
+     LockDir enabled.
+
+`LogHistory=VALUE'
+     Control what is logged to the `CVSROOT/history' file (*note
+     history::).  Default of `TOEFWUPCGMAR' (or simply `all') will log
+     all transactions.  Any subset of the default is legal.  (For
+     example, to only log transactions that modify the `*,v' files, use
+     `LogHistory=TMAR'.)
+
+`RereadLogAfterVerify=VALUE'
+     Modify the `commit' command such that CVS will reread the log
+     message after running the program specified by `verifymsg'.  VALUE
+     may be one of `yes' or `always', indicating that the log message
+     should always be reread; `no' or `never', indicating that it
+     should never be reread; or VALUE may be `stat', indicating that
+     the file should be checked with the file system `stat()' function
+     to see if it has changed (see warning below) before rereading.
+     The default value is `always'.
+
+     *Note: the `stat' mode can cause CVS to pause for up to one extra
+     second per directory committed.  This can be less IO and CPU
+     intensive but is not recommended for use with large repositories*
+
+     *Note verifymsg::, for more information on how verifymsg may be
+     used.
+
+`UserAdminOptions=VALUE'
+     Control what options will be allowed with the `cvs admin' command
+     (*note admin::) for users not in the `cvsadmin' group.  The VALUE
+     string is a list of single character options which should be
+     allowed.  If a user who is not a member of the `cvsadmin' group
+     tries to execute any `cvs admin' option which is not listed they
+     will will receive an error message reporting that the option is
+     restricted.
+
+     If no `cvsadmin' group exists on the server, CVS will ignore the
+     `UserAdminOptions' keyword (*note admin::).
+
+     When not specified, `UserAdminOptions' defaults to `k'.  In other
+     words, it defaults to allowing users outside of the `cvsadmin'
+     group to use the `cvs admin' command only to change the default
+     keyword expansion mode for files.
+
+     As an example, to restrict users not in the `cvsadmin' group to
+     using `cvs admin' to change the default keyword substitution mode,
+     lock revisions, unlock revisions, and replace the log message, use
+     `UserAdminOptions=klum'.
+
+`UseNewInfoFmtStrings=VALUE'
+     Specify whether CVS should support the new or old command line
+     template model for the commit support files (*note commit files::).
+     This configuration variable began life in deprecation and is only
+     here in order to give people time to update legacy repositories to
+     use the new format string syntax before support for the old syntax
+     is removed.  For information on updating your repository to
+     support the new model, please see *Note Updating Commit Files::.
+
+     _Note that new repositories (created with the `cvs init' command)
+     will have this value set to `yes', but the default value is `no'._
+
+`ImportNewFilesToVendorBranchOnly=VALUE'
+     Specify whether `cvs import' should always behave as if the `-X'
+     flag was specified on the command line.  VALUE may be either `yes'
+     or `no'.  If set to `yes', all uses of `cvs import' on the
+     repository will behave as if the `-X' flag was set.  The default
+     value is `no'.
+
+`PrimaryServer=CVSROOT'
+     When specified, and the repository specified by CVSROOT is not the
+     one currently being accessed, then the server will turn itself
+     into a transparent proxy to CVSROOT for write requests.  The
+     HOSTNAME configured as part of CVSROOT must resolve to the same
+     string returned by the `uname' command on the primary server for
+     this to work.  Host name resolution is performed via some
+     combination of `named', a broken out line from `/etc/hosts', and
+     the Network Information Service (NIS or YP), depending on the
+     configuration of the particular system.
+
+     Only the `:ext:' method is currently supported for primaries
+     (actually, `:fork:' is supported as well, but only for testing -
+     if you find another use for accessing a primary via the `:fork:'
+     method, please send a note to <bug-cvs@gnu.org> about it).  See
+     *Note Write proxies:: for more on configuring and using write
+     proxies.
+
+`MaxCommentLeaderLength=LENGTH'
+     Set to some length, in bytes, where a trailing `k', `M', `G', or
+     `T' causes the preceding nubmer to be interpreted as kilobytes,
+     megabytes, gigabytes, or terrabytes, respectively, will cause
+     `$Log$' keywords (*note Keyword substitution::), with more than
+     LENGTH bytes preceding it on a line to be ignored (or to fall back
+     on the comment leader set in the RCS archive file - see
+     `UseArchiveCommentLeader' below).  Defaults to 20 bytes to allow
+     checkouts to proceed normally when they include binary files
+     containing `$Log$' keywords and which users have neglected to mark
+     as binary.
+
+`UseArchiveCommentLeader=VALUE'
+     Set to `true', if the text preceding a `$Log$' keyword is found to
+     exceed `MaxCommentLeaderLength' bytes, then the comment leader set
+     in the RCS archive file (*note admin::), if any, will be used
+     instead.  If there is no comment leader set in the archive file or
+     VALUE is set to `false', then the keyword will not be expanded
+     (*note Keyword list::).  To force the comment leader in the RCS
+     archive file to be used exclusively (and `$Log$' expansion skipped
+     in files where the comment leader has not been set in the archive
+     file), set VALUE and set `MaxCommentLeaderLength' to `0'.
+
+
 File: cvs.info,  Node: Environment variables,  Next: Compatibility,  Prev: Administrative files,  Up: Top
 
 All environment variables which affect CVS

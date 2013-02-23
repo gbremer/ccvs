@@ -6,7 +6,7 @@
 --  Open source license information is in the zlib.ads file.  --
 ----------------------------------------------------------------
 
---  $Id: zlib-streams.ads,v 1.1.1.1 2004/10/21 15:30:08 dprice Exp $
+--  $Id: zlib-streams.ads,v 1.1.1.2 2005/02/20 17:57:20 dprice Exp $
 
 package ZLib.Streams is
 
@@ -76,6 +76,8 @@ package ZLib.Streams is
 
    --  !!! When the Need_Header is False ZLib-Ada is using undocumented
    --  ZLib 1.1.4 functionality to do not create/wait for ZLib headers.
+
+   function Is_Open (Stream : Stream_Type) return Boolean;
 
    procedure Close (Stream : in out Stream_Type);
 

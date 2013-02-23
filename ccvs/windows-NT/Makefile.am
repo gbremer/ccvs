@@ -5,9 +5,11 @@
 # *** dist' to work properly on Unix machines.
 
 # Makefile for GNU CVS windows-NT dist.
-# Copyright (C) 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-#               1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-#               Free Software Foundation, Inc.
+#
+# Copyright (C) 1986-2005 The Free Software Foundation, Inc.
+#
+# Portions Copyright (C) 1998-2005 Derek Price, Ximbiot <http://ximbiot.com>,
+#                                  and others.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,6 +28,9 @@ EXTRA_DIST = \
 	config.h.in \
 	config.h.in.in \
 	config.h.in.footer \
+	stamp-chi \
+	mkconfig.pl \
+	fix-msvc-mak.pl \
 	ndir.h \
 	pwd.h \
 	rcmd.h \
@@ -75,8 +80,8 @@ DISTCLEANFILES += stamp-ch
 # The shell portion of this target is so that this file will be regenerated
 # when it is missing, even when not in maintainer mode.
 config.h.in: @MAINTAINER_MODE_TRUE@ stamp-chi
-	@if test ! -f $@; then \
-	  rm -f stamp-chi; \
+	@if test ! -f $(srcdir)/$@; then \
+	  rm -f $(srcdir)/stamp-chi; \
 	  $(MAKE) stamp-chi; \
 	else :; fi
 
@@ -85,13 +90,17 @@ config.h.in: @MAINTAINER_MODE_TRUE@ stamp-chi
 # built in maintainer mode.  The second reason is so that the config.h.in, and
 # thus the config.h file only gets touched when it actually changes, which
 # could potentially save unnecessary rebuilds of many dependent files.
-stamp-chi: mkconfig $(top_srcdir)/config.h.in $(srcdir)/config.h.in.in \
-	   $(srcdir)/config.h.in.footer
-	@./mkconfig -q $(top_srcdir)/config.h.in $(srcdir)/config.h.in \
-	               $(srcdir)/config.h.in.in $(srcdir)/config.h.in.footer
-	@cp $(srcdir)/config.h.in $@
-DISTCLEANFILES += stamp-chi
-MAINTAINERCLEANFILES += $(srcdir)/config.h.in
+#
+# This file is distributed since without it config.h.in will always be rebuilt
+# on the first run in maintainer mode, even if its dependencies are unchanged.
+stamp-chi: $(srcdir)/mkconfig.pl $(top_srcdir)/config.h.in \
+	   $(srcdir)/config.h.in.in $(srcdir)/config.h.in.footer
+	@$(PERL) mkconfig.pl -q $(top_srcdir)/config.h.in \
+	                        $(srcdir)/config.h.in \
+	                        $(srcdir)/config.h.in.in \
+	                        $(srcdir)/config.h.in.footer
+	@cp $(srcdir)/config.h.in $(srcdir)/$@
+MAINTAINERCLEANFILES += $(srcdir)/config.h.in $(srcdir)/stamp-chi
 
 stdbool.h: stamp-sh
 stamp-sh: $(top_srcdir)/lib/stdbool_.h
@@ -122,7 +131,7 @@ stamp-sh2: $(top_srcdir)/lib/stdint_.h
 	@echo " *" >>stdint.tmp
 	@echo " * Edit ../lib/stdint_.h instead." >>stdint.tmp
 	@echo " */" >>stdint.tmp
-	sed 's/@''HAVE_LONG_64BIT''@/0/g;s/@''HAVE_LONGLONG_64BIT@/0/g' \
+	sed 's/@''HAVE_LONG_64BIT''@/0/g;s/@''HAVE_LONG_LONG_64BIT@/0/g' \
 	  <$(top_srcdir)/lib/stdint_.h >>stdint.tmp
 	@cmp -s stdint.tmp $(srcdir)/stdint.h \
 	  || (echo "Updating stdint.h"; \

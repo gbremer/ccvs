@@ -97,7 +97,7 @@ operations and pushing changes to the secondaries.
 
    Primary servers will not automatically push changes to secondaries.
 This must be configured via `loginfo', `postadmin', `posttag', &
-`postwatch' scripts (*note script hooks::) like the following:
+`postwatch' scripts (*note Trigger Scripts::) like the following:
 
      ALL	rsync -gopr -essh ./ secondary:/cvsroot/%p &
 
@@ -638,9 +638,10 @@ future:
 This is useful, for instance, if someone claims that there is a bug in
 that release, but you cannot find the bug in the current working copy.
 
-   You can also check out a module as it was at any given date.  *Note
-checkout options::.  When specifying `-r' to any of these commands, you
-will need beware of sticky tags; see *Note Sticky tags::.
+   You can also check out a module as it was on any branch at any given
+date.  *Note checkout options::.  When specifying `-r' or `-D' to any
+of these commands, you will need beware of sticky tags; see *Note
+Sticky tags::.
 
    When you tag more than one file with the same tag you can think
 about the tag as "a curve drawn through a matrix of filename vs.
@@ -718,12 +719,14 @@ does not look for a working directory).
      Tag the most recent revision no later than DATE.
 
 `-f'
-     Only useful with the `-D DATE' or `-r TAG' flags.  If no matching
-     revision is found, use the most recent revision (instead of
-     ignoring the file).
+     Only useful with the `-D' or `-r' flags.  If no matching revision
+     is found, use the most recent revision (instead of ignoring the
+     file).
 
-`-r TAG'
-     Only tag those files that contain existing tag TAG.
+`-r TAG[:DATE]'
+     Tag the revision already tagged with TAG or, when DATE is specified
+     and TAG is a branch tag, the version from the branch TAG as it
+     existed on DATE.  See *Note Common options::.
 
    The `cvs tag' command also allows one to specify files by revision
 or date, using the same `-r', `-D', and `-f' options.  However, this
@@ -1129,40 +1132,4 @@ revision 6.4 it will be numbered 6.4.2.  All branch numbers ending in a
 zero (such as 6.4.0) are used internally by CVS (*note Magic branch
 numbers::).  The branch 1.1.1 has a special meaning.  *Note Tracking
 sources::.
-
-
-File: cvs.info,  Node: Magic branch numbers,  Next: Merging a branch,  Prev: Branches and revisions,  Up: Branching and merging
-
-Magic branch numbers
-====================
-
-   This section describes a CVS feature called "magic branches".  For
-most purposes, you need not worry about magic branches; CVS handles
-them for you.  However, they are visible to you in certain
-circumstances, so it may be useful to have some idea of how it works.
-
-   Externally, branch numbers consist of an odd number of dot-separated
-decimal integers.  *Note Revision numbers::.  That is not the whole
-truth, however.  For efficiency reasons CVS sometimes inserts an extra 0
-in the second rightmost position (1.2.4 becomes 1.2.0.4, 8.9.10.11.12
-becomes 8.9.10.11.0.12 and so on).
-
-   CVS does a pretty good job at hiding these so called magic branches,
-but in a few places the hiding is incomplete:
-
-   * The magic branch number appears in the output from `cvs log'.
-
-   * You cannot specify a symbolic branch name to `cvs admin'.
-
-
-   You can use the `admin' command to reassign a symbolic name to a
-branch the way RCS expects it to be.  If `R4patches' is assigned to the
-branch 1.4.2 (magic branch number 1.4.0.2) in file `numbers.c' you can
-do this:
-
-     $ cvs admin -NR4patches:1.4.2 numbers.c
-
-   It only works if at least one revision is already committed on the
-branch.  Be very careful so that you do not assign the tag to the wrong
-number.  (There is no way to see how the tag was assigned yesterday).
 

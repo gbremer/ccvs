@@ -10,6 +10,44 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
+File: cvs.info,  Node: Watches,  Next: Choosing a model,  Prev: Concurrency,  Up: Multiple developers
+
+Mechanisms to track who is editing files
+========================================
+
+   For many groups, use of CVS in its default mode is perfectly
+satisfactory.  Users may sometimes go to check in a modification only
+to find that another modification has intervened, but they deal with it
+and proceed with their check in.  Other groups prefer to be able to
+know who is editing what files, so that if two people try to edit the
+same file they can choose to talk about who is doing what when rather
+than be surprised at check in time.  The features in this section allow
+such coordination, while retaining the ability of two developers to
+edit the same file at the same time.
+
+   For maximum benefit developers should use `cvs edit' (not `chmod')
+to make files read-write to edit them, and `cvs release' (not `rm') to
+discard a working directory which is no longer in use, but CVS is not
+able to enforce this behavior.
+
+   If a development team wants stronger enforcement of watches and all
+team members are using a CVS client version 1.12.10 or greater to
+access a CVS server version 1.12.10 or greater, they can enable
+advisory locks.  To enable advisory locks, have all developers put
+"edit -c" and "commit -c" into all .cvsrc files, and make files default
+to read only by turning on watches or putting "cvs -r" into all .cvsrc
+files.  This prevents multiple people from editting a file at the same
+time (unless explicitly overriden with `-f').
+
+* Menu:
+
+* Setting a watch::             Telling CVS to watch certain files
+* Getting Notified::            Telling CVS to notify you
+* Editing files::               How to edit a file which is being watched
+* Watch information::           Information about who is watching and editing
+* Watches Compatibility::       Watches interact poorly with CVS 1.6 or earlier
+
+
 File: cvs.info,  Node: Setting a watch,  Next: Getting Notified,  Up: Watches
 
 Telling CVS to watch certain files
@@ -1086,56 +1124,4 @@ successful status if it found no differences, or a failure status if
 there were differences or if there was an error.  Because this behavior
 provides no good way to detect errors, in the future it is possible that
 `cvs diff' will be changed to behave like the other CVS commands.
-
-
-File: cvs.info,  Node: ~/.cvsrc,  Next: Global options,  Prev: Exit status,  Up: CVS commands
-
-Default options and the ~/.cvsrc file
-=====================================
-
-   There are some `command_options' that are used so often that you
-might have set up an alias or some other means to make sure you always
-specify that option.  One example (the one that drove the
-implementation of the `.cvsrc' support, actually) is that many people
-find the default output of the `diff' command to be very hard to read,
-and that either context diffs or unidiffs are much easier to understand.
-
-   The `~/.cvsrc' file is a way that you can add default options to
-`cvs_commands' within cvs, instead of relying on aliases or other shell
-scripts.
-
-   The format of the `~/.cvsrc' file is simple.  The file is searched
-for a line that begins with the same name as the `cvs_command' being
-executed.  If a match is found, then the remainder of the line is split
-up (at whitespace characters) into separate options and added to the
-command arguments _before_ any options from the command line.
-
-   If a command has two names (e.g., `checkout' and `co'), the official
-name, not necessarily the one used on the command line, will be used to
-match against the file.  So if this is the contents of the user's
-`~/.cvsrc' file:
-
-     log -N
-     diff -uN
-     rdiff -u
-     update -Pd
-     checkout -P
-     release -d
-
-the command `cvs checkout foo' would have the `-P' option added to the
-arguments, as well as `cvs co foo'.
-
-   With the example file above, the output from `cvs diff foobar' will
-be in unidiff format.  `cvs diff -c foobar' will provide context diffs,
-as usual.  Getting "old" format diffs would be slightly more
-complicated, because `diff' doesn't have an option to specify use of
-the "old" format, so you would need `cvs -f diff foobar'.
-
-   In place of the command name you can use `cvs' to specify global
-options (*note Global options::).  For example the following line in
-`.cvsrc'
-
-     cvs -z6
-
-causes CVS to use compression level 6.
 

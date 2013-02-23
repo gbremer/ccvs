@@ -6,7 +6,7 @@
 --  Open source license information is in the zlib.ads file.  --
 ----------------------------------------------------------------
 
---  $Id: read.adb,v 1.1.1.1 2004/10/21 15:30:07 dprice Exp $
+--  $Id: read.adb,v 1.1.1.2 2005/02/20 17:57:20 dprice Exp $
 
 --  Test/demo program for the generic read interface.
 
@@ -68,7 +68,11 @@ procedure Read is
    --  ZLib.Read
    --  reading data from the File_In.
 
-   procedure Read is new ZLib.Read (Read, Read_Buffer, Read_First, Read_Last);
+   procedure Read is new ZLib.Read
+                           (Read,
+                            Read_Buffer,
+                            Rest_First => Read_First,
+                            Rest_Last  => Read_Last);
 
    ----------
    -- Read --
@@ -103,6 +107,7 @@ procedure Read is
       Pack_Size := 0;
       Offset := 1;
       Read_First := Read_Buffer'Last + 1;
+      Read_Last  := Read_Buffer'Last;
    end Reset;
 
 begin

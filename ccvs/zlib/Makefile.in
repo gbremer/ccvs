@@ -34,7 +34,7 @@ CPP=$(CC) -E
 
 LIBS=libz.a
 SHAREDLIB=libz.so
-SHAREDLIBV=libz.so.1.2.1
+SHAREDLIBV=libz.so.1.2.2
 SHAREDLIBM=libz.so.1
 
 # For CVS, separate AR and ARFLAGS.
@@ -66,7 +66,7 @@ DISTFILES = README FAQ INDEX ChangeLog configure Makefile.* *.[ch] \
   msdos/[a-z0-9ABD-Z]* \
   qnx/package.qpg \
   win32/[a-z0-9ABD-Z]* \
-  contrib/RE*.contrib contrib/*.txt \
+  contrib/RE*.contrib \
   contrib/ada/[a-z0-9]* \
   contrib/asm586/match.S contrib/asm586/README.586 \
   contrib/asm686/match.S contrib/asm686/README.686 \
@@ -74,6 +74,7 @@ DISTFILES = README FAQ INDEX ChangeLog configure Makefile.* *.[ch] \
   contrib/delphi/[a-z0-9ABD-Z]* \
   contrib/gzappend/[a-z0-9ABD-Z]* \
   contrib/infback9/[a-z0-9ABD-Z]* \
+  contrib/inflate86/[a-z0-9ABD-Z]* \
   contrib/iostream/[a-z0-9ABD-Z]* \
   contrib/iostream2/[a-z0-9ABD-Z]* \
   contrib/iostream3/[a-z0-9ABD-Z]* \
@@ -202,7 +203,8 @@ mostlyclean: clean
 clean:
 	rm -f *.o *~ example$(EXE) minigzip$(EXE) \
 	   libz.a libz.so* foo.gz so_locations \
-	   _match.s maketree contrib/infback9/*.o
+	   _match.s maketree contrib/infback9/*.o \
+	   tags
 .PHONY: mostlyclean clean
 
 realclean: distclean

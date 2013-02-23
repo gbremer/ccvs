@@ -285,7 +285,7 @@ tags TAGS:
 # distdir added for compatibility with CVS automake.
 top_distdir = ..
 PACKAGE = cvs
-VERSION = 1.12.11
+VERSION = 1.12.12
 distdir = $(top_distdir)/$(PACKAGE)-$(VERSION)
 
 distdir: $(DISTFILES)

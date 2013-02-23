@@ -152,7 +152,6 @@ Index
 * Committing changes to files:           Committing your changes.
 * Committing, when to:                   When to commit.
 * Common options:                        Common options.
-* Common syntax of info files:           syntax.
 * Common syntax of info files, format strings: syntax.
 * Common syntax of info files, updating legacy repositories: Updating Commit Files.
 * compatibility notes, commitinfo admin file: commitinfo.
@@ -368,11 +367,13 @@ Index
 * ImportNewFilesToVendorBranchOnly, in CVSROOT/config: config.
 * Index:                                 Index.
 * inetd, configuring for pserver:        Password authentication server.
-* Info files (syntax):                   syntax.
-* Info files (syntax), updating legacy repositories: Updating Commit Files.
-* Info files, commitinfo:                commitinfo.
-* Info files, common syntax, format strings: syntax.
-* Info files, precommit verification of commits: commitinfo.
+* info files:                            Trigger Scripts.
+* info files, commitinfo:                commitinfo.
+* info files, common syntax:             syntax.
+* info files, common syntax, format strings: syntax.
+* info files, common syntax, updating legacy repositories: Updating Commit Files.
+* info files, precommit verification of commits: commitinfo.
+* info files, security:                  Trigger Script Security.
 * Informing others:                      Informing others.
 * init (subcommand):                     Creating a repository.
 * Installed images (VMS):                File permissions.
@@ -623,6 +624,11 @@ Index
 * script hook, postwatch:                postwatch.
 * script hook, preproxy:                 preproxy.
 * script hook, taginfo:                  taginfo.
+* script hooks:                          Trigger Scripts.
+* script hooks, commitinfo:              commitinfo.
+* script hooks, common syntax:           syntax.
+* script hooks, precommit verification of commits: commitinfo.
+* script hooks, security:                Trigger Script Security.
 * Secondary server <1>:                  config.
 * Secondary server:                      Write proxies.
 * secondary server, pull updates:        postproxy.
@@ -659,8 +665,8 @@ Index
 * Symbolic link, importing:              import output.
 * Symbolic links:                        Special Files.
 * Symbolic name (tag):                   Tags.
-* Syntax of info files:                  syntax.
 * Syntax of info files, updating legacy repositories: Updating Commit Files.
+* syntax of trigger script hooks:        syntax.
 * SystemAuth, in CVSROOT/config:         config.
 * tag (subcommand):                      Tagging the working directory.
 * tag (subcommand), creating a branch using: Creating a branch.
@@ -704,6 +710,11 @@ Index
 * Traceability:                          History browsing.
 * Tracking sources:                      Tracking sources.
 * Transactions, atomic, lack of:         Concurrency.
+* trigger script hooks, common syntax:   syntax.
+* trigger scripts:                       Trigger Scripts.
+* trigger scripts, commitinfo:           commitinfo.
+* trigger scripts, precommit verification of commits: commitinfo.
+* trigger scripts, security:             Trigger Script Security.
 * Trivial Compiler (example):            A sample session.
 * Typical repository:                    Repository.
 * Umask, for repository files:           File permissions.

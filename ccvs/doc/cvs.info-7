@@ -10,6 +10,71 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
+File: cvs.info,  Node: checkout,  Next: commit,  Prev: annotate,  Up: CVS commands
+
+checkout--Check out sources for editing
+=======================================
+
+   * Synopsis: checkout [options] modules...
+
+   * Requires: repository.
+
+   * Changes: working directory.
+
+   * Synonyms: co, get
+
+   Create or update a working directory containing copies of the source
+files specified by MODULES.  You must execute `checkout' before using
+most of the other CVS commands, since most of them operate on your
+working directory.
+
+   The MODULES are either symbolic names for some collection of source
+directories and files, or paths to directories or files in the
+repository.  The symbolic names are defined in the `modules' file.
+*Note modules::.
+
+   Depending on the modules you specify, `checkout' may recursively
+create directories and populate them with the appropriate source files.
+You can then edit these source files at any time (regardless of
+whether other software developers are editing their own copies of the
+sources); update them to include new changes applied by others to the
+source repository; or commit your work as a permanent change to the
+source repository.
+
+   Note that `checkout' is used to create directories.  The top-level
+directory created is always added to the directory where `checkout' is
+invoked, and usually has the same name as the specified module.  In the
+case of a module alias, the created sub-directory may have a different
+name, but you can be sure that it will be a sub-directory, and that
+`checkout' will show the relative path leading to each file as it is
+extracted into your private work area (unless you specify the `-Q'
+global option).
+
+   The files created by `checkout' are created read-write, unless the
+`-r' option to CVS (*note Global options::) is specified, the `CVSREAD'
+environment variable is specified (*note Environment variables::), or a
+watch is in effect for that file (*note Watches::).
+
+   Note that running `checkout' on a directory that was already built
+by a prior `checkout' is also permitted.  This is similar to specifying
+the `-d' option to the `update' command in the sense that new
+directories that have been created in the repository will appear in
+your work area.  However, `checkout' takes a module name whereas
+`update' takes a directory name.  Also to use `checkout' this way it
+must be run from the top level directory (where you originally ran
+`checkout' from), so before you run `checkout' to update an existing
+directory, don't forget to change your directory to the top level
+directory.
+
+   For the output produced by the `checkout' command see *Note update
+output::.
+
+* Menu:
+
+* checkout options::            checkout options
+* checkout examples::           checkout examples
+
+
 File: cvs.info,  Node: checkout options,  Next: checkout examples,  Up: checkout
 
 checkout options
@@ -24,9 +89,9 @@ options::, for a complete description of them):
      information on sticky tags/dates.
 
 `-f'
-     Only useful with the `-D DATE' or `-r TAG' flags.  If no matching
-     revision is found, retrieve the most recent revision (instead of
-     ignoring the file).
+     Only useful with the `-D' or `-r' flags.  If no matching revision
+     is found, retrieve the most recent revision (instead of ignoring
+     the file).
 
 `-k KFLAG'
      Process keywords according to KFLAG.  See *Note Keyword
@@ -51,9 +116,12 @@ options::, for a complete description of them):
 `-R'
      Checkout directories recursively.  This option is on by default.
 
-`-r TAG'
-     Use revision TAG.  This option is sticky, and implies `-P'.  See
+`-r TAG[:DATE]'
+     Checkout the revision specified by TAG or, when DATE is specified
+     and TAG is a branch tag, the version from the branch TAG as it
+     existed on DATE.  This option is sticky, and implies `-P'.  See
      *Note Sticky tags::, for more information on sticky tags/dates.
+     Also, see *Note Common options::.
 
    In addition to those, you can use these special command options with
 `checkout':
@@ -178,6 +246,11 @@ see *Note log::.  You can specify the log message on the command line
 with the `-m MESSAGE' option, and thus avoid the editor invocation, or
 use the `-F FILE' option to specify that the argument file contains the
 log message.
+
+   At `commit', a unique commitid is placed in the RCS file inside the
+repository. All files committed at once get the same commitid. The
+commitid can be retrieved with the `log' and `status' command; see
+*Note log::, *Note File status::.
 
 * Menu:
 
@@ -307,8 +380,8 @@ File: cvs.info,  Node: diff,  Next: export,  Prev: commit,  Up: CVS commands
 diff--Show differences between revisions
 ========================================
 
-   * Synopsis: diff [-lR] [-k kflag] [format_options] [[-r rev1 | -D
-     date1] [-r rev2 |  -D date2]] [files...]
+   * Synopsis: diff [-lR] [-k kflag] [format_options] [(-r rev1[:date1]
+     | -D date1) [-r rev2[:date2] | -D date2]] [files...]
 
    * Requires: working directory, repository.
 
@@ -352,13 +425,15 @@ options::, for a complete description of them):
 `-R'
      Examine directories recursively.  This option is on by default.
 
-`-r TAG'
-     Compare with revision TAG.  Zero, one or two `-r' options can be
-     present.  With no `-r' option, the working file will be compared
-     with the revision it was based on.  With one `-r', that revision
-     will be compared to your current working file.  With two `-r'
-     options those two revisions will be compared (and your working
-     file will not affect the outcome in any way).
+`-r TAG[:DATE]'
+     Compare with revision specified by TAG or, when DATE is specified
+     and TAG is a branch tag, the version from the branch TAG as it
+     existed on DATE.  Zero, one or two `-r' options can be present.
+     With no `-r' option, the working file will be compared with the
+     revision it was based on.  With one `-r', that revision will be
+     compared to your current working file.  With two `-r' options
+     those two revisions will be compared (and your working file will
+     not affect the outcome in any way).
 
      One or both `-r' options can be replaced by a `-D DATE' option,
      described above.
@@ -889,8 +964,8 @@ File: cvs.info,  Node: export,  Next: history,  Prev: diff,  Up: CVS commands
 export--Export sources from CVS, similar to checkout
 ====================================================
 
-   * Synopsis: export [-flNnR] [-r rev|-D date] [-k subst] [-d dir]
-     module...
+   * Synopsis: export [-flNnR] (-r rev[:date] | -D date) [-k subst] [-d
+     dir] module...
 
    * Requires: repository.
 
@@ -941,8 +1016,10 @@ options::, for a complete description of them):
 `-R'
      Export directories recursively.  This is on by default.
 
-`-r TAG'
-     Use revision TAG.
+`-r TAG[:DATE]'
+     Export the revision specified by TAG or, when DATE is specified
+     and TAG is a branch tag, the version from the branch TAG as it
+     existed on DATE.  See *Note Common options::.
 
    In addition, these options (that are common to `checkout' and
 `export') are also supported:
@@ -1295,10 +1372,10 @@ options, which are not quite in the style of the other CVS commands.
    The output includes the location of the RCS file, the "head"
 revision (the latest revision on the trunk), all symbolic names (tags)
 and some other things.  For each revision, the revision number, the
-date, the author, the number of lines added/deleted and the log message
-are printed.  All dates are displayed in local time at the client.
-This is typically specified in the `$TZ' environment variable, which
-can be set to govern how `log' displays dates.
+date, the author, the number of lines added/deleted, the commitid and
+the log message are printed.  All dates are displayed in local time at
+the client. This is typically specified in the `$TZ' environment
+variable, which can be set to govern how `log' displays dates.
 
    *Note: `log' uses `-R' in a way that conflicts with the normal use
 inside CVS (*note Common options::).*
@@ -1307,226 +1384,4 @@ inside CVS (*note Common options::).*
 
 * log options::                 log options
 * log examples::                log examples
-
-
-File: cvs.info,  Node: log options,  Next: log examples,  Up: log
-
-log options
------------
-
-   By default, `log' prints all information that is available.  All
-other options restrict the output.
-
-`-b'
-     Print information about the revisions on the default branch,
-     normally the highest branch on the trunk.
-
-`-d DATES'
-     Print information about revisions with a checkin date/time in the
-     range given by the semicolon-separated list of dates.  The date
-     formats accepted are those accepted by the `-D' option to many
-     other CVS commands (*note Common options::).  Dates can be
-     combined into ranges as follows:
-
-    `D1<D2'
-    `D2>D1'
-          Select the revisions that were deposited between D1 and D2.
-
-    `<D'
-    `D>'
-          Select all revisions dated D or earlier.
-
-    `D<'
-    `>D'
-          Select all revisions dated D or later.
-
-    `D'
-          Select the single, latest revision dated D or earlier.
-
-     The `>' or `<' characters may be followed by `=' to indicate an
-     inclusive range rather than an exclusive one.
-
-     Note that the separator is a semicolon (;).
-
-`-h'
-     Print only the name of the RCS file, name of the file in the
-     working directory, head, default branch, access list, locks,
-     symbolic names, and suffix.
-
-`-l'
-     Local; run only in current working directory.  (Default is to run
-     recursively).
-
-`-N'
-     Do not print the list of tags for this file.  This option can be
-     very useful when your site uses a lot of tags, so rather than
-     "more"'ing over 3 pages of tag information, the log information is
-     presented without tags at all.
-
-`-R'
-     Print only the name of the RCS file.
-
-`-rREVISIONS'
-     Print information about revisions given in the comma-separated
-     list REVISIONS of revisions and ranges.  The following table
-     explains the available range formats:
-
-    `REV1:REV2'
-          Revisions REV1 to REV2 (which must be on the same branch).
-
-    `REV1::REV2'
-          The same, but excluding REV1.
-
-    `:REV'
-    `::REV'
-          Revisions from the beginning of the branch up to and
-          including REV.
-
-    `REV:'
-          Revisions starting with REV to the end of the branch
-          containing REV.
-
-    `REV::'
-          Revisions starting just after REV to the end of the branch
-          containing REV.
-
-    `BRANCH'
-          An argument that is a branch means all revisions on that
-          branch.
-
-    `BRANCH1:BRANCH2'
-    `BRANCH1::BRANCH2'
-          A range of branches means all revisions on the branches in
-          that range.
-
-    `BRANCH.'
-          The latest revision in BRANCH.
-
-     A bare `-r' with no revisions means the latest revision on the
-     default branch, normally the trunk.  There can be no space between
-     the `-r' option and its argument.
-
-`-S'
-     Suppress the header if no revisions are selected.
-
-`-s STATES'
-     Print information about revisions whose state attributes match one
-     of the states given in the comma-separated list STATES.
-
-`-t'
-     Print the same as `-h', plus the descriptive text.
-
-`-wLOGINS'
-     Print information about revisions checked in by users with login
-     names appearing in the comma-separated list LOGINS.  If LOGINS is
-     omitted, the user's login is assumed.  There can be no space
-     between the `-w' option and its argument.
-
-   `log' prints the intersection of the revisions selected with the
-options `-d', `-s', and `-w', intersected with the union of the
-revisions selected by `-b' and `-r'.
-
-
-File: cvs.info,  Node: log examples,  Prev: log options,  Up: log
-
-log examples
-------------
-
-   Since `log' shows dates in local time, you might want to see them in
-Coordinated Universal Time (UTC) or some other timezone.  To do this
-you can set your `$TZ' environment variable before invoking CVS:
-
-     $ TZ=UTC cvs log foo.c
-     $ TZ=EST cvs log bar.c
-
-   (If you are using a `csh'-style shell, like `tcsh', you would need
-to prefix the examples above with `env'.)
-
-
-File: cvs.info,  Node: ls & rls,  Next: rdiff,  Prev: log,  Up: CVS commands
-
-ls & rls
-========
-
-   * ls [-e | -l] [-RP] [-r revision] [-D date] [path...]
-
-   * Requires: repository for `rls', repository & working directory for
-     `ls'.
-
-   * Changes: nothing.
-
-   * Synonym: `dir' & `list' are synonyms for `ls' and `rdir' & `rlist'
-     are synonyms for `rls'.
-
-   The `ls' and `rls' commands are used to list files and directories
-in the repository.
-
-   By default `ls' lists the files and directories that belong in your
-working directory, what would be there after an `update'.
-
-   By default `rls' lists the files and directories on the tip of the
-trunk in the topmost directory of the repository.
-
-   Both commands accept an optional list of file and directory names,
-relative to the working directory for `ls' and the topmost directory of
-the repository for `rls'.  Neither is recursive by default.
-
-* Menu:
-
-* ls & rls options::         ls & rls options
-* rls examples:              rls examples
-
-
-File: cvs.info,  Node: ls & rls options,  Next: rls examples,  Up: ls & rls
-
-ls & rls options
-----------------
-
-   These standard options are supported by `ls' & `rls':
-
-`-d'
-     Show dead revisions (with tag when specified).
-
-`-e'
-     Display in CVS/Entries format.  This format is meant to remain
-     easily parsable by automation.
-
-`-l'
-     Display all details.
-
-`-P'
-     Don't list contents of empty directories when recursing.
-
-`-R'
-     List recursively.
-
-`-r REVISION'
-     Show files with revision or tag.
-
-`-D DATE'
-     Show files from date.
-
-
-File: cvs.info,  Node: rls examples,  Prev: ls & rls options,  Up: ls & rls
-
-rls examples
-------------
-
-     $ cvs rls
-     cvs rls: Listing module: `.'
-     CVSROOT
-     first-dir
-
-     $ cvs rls CVSROOT
-     cvs rls: Listing module: `CVSROOT'
-     checkoutlist
-     commitinfo
-     config
-     cvswrappers
-     loginfo
-     modules
-     notify
-     rcsinfo
-     taginfo
-     verifymsg
 

@@ -10,6 +10,42 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
+File: cvs.info,  Node: Magic branch numbers,  Next: Merging a branch,  Prev: Branches and revisions,  Up: Branching and merging
+
+Magic branch numbers
+====================
+
+   This section describes a CVS feature called "magic branches".  For
+most purposes, you need not worry about magic branches; CVS handles
+them for you.  However, they are visible to you in certain
+circumstances, so it may be useful to have some idea of how it works.
+
+   Externally, branch numbers consist of an odd number of dot-separated
+decimal integers.  *Note Revision numbers::.  That is not the whole
+truth, however.  For efficiency reasons CVS sometimes inserts an extra 0
+in the second rightmost position (1.2.4 becomes 1.2.0.4, 8.9.10.11.12
+becomes 8.9.10.11.0.12 and so on).
+
+   CVS does a pretty good job at hiding these so called magic branches,
+but in a few places the hiding is incomplete:
+
+   * The magic branch number appears in the output from `cvs log'.
+
+   * You cannot specify a symbolic branch name to `cvs admin'.
+
+
+   You can use the `admin' command to reassign a symbolic name to a
+branch the way RCS expects it to be.  If `R4patches' is assigned to the
+branch 1.4.2 (magic branch number 1.4.0.2) in file `numbers.c' you can
+do this:
+
+     $ cvs admin -NR4patches:1.4.2 numbers.c
+
+   It only works if at least one revision is already committed on the
+branch.  Be very careful so that you do not assign the tag to the wrong
+number.  (There is no way to see how the tag was assigned yesterday).
+
+
 File: cvs.info,  Node: Merging a branch,  Next: Merging more than once,  Prev: Magic branch numbers,  Up: Branching and merging
 
 Merging an entire branch
@@ -586,7 +622,7 @@ on what portion of the history you are accessing.  For example, `cvs
 log OLD' will give the log up until the time of the rename.
 
    When NEW is committed its revision numbers will start again, usually
-at 1.1, so if that bothers you, use the `-r rev' option to commit.  For
+at 1.1, so if that bothers you, use the `-r TAG' option to commit.  For
 more information see *Note Assigning revisions::.
 
 
@@ -647,8 +683,8 @@ is safe, but not without drawbacks.
 
 Advantages:
 
-   * Checking out old revisions works correctly, as long as you use
-     `-rTAG' and not `-DDATE' to retrieve the revisions.
+   * Checking out old revisions works correctly, as long as you use `-r
+     TAG' and not `-D DATE' to retrieve the revisions.
 
    * The log of changes is maintained intact.
 
@@ -998,7 +1034,8 @@ Unknown
    To help clarify the file status, `status' also reports the `Working
 revision' which is the revision that the file in the working directory
 derives from, and the `Repository revision' which is the latest
-revision in the repository for the branch in use.
+revision in the repository for the branch in use.  The `Commit
+Identifier' reflects the unique commitid of the `commit'.
 
    The options to `status' are listed in *Note Invoking CVS::.  For
 information on its `Sticky tag' and `Sticky date' output, see *Note
@@ -1250,42 +1287,4 @@ if someone runs
 and someone else runs `cvs update' at the same time, the person running
 `update' might get only the change to `b/three.c' and not the change to
 `a/two.c'.
-
-
-File: cvs.info,  Node: Watches,  Next: Choosing a model,  Prev: Concurrency,  Up: Multiple developers
-
-Mechanisms to track who is editing files
-========================================
-
-   For many groups, use of CVS in its default mode is perfectly
-satisfactory.  Users may sometimes go to check in a modification only
-to find that another modification has intervened, but they deal with it
-and proceed with their check in.  Other groups prefer to be able to
-know who is editing what files, so that if two people try to edit the
-same file they can choose to talk about who is doing what when rather
-than be surprised at check in time.  The features in this section allow
-such coordination, while retaining the ability of two developers to
-edit the same file at the same time.
-
-   For maximum benefit developers should use `cvs edit' (not `chmod')
-to make files read-write to edit them, and `cvs release' (not `rm') to
-discard a working directory which is no longer in use, but CVS is not
-able to enforce this behavior.
-
-   If a development team wants stronger enforcement of watches and all
-team members are using a CVS client version 1.12.10 or greater to
-access a CVS server version 1.12.10 or greater, they can enable
-advisory locks.  To enable advisory locks, have all developers put
-"edit -c" and "commit -c" into all .cvsrc files, and make files default
-to read only by turning on watches or putting "cvs -r" into all .cvsrc
-files.  This prevents multiple people from editting a file at the same
-time (unless explicitly overriden with `-f').
-
-* Menu:
-
-* Setting a watch::             Telling CVS to watch certain files
-* Getting Notified::            Telling CVS to notify you
-* Editing files::               How to edit a file which is being watched
-* Watch information::           Information about who is watching and editing
-* Watches Compatibility::       Watches interact poorly with CVS 1.6 or earlier
 
